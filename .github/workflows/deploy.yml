@@ -30,6 +30,26 @@ jobs:
             docker compose -f docker-compose.prod.yml exec -T db \
               pg_dump -U $POSTGRES_USER $POSTGRES_DB > backups/backup_$(date +%F_%H-%M).sql
 
+
+            # 2.5. リポジトリを配置 or 更新
+      - name: Ensure repo exists on VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}
+            if [ ! -d "schedule_app" ]; then
+              echo "📥 Cloning repository..."
+              git clone https://github.com/o289/schedule_app.git
+            else
+              echo "🔄 Updating repository..."
+              cd schedule_app
+              git fetch origin
+              git reset --hard origin/main
+            fi
+
       # 2. Secretsから.env.prodを生成して転送
       - name: Create local .env.prod from secrets
         run: echo "${{ secrets.ENV_PROD_FILE }}" > .env.prod
