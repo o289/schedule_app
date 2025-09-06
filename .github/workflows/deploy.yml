@@ -25,13 +25,12 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd /home/${{ secrets.VPS_USER }}/schedule_app
+            cd /home/${{ secrets.VPS_USER }}/schedule_app || exit 0
             mkdir -p backups
             docker compose -f docker-compose.prod.yml exec -T db \
-              pg_dump -U $POSTGRES_USER $POSTGRES_DB > backups/backup_$(date +%F_%H-%M).sql
+              pg_dump -U $POSTGRES_USER $POSTGRES_DB > backups/backup_$(date +%F_%H-%M).sql || true
 
-
-            # 2.5. リポジトリを配置 or 更新
+      # 2. リポジトリを配置 or 更新
       - name: Ensure repo exists on VPS
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -50,7 +49,7 @@ jobs:
               git reset --hard origin/main
             fi
 
-      # 2. Secretsから.env.prodを生成して転送
+      # 3. Secretsから.env.prodを生成して転送
       - name: Create local .env.prod from secrets
         run: echo "${{ secrets.ENV_PROD_FILE }}" > .env.prod
 
@@ -63,10 +62,9 @@ jobs:
           source: ".env.prod"
           target: "/home/${{ secrets.VPS_USER }}/schedule_app/"
 
-      # 3. デプロイ（新しいイメージをタグ付きでビルド）
+      # 4. デプロイ（新しいイメージをタグ付きでビルド）
       - name: Deploy App with image tag
         id: deploy-step
-        # continue-on-error: true
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -83,7 +81,7 @@ jobs:
             # 新しいコンテナ起動
             docker compose -f docker-compose.prod.yml up -d
 
-      # 4. 失敗時のログ収集
+      # 5. 失敗時のログ収集
       - name: Collect docker logs on failure
         if: failure()
         uses: appleboy/ssh-action@v1.0.0
@@ -112,7 +110,7 @@ jobs:
           name: deploy-error-logs
           path: logs/deploy-error.log
 
-      # 5. 失敗時のロールバック（前の安定版に戻す）
+      # 6. 失敗時のロールバック（前の安定版に戻す）
       - name: Rollback to previous image
         if: failure()
         uses: appleboy/ssh-action@v1.0.0
@@ -123,11 +121,10 @@ jobs:
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             echo "🚨 Deployment failed. Rolling back..."
-            # 前回成功した最新イメージで再起動
             docker compose -f docker-compose.prod.yml down
             docker compose -f docker-compose.prod.yml up -d
 
-      # 6. 成功時にイメージを保存（tarアーカイブ化）
+      # 7. 成功時にイメージを保存（tarアーカイブ化）
       - name: Save Docker images on success
         if: success()
         uses: appleboy/ssh-action@v1.0.0
