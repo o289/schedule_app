@@ -1,0 +1,63 @@
+/* 日曜ヘッダー */
+.fc-col-header-cell.fc-day-sun {
+  color: red;
+}
+
+/* 土曜ヘッダー */
+.fc-col-header-cell.fc-day-sat {
+  color: blue;
+}
+
+/* FullCalendar のデフォルト色を消す */
+.fc .fc-event {
+  background-color: transparent !important;
+  border: none !important;
+  color: black !important;
+}
+
+
+/* 自作リンクのスタイル */
+.fc-event-link {
+  color: black;                  /* 非 hover 時: 黒文字 */
+  text-decoration: none;
+  display: block;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background-color: transparent; /* 非 hover 時: 背景透明 */
+  transition: all 0.2s ease;
+}
+
+/* hover 時にカテゴリ色を反映 */
+.fc-event-link:hover {
+  background-color: var(--hover-color); /* カテゴリカラー */
+  color: white;                         /* 白文字 */
+}
+
+.fc-event-title{
+  font-weight: 500;
+}
+
+
+/* 日付入力行 */
+.date-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.date-row input[type="date"] {
+  flex: 1; /* 入力欄を広く */
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #333;
+  background-color: #fff;
+}
+
+.date-row input[type="date"]:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 4px rgba(74, 144, 226, 0.3);
+  outline: none;
+}

@@ -1,0 +1,37 @@
+# Node.js
+frontend/node_modules/
+frontend/dist/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pytest_cache/
+.venv/
+venv/
+
+# Alembic（必要なら除外）
+backend/alembic/versions/
+
+# Env files
+.env
+.env.prod
+
+# Docker
+*.log
+docker-data/
+certs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Docker
+postgres_data/
+certs/
+

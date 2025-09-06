@@ -1,0 +1,123 @@
+name: Deploy to VPS with Backup and Rollback (Image Tag)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 環境変数としてタグを定義（コミットSHAの先頭7文字）
+      - name: Set IMAGE TAG
+        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      # 1. DBバックアップ
+      - name: Backup DB before deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/schedule_app
+            mkdir -p backups
+            docker compose -f docker-compose.prod.yml exec -T db \
+              pg_dump -U $POSTGRES_USER $POSTGRES_DB > backups/backup_$(date +%F_%H-%M).sql
+
+      # 2. Secretsから.env.prodを生成して転送
+      - name: Create local .env.prod from secrets
+        run: echo "${{ secrets.ENV_PROD_FILE }}" > .env.prod
+
+      - name: Copy .env.prod to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: ".env.prod"
+          target: "/home/${{ secrets.VPS_USER }}/schedule_app/"
+
+      # 3. デプロイ（新しいイメージをタグ付きでビルド）
+      - name: Deploy App with image tag
+        id: deploy-step
+        continue-on-error: true
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/schedule_app
+
+            # 古いイメージを残しつつ新しいタグでビルド
+            docker compose -f docker-compose.prod.yml build --build-arg IMAGE_TAG=${IMAGE_TAG}
+            docker tag schedule_app-backend:latest schedule_app-backend:${IMAGE_TAG}
+            docker tag schedule_app-frontend:latest schedule_app-frontend:${IMAGE_TAG}
+
+            # 新しいコンテナ起動
+            docker compose -f docker-compose.prod.yml up -d
+
+      # 4. 失敗時のログ収集
+      - name: Collect docker logs on failure
+        if: failure()
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/schedule_app
+            docker compose -f docker-compose.prod.yml logs --tail=200 > deploy-error.log
+
+      - name: Download error logs from VPS
+        if: failure()
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "/home/${{ secrets.VPS_USER }}/schedule_app/deploy-error.log"
+          target: "./logs/"
+
+      - name: Upload logs as artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-error-logs
+          path: logs/deploy-error.log
+
+      # 5. 失敗時のロールバック（前の安定版に戻す）
+      - name: Rollback to previous image
+        if: failure()
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/schedule_app
+            echo "🚨 Deployment failed. Rolling back..."
+            # 前回成功した最新イメージで再起動
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up -d
+
+      # 6. 成功時にイメージを保存（tarアーカイブ化）
+      - name: Save Docker images on success
+        if: success()
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/schedule_app
+            mkdir -p image_backups
+            docker save -o image_backups/backend_$(date +%F).tar schedule_app-backend:latest
+            docker save -o image_backups/frontend_$(date +%F).tar schedule_app-frontend:latest
+            ls -lh image_backups/

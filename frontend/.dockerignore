@@ -1,0 +1,21 @@
+# 依存関係はDockerでnpm installするので除外
+node_modules/
+
+# Vite / React のビルド成果物
+dist/
+build/
+
+# キャッシュ
+.cache/
+.vite/
+
+# エディタ/OSのゴミ
+*.swp
+*.swo
+.DS_Store
+.idea/
+.vscode/
+
+# Git
+.git/
+.gitignore
