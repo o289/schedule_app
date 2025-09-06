@@ -184,3 +184,5 @@ schedule_app
 		├── shared/               # 共通部品（Button, Modalなど）
 		├── App.tsx
 		└── main.tsx
+
+		変更
