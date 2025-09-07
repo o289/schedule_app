@@ -49,9 +49,12 @@ jobs:
               git reset --hard origin/main
             fi
 
-      # 3. Secretsから.env.prodを生成して転送
+      # 3. Secretsから.env.prodを生成（改行を保持）
       - name: Create local .env.prod from secrets
-        run: echo "${{ secrets.ENV_PROD_FILE }}" > .env.prod
+        run: |
+          cat <<'EOF' > .env.prod
+          ${{ secrets.ENV_PROD_FILE }}
+          EOF
 
       - name: Copy .env.prod to VPS
         uses: appleboy/scp-action@v0.1.7
