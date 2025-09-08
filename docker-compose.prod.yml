@@ -16,7 +16,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.prod
       args:
-        VITE_API_URL: ${VITE_API_URL}  
+        VITE_API_URL: /api
     image: schedule_app-nginx:latest
     env_file:
       - .env.prod
