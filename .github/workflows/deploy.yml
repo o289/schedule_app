@@ -79,7 +79,7 @@ jobs:
             # 古いイメージを残しつつ新しいタグでビルド
             docker compose -f docker-compose.prod.yml build --build-arg IMAGE_TAG=${IMAGE_TAG}
             docker tag schedule_app-backend:latest schedule_app-backend:${IMAGE_TAG}
-            docker tag schedule_app-frontend:latest schedule_app-frontend:${IMAGE_TAG}
+            docker tag schedule_app-nginx:latest schedule_app-nginx:${IMAGE_TAG}
 
             # 新しいコンテナ起動
             docker compose -f docker-compose.prod.yml up -d
@@ -139,5 +139,5 @@ jobs:
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             mkdir -p image_backups
             docker save -o image_backups/backend_$(date +%F).tar schedule_app-backend:latest
-            docker save -o image_backups/frontend_$(date +%F).tar schedule_app-frontend:latest
+            docker save -o image_backups/nginx_$(date +%F).tar schedule_app-nginx:latest
             ls -lh image_backups/
