@@ -15,6 +15,7 @@
 - 認証: JWT（学習目的で導入）  
 - 定期削除: APScheduler  
 
+
 **デプロイ先**  
 - Backend: Render / Railway  
 - Frontend: Vercel / Netlify  
