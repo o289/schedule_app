@@ -18,6 +18,8 @@ services:
       args:
         VITE_API_URL: ${VITE_API_URL}  
     image: schedule_app-nginx:latest
+    env_file:
+      - .env.prod
     restart: always
     ports:
       - "80:80"

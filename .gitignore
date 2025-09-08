@@ -11,9 +11,6 @@ __pycache__/
 .venv/
 venv/
 
-# Alembic（必要なら除外）
-backend/alembic/versions/
-
 # Env files
 .env
 .env.prod
