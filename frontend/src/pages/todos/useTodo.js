@@ -4,40 +4,41 @@ import { apiFetch } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 
 
-
 export function useTodo(scheduleId) {
     const { accessToken, refreshToken, handleRefresh } = useAuth();
     const [todos, setTodos] = useState([]);
     const [error, setError] = useState("");
 
+    const base_todo_url = `/api/schedules/${scheduleId}/todos`
+
     // 一覧取得
     const fetchTodos = async () => {
         try {
         const res = await apiFetch(
-            `/schedules/${scheduleId}/todos`,
-            { method: "GET" },
-            { accessToken, refreshToken, handleRefresh }
+                `${base_todo_url}`,
+                { method: "GET" },
+                { accessToken, refreshToken, handleRefresh }
         );
-        setTodos(res);
+            setTodos(res);
         } catch (err) {
-        setError(err.message);
+            setError(err.message);
         }
     };
 
     // 作成
     const createTodo = async (newTodo) => {
         try {
-        await apiFetch(
-            `/schedules/${scheduleId}/todos`,
-            {
-            method: "POST",
-            body: JSON.stringify({ ...newTodo, schedule_id: scheduleId }),
-            },
-            { accessToken, refreshToken, handleRefresh }
+            await apiFetch(
+                `${base_todo_url}`,
+                {
+                    method: "POST",
+                    body: JSON.stringify({ ...newTodo, schedule_id: scheduleId }),
+                },
+                { accessToken, refreshToken, handleRefresh }
         );
-        fetchTodos();
+            fetchTodos();
         } catch (err) {
-        setError(err.message);
+            setError(err.message);
         }
     };
 
@@ -45,10 +46,10 @@ export function useTodo(scheduleId) {
     const updateTodo = async (todoId, payload) => {
         try {
         await apiFetch(
-            `/schedules/${scheduleId}/todos/${todoId}`,
+            `${base_todo_url}/${todoId}`,
             {
-            method: "PUT",
-            body: JSON.stringify(payload),
+                method: "PUT",
+                body: JSON.stringify(payload),
             },
             { accessToken, refreshToken, handleRefresh }
         );
@@ -62,7 +63,7 @@ export function useTodo(scheduleId) {
     const deleteTodo = async (todoId) => {
         try {
         await apiFetch(
-            `/schedules/${scheduleId}/todos/${todoId}`,
+            `${base_todo_url}/${todoId}`,
             { method: "DELETE" },
             { accessToken, refreshToken, handleRefresh }
         );

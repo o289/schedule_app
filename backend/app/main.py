@@ -26,4 +26,4 @@ def pong():
 app.include_router(user_router)
 app.include_router(category_router)
 app.include_router(schedule_router)
-app.include_router(todo_router)
+app.include_router(todo_router, prefix="/api")
