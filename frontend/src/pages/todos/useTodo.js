@@ -9,7 +9,7 @@ export function useTodo(scheduleId) {
     const [todos, setTodos] = useState([]);
     const [error, setError] = useState("");
 
-    const base_todo_url = `/schedules/${scheduleId}/todos/`
+    const base_todo_url = `/schedules/${scheduleId}/todos/  `
 
     // 一覧取得
     const fetchTodos = async () => {
@@ -46,7 +46,7 @@ export function useTodo(scheduleId) {
     const updateTodo = async (todoId, payload) => {
         try {
         await apiFetch(
-            `${base_todo_url}/${todoId}`,
+            `${base_todo_url}${todoId}`,
             {
                 method: "PUT",
                 body: JSON.stringify(payload),
@@ -63,7 +63,7 @@ export function useTodo(scheduleId) {
     const deleteTodo = async (todoId) => {
         try {
         await apiFetch(
-            `${base_todo_url}/${todoId}`,
+            `${base_todo_url}${todoId}`,
             { method: "DELETE" },
             { accessToken, refreshToken, handleRefresh }
         );
