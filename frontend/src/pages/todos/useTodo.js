@@ -9,7 +9,7 @@ export function useTodo(scheduleId) {
     const [todos, setTodos] = useState([]);
     const [error, setError] = useState("");
 
-    const base_todo_url = `/schedules/${scheduleId}/todos/  `
+    const base_todo_url = `/schedules/${scheduleId}/todos/`
 
     // 一覧取得
     const fetchTodos = async () => {
