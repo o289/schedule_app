@@ -1,16 +1,12 @@
 name: Deploy to VPS with Backup and Rollback (Image Tag)
 
 on:
-  workflow_run: # ← テスト成功後にのみ実行される
-    workflows: ["Run Tests"]
-    types:
-      - completed
+  push:
     branches:
       - main
 
 jobs:
-  deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }} 
+  deploy: 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
