@@ -31,5 +31,3 @@ Thumbs.db
 # Docker
 postgres_data/
 certs/
-
-frontend/public/user_icon.png
