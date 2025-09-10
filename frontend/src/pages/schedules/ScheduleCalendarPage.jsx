@@ -3,12 +3,14 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
+import CalendarBase from "../../components/CalendarBase";
 
 import ScheduleForm from "./ScheduleForm";
 import useScheduleCalendar from "./useScheduleCalendar";
 
 import "./ScheduleCalendarPage.css"; // ← CSSを読み込む
 import "./ScheduleForm.css"
+
 
 
 export default function ScheduleCalendarPage() {
@@ -30,48 +32,42 @@ export default function ScheduleCalendarPage() {
 
   return (
     <div style={{ padding: "1rem" }}>
-      <h2>スケジュールカレンダー</h2>
-
-      {!isCreating ? (
-        <button onClick={() => setIsCreating(true)} className="btn-category btn-save">
-          ＋新規作成
-        </button>
-      ) : (
-        <>
-          <ScheduleForm
-            formData={formData}
-            onChange={handleChange}
-            onSubmit={handleCreate}
-            submitLabel="作成"
-            categories={categories}
-            useDateTime={false}
-          />
-          <div className="form-group">
-            <label>日付</label>
-            {selectedDates.map((date, idx) => (
-                <div key={idx} className="date-row">
-                <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => updateDate(idx, e.target.value)}
-                    required
-                />
-                <button
-                    type="button"
-                    className="btn-category btn-cancel"
-                    onClick={() => removeDate(idx)}
-                >
-                    削除
-                </button>
-                </div>
-            ))}
-            <button type="button" className="btn-category btn-submit" onClick={addDate}>
-                ＋日付追加
+      {isCreating && (
+          <>
+            <ScheduleForm
+              formData={formData}
+              onChange={handleChange}
+              onSubmit={handleCreate}
+              submitLabel="作成"
+              categories={categories}
+              useDateTime={false}
+            />
+            <div className="form-group">
+              <label>日付</label>
+              {selectedDates.map((date, idx) => (
+                  <div key={idx} className="date-row">
+                  <input
+                      type="date"
+                      value={date}
+                      onChange={(e) => updateDate(idx, e.target.value)}
+                      required
+                  />
+                  <button
+                      type="button"
+                      className="btn-category btn-cancel"
+                      onClick={() => removeDate(idx)}
+                  >
+                      削除
+                  </button>
+                  </div>
+              ))}
+              <button type="button" className="btn-category btn-submit" onClick={addDate}>
+                  ＋日付追加
+              </button>
+              </div>
+            <button onClick={() => setIsCreating(false)} className="btn-category btn-cancel">
+              キャンセル
             </button>
-            </div>
-          <button onClick={() => setIsCreating(false)} className="btn-category btn-cancel">
-            キャンセル
-          </button>
         </>
       )}
 
@@ -80,26 +76,11 @@ export default function ScheduleCalendarPage() {
       {/* 作成モード中はカレンダー非表示 */}
       {!isCreating && (
         <>
-          <FullCalendar
-            plugins={[dayGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
+          <CalendarBase
             events={events}
-            dateClick={handleDateClick}
-            displayEventTime={false} // ← これを追加
-            eventContent={(arg) => {
-                const color = arg.event.extendedProps.categoryColor || "gray";
-                return (
-                  <Link
-                    to={`/schedules/${arg.event.id}`}
-                    className="fc-event-link"
-                    style={{ "--hover-color": color }}
-                  >
-                    <span className="fc-event-title">{arg.event.title}</span>
-                  </Link>
-                );
-              }}
+            handleDateClick={handleDateClick}
+            buttonEvent={ () => setIsCreating(true) }
           />
-
         </>
       )}
     </div>

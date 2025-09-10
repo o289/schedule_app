@@ -26,7 +26,6 @@ export default function LoginPage() {
 
   return (
     <div style={{ padding: "1rem" }}>
-      <h2>ログイン</h2>
       <form onSubmit={onSubmit} className="schedule-form">
         <div>
           <label>メール</label>

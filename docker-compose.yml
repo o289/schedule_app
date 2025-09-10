@@ -39,6 +39,7 @@ services:
       - "${WEB_PORT}:3000"
     volumes:
       - ./frontend:/app
+      - ./frontend/public:/app/public
       - /app/node_modules
     stdin_open: true
     tty: true

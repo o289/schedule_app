@@ -7,6 +7,12 @@ from app.api.category import router as category_router
 from app.api.schedule import router as schedule_router
 from app.api.todo import router as todo_router
 
+from app.core.error_handler import http_exception_handler, validation_exception_handler
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+
+
 app = FastAPI(debug=settings.DEBUG)
 
 
@@ -27,3 +33,8 @@ app.include_router(user_router)
 app.include_router(category_router)
 app.include_router(schedule_router)
 app.include_router(todo_router)
+
+
+# 共通ハンドラを登録
+app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)

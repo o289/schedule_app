@@ -19,17 +19,6 @@ export default function CategoryListPage() {
   const [error, setError] = useState("");
 
 
-
-  const fetchCategories = async () => {
-    try {
-      const res = await apiFetch("/categories/", { method: "GET" }, { accessToken, refreshToken, handleRefresh } );
-      console.log("fetched categories:", res);  // ← ここ追加
-      setCategories(res);
-    } catch (err) {
-      console.error("カテゴリ取得失敗:", err);
-    }
-  };
-
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -55,32 +44,32 @@ export default function CategoryListPage() {
   //   setEditForm,
   // });
 
+  const fetchCategories = async () => {
+    const res = await apiFetch("/categories/", { method: "GET" }, { accessToken, refreshToken, handleRefresh } );
+    console.log("fetched categories:", res);  // ← ここ追加
+    setCategories(res);
+  };
+
   const handleNewChange = (e) => {
     setNewForm({ ...newForm, [e.target.name]: e.target.value });
   };
 
   const handleCreate = async () => {
-    try {
-      await apiFetch(
-        "/categories/",
-        {
-          method: "POST",
-          body: JSON.stringify(newForm),
-        },
-        { accessToken, refreshToken, handleRefresh }
-      );
-      // 初期化
-      setNewForm({ name: "", color: "gray" });
-      setIsCreating(false);
-      fetchCategories();
-    } catch (err) {
-      setError(err.message);
-    }
+    await apiFetch(
+      "/categories/",
+      {
+        method: "POST",
+        body: JSON.stringify(newForm),
+      },
+      { accessToken, refreshToken, handleRefresh }
+    );
+    // 初期化
+    setNewForm({ name: "", color: "gray" });
+    setIsCreating(false);
+    fetchCategories();
   };
 
   
-
-
   // 編集
   const handleEditClick = (category) => {
     if (!isEditMode) return; // 編集モードOFFなら何もしない
@@ -93,44 +82,34 @@ export default function CategoryListPage() {
   };
 
   const handleUpdate = async () => {
-    try {
-      await apiFetch(
-        `/categories/${editingId}`,
-        {
-          method: "PUT",
-          body: JSON.stringify(editForm),
-        },
-        { accessToken, refreshToken, handleRefresh }
-      );
-        setEditingId(null);
-        setEditForm({ name: "", color: "" });
-        fetchCategories();
-    } catch (err) {
-      console.error("更新失敗:", err);
-    }
+    await apiFetch(
+      `/categories/${editingId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(editForm),
+      },
+      { accessToken, refreshToken, handleRefresh }
+    );
+    setEditingId(null);
+    setEditForm({ name: "", color: "" });
+    fetchCategories();
   };
 
   // 削除
   const handleDelete = async (id) => {
     if (!window.confirm("本当に削除しますか？")) return;
 
-    try {
       await apiFetch(`/categories/${id}`, { method: "DELETE" }, { accessToken, refreshToken, handleRefresh } );
       // 即時反映（サーバーの再取得前にUI更新）
       setCategories((prev) => prev.filter((c) => String(c.id) !== String(id)));
 
       // 念のためサーバーから再取得して同期
       fetchCategories();
-    } catch (err) {
-      console.error("削除失敗:", err);
-    }
+    
   };
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h2>カテゴリ一覧</h2>
-      
-
+    <div style={{ padding: "2rem" }}>
       {!isCreating ? (
         <>
           <button onClick={() => setIsCreating(true)} className="btn-category btn-save">

@@ -1,6 +1,7 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { signup, login, logout, refresh } from "../api/auth";
 import { current_user } from "../api/user";
+import ErrorModal from "../components/ErrorModal";
 
 const AuthContext = createContext(null);
 
@@ -8,7 +9,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [refreshToken, setRefreshToken] = useState(null);
-  
+  const [error, setError] = useState(null); // 共通エラー用 state
   const [initializing, setInitializing] = useState(true);
 
   // 初期化: localStorageから復元
@@ -98,12 +99,18 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, refreshToken, handleSignup, handleLogin, handleLogout, handleRefresh, setAccessToken, setUser }}>
+    <AuthContext.Provider value={{ user, accessToken, refreshToken, handleSignup, handleLogin, handleLogout, handleRefresh, setAccessToken, setUser, setError }}>
       {children}
+      <ErrorModal
+        error={error}
+        onClose={() => setError(null)}
+        onLogout={handleLogout}
+      />
     </AuthContext.Provider>
   );
 }
 
+// 呼び出し
 export function useAuth() {
   return useContext(AuthContext);
 }

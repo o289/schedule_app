@@ -13,38 +13,30 @@ export function useTodo(scheduleId) {
 
     // 一覧取得
     const fetchTodos = async () => {
-        try {
         const res = await apiFetch(
-                `${base_todo_url}`,
-                { method: "GET" },
-                { accessToken, refreshToken, handleRefresh }
+            `${base_todo_url}`,
+            { method: "GET" },
+            { accessToken, refreshToken, handleRefresh }
         );
-            setTodos(res);
-        } catch (err) {
-            setError(err.message);
-        }
+        setTodos(res);
+        
     };
 
     // 作成
     const createTodo = async (newTodo) => {
-        try {
-            await apiFetch(
-                `${base_todo_url}`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({ ...newTodo, schedule_id: scheduleId }),
-                },
-                { accessToken, refreshToken, handleRefresh }
+        await apiFetch(
+            `${base_todo_url}`,
+            {
+                method: "POST",
+                body: JSON.stringify({ ...newTodo, schedule_id: scheduleId }),
+            },
+            { accessToken, refreshToken, handleRefresh }
         );
-            fetchTodos();
-        } catch (err) {
-            setError(err.message);
-        }
+        fetchTodos();
     };
 
     // 更新（例: 完了トグル）
     const updateTodo = async (todoId, payload) => {
-        try {
         await apiFetch(
             `${base_todo_url}${todoId}`,
             {
@@ -53,24 +45,17 @@ export function useTodo(scheduleId) {
             },
             { accessToken, refreshToken, handleRefresh }
         );
-            fetchTodos();
-        } catch (err) {
-            setError(err.message);
-        }
+        fetchTodos();
     };
 
     // 削除
     const deleteTodo = async (todoId) => {
-        try {
         await apiFetch(
             `${base_todo_url}${todoId}`,
             { method: "DELETE" },
             { accessToken, refreshToken, handleRefresh }
         );
-            fetchTodos();
-        } catch (err) {
-            setError(err.message);
-        }
+        fetchTodos();
     };
 
     return { todos, error, fetchTodos, createTodo, updateTodo, deleteTodo };

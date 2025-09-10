@@ -36,7 +36,6 @@ export default function ScheduleDetailPage() {
         }
       }, [id]);
 
-    if (error) return <p style={{ color: "red" }}>{error}</p>;
     if (!schedule) return <p>読み込み中...</p>;
 
     return (

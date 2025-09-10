@@ -36,8 +36,8 @@ export default function MePage() {
       </div>
 
       <div className="profile-footer">
-        <Link to="/categories" className="btn-link-me">全てのカテゴリー</Link>
-        <Link to="/schedules" className="btn-link-me">全てのスケジュール</Link>
+        <Link to="/categories" className="btn-link-me">カテゴリー</Link>
+        <Link to="/schedules" className="btn-link-me">スケジュール</Link>
         <button onClick={onLogout} className="btn-link-me">
             ログアウト
         </button>

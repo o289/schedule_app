@@ -38,21 +38,16 @@ export default function useScheduleDetail(id) {
 
     // --- カテゴリ一覧取得 ---
     const fetchCategories = async () => {
-        try {
         const res = await apiFetch(
             "/categories/",
             { method: "GET" },
             { accessToken, refreshToken, handleRefresh }
         );
         setCategories(res);
-        } catch (err) {
-        console.error("カテゴリ取得失敗:", err);
-        }
     };
 
     // --- スケジュール取得 ---
     const fetchSchedule = async () => {
-        try {
         const res = await apiFetch(
             `/schedules/${id}`,
             { method: "GET" },
@@ -66,9 +61,6 @@ export default function useScheduleDetail(id) {
             note: res.note || "",
             category_id: res.category_id,
         });
-        } catch (err) {
-        setError(err.message);
-        }
     };
 
     useEffect(() => {
@@ -85,36 +77,28 @@ export default function useScheduleDetail(id) {
 
     // --- 更新 ---
     const handleUpdate = async (e) => {
-        e.preventDefault();
-        try {
         await apiFetch(
             `/schedules/${id}`,
             {
-            method: "PUT",
-            body: JSON.stringify(formData),
+                method: "PUT",
+                body: JSON.stringify(formData),
             },
             { accessToken, refreshToken, handleRefresh }
         );
         setIsEditMode(false);
-            fetchSchedule();
-        } catch (err) {
-            setError(err.message);
-        }
+        fetchSchedule();
+        
     };
 
     // --- 削除 ---
     const handleDelete = async () => {
         if (!window.confirm("本当に削除しますか？")) return;
-        try {
         await apiFetch(
             `/schedules/${id}`,
             { method: "DELETE" },
             { accessToken, refreshToken, handleRefresh }
         );
-            navigate("/schedules");
-        } catch (err) {
-            setError(err.message);
-        }
+        navigate("/schedules");
     };
 
     return {

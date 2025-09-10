@@ -25,8 +25,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h2>サインアップ</h2>
+    <div style={{ padding: "1rem" }}> 
       <form onSubmit={onSubmit} className="schedule-form">
         <div>
           <label>名前</label>

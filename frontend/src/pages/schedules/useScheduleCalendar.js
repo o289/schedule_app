@@ -11,7 +11,7 @@ export default function useScheduleCalendar() {
     const [error, setError] = useState("");
 
     const [isCreating, setIsCreating] = useState(false);
-    const [setSelectedDate] = useState(null);
+    const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDates, setSelectedDates] = useState([getNowDateTime().slice(0, 10)]);
     const [formData, setFormData] = useState({
         title: "",
@@ -40,34 +40,25 @@ export default function useScheduleCalendar() {
 
     // --- API処理 ---
     const fetchSchedules = async () => {
-        try {
         const res = await apiFetch(
             "/schedules/",
             { method: "GET" },
             { accessToken, refreshToken, handleRefresh }
         );
-            setSchedules(res);
-        } catch (err) {
-        console.error("スケジュール取得失敗:", err);
-        }
+        setSchedules(res);
     };
 
     const fetchCategories = async () => {
-        try {
         const res = await apiFetch(
             "/categories/",
             { method: "GET" },
             { accessToken, refreshToken, handleRefresh }
         );
-            setCategories(res);
-        } catch (err) {
-        console.error("カテゴリ取得失敗:", err);
-        }
+        setCategories(res);
     };
 
     const handleCreate = async (e) => {
         e.preventDefault();
-        try {
         for (const date of selectedDates) {
             const payload = {
             ...formData,
@@ -75,17 +66,15 @@ export default function useScheduleCalendar() {
             end_time: `${date}T${formData.end_time}`,
             };
             await apiFetch(
-            "/schedules/",
-            { method: "POST", body: JSON.stringify(payload) },
-            { accessToken, refreshToken, handleRefresh }
+                "/schedules/",
+                { method: "POST", body: JSON.stringify(payload) },
+                { accessToken, refreshToken, handleRefresh }
             );
         }
-            await fetchSchedules();
-            resetForm();
-            setIsCreating(false);
-        } catch (err) {
-        setError(err.message);
-        }
+        await fetchSchedules();
+        resetForm();
+        setIsCreating(false);
+        
     };
 
     // --- フォーム処理 ---

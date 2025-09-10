@@ -37,7 +37,7 @@ body {
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: 2em;
   line-height: 1.1;
   margin-top: 0;
 }
@@ -54,5 +54,31 @@ h1 {
   }
   button {
     background-color: #f9f9f9;
+  }
+}
+
+
+/* カードデザイン */
+
+/* 共通カードデザイン */
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+  display: flex;         /* デフォルトは横並び */
+  gap: 1rem;             /* 子要素の余白 */
+  margin: 1rem auto;
+  max-width: 900px;
+  width: 100%;
+  align-items: flex-start;
+}
+
+/* レスポンシブ対応（スマホ以下は縦並び） */
+@media (max-width: 768px) {
+  .card {
+    display: block;      /* フレックス解除 */
+    padding: 1rem;
   }
 }

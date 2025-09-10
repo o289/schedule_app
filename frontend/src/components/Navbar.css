@@ -2,13 +2,20 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #4a90e2;
+    background: whitesmoke;
     padding: 0.8rem 1.5rem;
     width: 100vw;
     max-width: 100%;
-    color: white;
+    color: #4a90e2;
   }
   
+
+
+.navbar-center {
+  justify-content: center; /* 中央寄せ */
+}
+
+
   .navbar-left .navbar-brand {
     font-size: 1.4rem;
     font-weight: bold;
@@ -21,15 +28,23 @@
     align-items: center;
     gap: 1rem;
   }
+  .app-icon {
+    height: 70px;
+    margin-right: 0.6rem;
+  }
   
+  .brand-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
   .navbar-link, .navbar-user {
     text-decoration: none;
-    color: white;
-    font-weight: 500;
+    color: #4a90e2;
+    font-weight: 600;
     transition: color 0.2s;
   }
   
   .navbar-link:hover,
   .navbar-user:hover {
-    color: #dfefff;
+    color: #a3c0e1;
   }

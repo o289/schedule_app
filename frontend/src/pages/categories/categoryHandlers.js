@@ -15,7 +15,7 @@ export const createCategoryHandlers = ({
         setEditForm,
     }) => {
     const handleNewChange = (e) => {
-    setNewForm({ ...newForm, [e.target.name]: e.target.value });
+        setNewForm({ ...newForm, [e.target.name]: e.target.value });
     };
 
     const handleCreate = async () => {
