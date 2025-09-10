@@ -32,4 +32,4 @@ Thumbs.db
 postgres_data/
 certs/
 
-frontend/public/
+frontend/public/user_icon.png
