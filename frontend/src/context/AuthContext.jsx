@@ -12,21 +12,6 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null); // 共通エラー用 state
   const [initializing, setInitializing] = useState(true);
 
-  // 初期化: localStorageから復元
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    const savedAccess = localStorage.getItem("accessToken");
-    const savedRefresh = localStorage.getItem("refreshToken");
-
-    if (savedUser && savedAccess && savedRefresh) {
-      setUser(JSON.parse(savedUser));
-      setAccessToken(savedAccess);
-      setRefreshToken(savedRefresh);
-    }
-
-    setInitializing(false); // ← 復元完了！
-  }, []);
-
 
   // サインアップ
   const handleSignup = async (email, password, name) => {
@@ -93,6 +78,43 @@ export function AuthProvider({ children }) {
       return false; // 失敗
     }
   };
+
+
+  // 初期化: localStorageから復元
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    const savedAccess = localStorage.getItem("accessToken");
+    const savedRefresh = localStorage.getItem("refreshToken");
+  
+    const initAuth = async () => {
+      if (savedUser && savedAccess && savedRefresh) {
+        setUser(JSON.parse(savedUser));
+        setAccessToken(savedAccess);
+        setRefreshToken(savedRefresh);
+  
+        // ここで必ずリフレッシュ
+        const newToken = await handleRefresh();
+        if (newToken) {
+          try {
+            const me = await current_user(newToken)
+            setUser(me);
+          } catch (err) {
+            console.error("me取得失敗:", err);
+            setUser(null);
+          }
+        } else {
+          // リフレッシュ失敗 → ログアウト扱い
+          setUser(null);
+          setAccessToken(null);
+          setRefreshToken(null);
+        }
+      }
+      setInitializing(false); // ← リフレッシュが終わってから
+    };
+  
+    initAuth();
+  }, []);
+
 
   if (initializing) {
     return <div>読み込み中...</div>;
