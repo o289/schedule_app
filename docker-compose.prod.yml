@@ -26,6 +26,7 @@ services:
       - "443:443"
     volumes:
       - certs:/etc/letsencrypt
+      - webroot:/usr/share/nginx/html 
     depends_on:
       - backend
 
@@ -40,8 +41,10 @@ services:
     image: certbot/certbot
     volumes:
       - certs:/etc/letsencrypt
+      - webroot:/usr/share/nginx/html 
     entrypoint: sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done"
 
 volumes:
   postgres_data:
   certs:
+  webroot:  
