@@ -15,7 +15,6 @@ import ScheduleDetailPage from "./pages/schedules/ScheduleDetailPage"
 import TopPage from "./pages/TopPage"
 
 
-<Routes></Routes>
 
 function App() {
   return (

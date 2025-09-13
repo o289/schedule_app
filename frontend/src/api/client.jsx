@@ -45,10 +45,11 @@ export async function apiFetch(url, options = {}, auth=null) {
               "Content-Type": "application/json",
             };
 
-            res = await fetch(`${API_URL}${url}`, { ...options, headers: retryHeaders });
+            retryRes = await fetch(`${API_URL}${url}`, { ...options, headers: retryHeaders });
 
             if (res.ok) {
-              return await data; // ← リトライ成功時は throw しない
+              retryData = await retryRes.json().catch(() => ({}))
+              return await retryData; // ← リトライ成功時は throw しない
             }
           } else {
             errorObj.message = "長時間操作がなかったためセッションが切れました";
