@@ -11,7 +11,7 @@ export default function TopPage() {
     return (
         <div className="top-page">
             <div className="hero">
-                <h1 className="hero-title">スケジュール & Todo 管理アプリ</h1>
+                <h1 className="hero-title">スケジュール管理アプリ</h1>
                 <p className="hero-subtitle">
                 カテゴリごとに色分けして、予定とタスクを直感的に整理できます。
                 </p>
