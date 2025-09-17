@@ -45,10 +45,10 @@ export async function apiFetch(url, options = {}, auth=null) {
               "Content-Type": "application/json",
             };
 
-            retryRes = await fetch(`${API_URL}${url}`, { ...options, headers: retryHeaders });
+            const retryRes = await fetch(`${API_URL}${url}`, { ...options, headers: retryHeaders });
 
-            if (res.ok) {
-              retryData = await retryRes.json().catch(() => ({}))
+            if (retryRes.ok) {
+              const retryData = await retryRes.json().catch(() => ({}))
               return await retryData; // ← リトライ成功時は throw しない
             }
           } else {

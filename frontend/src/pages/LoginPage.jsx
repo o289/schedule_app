@@ -18,7 +18,6 @@ export default function LoginPage() {
 
     try {
       await handleLogin(email, password);
-      navigate("/me"); // 成功したらプロフィールページへ
     } catch (err) {
       setError(err.message || "ログインに失敗しました");
     }

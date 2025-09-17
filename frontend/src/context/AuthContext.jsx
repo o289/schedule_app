@@ -2,6 +2,7 @@ import { createContext, useState, useContext, useEffect } from "react";
 import { signup, login, logout, refresh } from "../api/auth";
 import { current_user } from "../api/user";
 import ErrorModal from "../components/ErrorModal";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext(null);
 
@@ -12,6 +13,7 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null); // 共通エラー用 state
   const [initializing, setInitializing] = useState(true);
 
+  const navigate = useNavigate();
 
   // サインアップ
   const handleSignup = async (email, password, name) => {
@@ -19,6 +21,8 @@ export function AuthProvider({ children }) {
         await signup({ email, password, name });
         // サインアップ後に自動ログイン
         handleLogin(email, password)
+
+        navigate("/me")
     } catch (err) {
         console.error("サインアップ失敗", err)
     }
@@ -34,13 +38,13 @@ export function AuthProvider({ children }) {
       // 永続化
       localStorage.setItem("accessToken", res.access_token);
       localStorage.setItem("refreshToken", res.refresh_token);
-
+      console.log("保存した refreshToken:", res.refresh_token);
 
       // Meエンドポイントでユーザー情報を取得
       const me = await current_user(res.access_token);
       setUser(me);
-
       localStorage.setItem("user", JSON.stringify(me)); 
+      navigate("/schedules")
       return true
     } else {
       throw new Error(res.detail || "ログインに失敗しました");
@@ -58,6 +62,8 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("user");
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+
+    navigate("/login")
   };
 
   // リフレッシュ
@@ -68,6 +74,7 @@ export function AuthProvider({ children }) {
       if (res.access_token) {
         setAccessToken(res.access_token);
         localStorage.setItem("accessToken", res.access_token); // ← 永続化も更新
+        console.log("リフレッシュは成功している")
         return res.access_token; // 成功
       }
     } catch (err) {
@@ -102,12 +109,7 @@ export function AuthProvider({ children }) {
             console.error("me取得失敗:", err);
             setUser(null);
           }
-        } else {
-          // リフレッシュ失敗 → ログアウト扱い
-          setUser(null);
-          setAccessToken(null);
-          setRefreshToken(null);
-        }
+        } 
       }
       setInitializing(false); // ← リフレッシュが終わってから
     };

@@ -25,13 +25,13 @@ export default function CalendarBase({ events, handleDateClick, buttonEvent}) {
       headerToolbar={{
         left: window.innerWidth < 768
           ? "addScheduleButton" // 📱スマホ → 左に新規作成ボタン
-          : "prev,next today addScheduleButton",
+          : "prev today next addScheduleButton",
       
         center: "title",
       
         right: window.innerWidth < 768
-          ? "prev, today next" // 📱スマホ → 右に今日ボタン
-          : "dayGridMonth,timeGridWeek,timeGridDay"
+          ? "prev next today" // 📱スマホ → 右に今日ボタン
+          : "dayGridMonth timeGridWeek timeGridDay"
       }}
 
       // --- ボタンの日本語化 ---

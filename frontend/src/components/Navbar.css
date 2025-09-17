@@ -27,6 +27,7 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    position: relative;
   }
   .app-icon {
     height: 70px;
@@ -42,9 +43,36 @@
     color: #4a90e2;
     font-weight: 600;
     transition: color 0.2s;
+    cursor: pointer;
   }
   
   .navbar-link:hover,
   .navbar-user:hover {
+    color: #a3c0e1;
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    min-width: 150px;
+    z-index: 1000;
+  }
+
+  .dropdown-item {
+    padding: 0.5rem 1rem;
+    color: #4a90e2;
+    text-decoration: none;
+    display: block;
+    font-weight: 600;
+  }
+
+  .dropdown-item:hover {
+    background-color: #f0f4fb;
     color: #a3c0e1;
   }
