@@ -64,7 +64,7 @@ jobs:
           source: ".env.prod"
           target: "/home/${{ secrets.VPS_USER }}/schedule_app/"
 
-      # 4. デプロイ（新しいイメージをタグ付きでビルド）
+      # 4. デプロイ（新しいイメージをタグ付きでビルドして起動）
       - name: Deploy App with image tag
         id: deploy-step
         uses: appleboy/ssh-action@v1.0.0
@@ -80,8 +80,9 @@ jobs:
             docker tag schedule_app-backend:latest schedule_app-backend:${IMAGE_TAG}
             docker tag schedule_app-nginx:latest schedule_app-nginx:${IMAGE_TAG}
 
-            # 新しいコンテナ起動
-            docker compose -f docker-compose.prod.yml up -d
+            # 新しいタグ付きイメージを使って起動
+            docker compose -f docker-compose.prod.yml pull || true
+            docker compose -f docker-compose.prod.yml up -d --no-build
 
       # 5. 失敗時のログ収集
       - name: Collect docker logs on failure
@@ -123,10 +124,23 @@ jobs:
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             echo "🚨 Deployment failed. Rolling back..."
-            docker compose -f docker-compose.prod.yml down
-            docker compose -f docker-compose.prod.yml up -d
 
-      # 7. 成功時にイメージを保存（tarアーカイブ化）
+            # 最新のバックアップイメージをロード
+            BACKUP_DIR=image_backups
+            BACKEND_IMAGE=$(ls -t ${BACKUP_DIR}/backend_*.tar 2>/dev/null | head -n1)
+            NGINX_IMAGE=$(ls -t ${BACKUP_DIR}/nginx_*.tar 2>/dev/null | head -n1)
+
+            if [ -f "$BACKEND_IMAGE" ]; then
+              docker load -i "$BACKEND_IMAGE"
+            fi
+            if [ -f "$NGINX_IMAGE" ]; then
+              docker load -i "$NGINX_IMAGE"
+            fi
+
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up -d --no-build
+
+      # 7. 成功時にイメージを保存（タグ付きイメージをtarアーカイブ化）
       - name: Save Docker images on success
         if: success()
         uses: appleboy/ssh-action@v1.0.0
@@ -137,6 +151,6 @@ jobs:
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             mkdir -p image_backups
-            docker save -o image_backups/backend_$(date +%F).tar schedule_app-backend:latest
-            docker save -o image_backups/nginx_$(date +%F).tar schedule_app-nginx:latest
+            docker save -o image_backups/backend_${IMAGE_TAG}.tar schedule_app-backend:${IMAGE_TAG}
+            docker save -o image_backups/nginx_${IMAGE_TAG}.tar schedule_app-nginx:${IMAGE_TAG}
             ls -lh image_backups/
