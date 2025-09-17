@@ -5,7 +5,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
-    image: schedule_app-backend:${IMAGE_TAG}
+    image: schedule_app-backend:latest
     restart: always
     env_file: .env.prod
     depends_on:
@@ -17,7 +17,7 @@ services:
       dockerfile: Dockerfile.prod
       args:
         VITE_API_URL: /api
-    image: schedule_app-nginx:${IMAGE_TAG}
+    image: schedule_app-nginx:latest
     env_file:
       - .env.prod
     restart: always
@@ -47,4 +47,4 @@ services:
 volumes:
   postgres_data:
   certs:
-  webroot: 
+  webroot:  
