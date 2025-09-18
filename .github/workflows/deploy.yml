@@ -79,9 +79,9 @@ jobs:
             docker build -t schedule_app-backend:${IMAGE_TAG} -t schedule_app-backend:latest ./backend
             docker build -t schedule_app-nginx:${IMAGE_TAG} -t schedule_app-nginx:latest ./frontend
 
-            # 新しいタグ付きイメージを使って起動
-            docker compose -f docker-compose.prod.yml pull || true
-            docker compose -f docker-compose.prod.yml up -d 
+            # 新しいタグ付きイメージを使って起動（ダウンしてからアップ）
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up -d
 
       # 5. 失敗時のログ収集
       - name: Collect docker logs on failure
