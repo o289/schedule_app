@@ -12,9 +12,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 環境変数としてタグを定義（コミットSHAの先頭7文字）
-      - name: Set IMAGE TAG
-        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       # 1. DBバックアップ
       - name: Backup DB before deploy
@@ -64,8 +61,8 @@ jobs:
           source: ".env.prod"
           target: "/home/${{ secrets.VPS_USER }}/schedule_app/"
 
-      # 4. デプロイ（新しいイメージをタグ付きでビルドして起動）
-      - name: Deploy App with image tag
+      # 4. デプロイ（イメージをlatestタグでビルドして起動）
+      - name: Deploy App with latest image
         id: deploy-step
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -75,11 +72,11 @@ jobs:
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
 
-            # 古いイメージを残しつつ新しいタグでビルド
-            docker build -t schedule_app-backend:${IMAGE_TAG} -t schedule_app-backend:latest ./backend
-            docker build -t schedule_app-nginx:${IMAGE_TAG} -t schedule_app-nginx:latest ./frontend
+            # latestタグでビルド
+            docker build -t schedule_app-backend:latest ./backend
+            docker build -t schedule_app-nginx:latest ./frontend
 
-            # 新しいタグ付きイメージを使って起動（ダウンしてからアップ）
+            # latestイメージで起動（ダウンしてからアップ）
             docker compose -f docker-compose.prod.yml down
             docker compose -f docker-compose.prod.yml up -d
 
@@ -139,7 +136,7 @@ jobs:
             docker compose -f docker-compose.prod.yml down
             docker compose -f docker-compose.prod.yml up -d --no-build
 
-      # 7. 成功時にイメージを保存（タグ付きイメージをtarアーカイブ化）
+      # 7. 成功時にイメージを保存（latestイメージをtarアーカイブ化）
       - name: Save Docker images on success
         if: success()
         uses: appleboy/ssh-action@v1.0.0
@@ -150,6 +147,6 @@ jobs:
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             mkdir -p image_backups
-            docker save -o image_backups/backend_${IMAGE_TAG}.tar schedule_app-backend:${IMAGE_TAG}
-            docker save -o image_backups/nginx_${IMAGE_TAG}.tar schedule_app-nginx:${IMAGE_TAG}
+            docker save -o image_backups/backend_$(date +%F).tar schedule_app-backend:latest
+            docker save -o image_backups/nginx_$(date +%F).tar schedule_app-nginx:latest
             ls -lh image_backups/
