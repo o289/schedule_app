@@ -56,7 +56,6 @@ export default function Navbar() {
                     <Link to="/me" className="dropdown-item" onClick={() => setDropdownOpen(false)}>マイページ</Link>
                     <Link to="/categories" className="dropdown-item" onClick={() => setDropdownOpen(false)}>カテゴリー</Link>
                     <Link to="/schedules" className="dropdown-item" onClick={() => setDropdownOpen(false)}>スケジュール</Link>
-                    <Link to="/logout" className="dropdown-item" onClick={() => setDropdownOpen(false)}>ログアウト</Link>
                   </div>
                 ) : (
                   <div className="dropdown-menu">

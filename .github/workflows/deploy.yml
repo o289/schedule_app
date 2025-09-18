@@ -61,8 +61,8 @@ jobs:
           source: ".env.prod"
           target: "/home/${{ secrets.VPS_USER }}/schedule_app/"
 
-      # 4. デプロイ（イメージをlatestタグでビルドして起動）
-      - name: Deploy App with latest image
+      # 4. デプロイ（frontendコンテナを完全に作り直し）
+      - name: Deploy App (with no-cache build + rollback check)
         id: deploy-step
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -71,14 +71,38 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
+            
+            echo "🔨 Build nginx image (no-cache)..."
+            docker compose -f docker-compose.prod.yml build --no-cache nginx
 
-            # latestタグでビルド
-            docker build -t schedule_app-backend:latest ./backend
-            docker build -t schedule_app-nginx:latest ./frontend
-
-            # latestイメージで起動（ダウンしてからアップ）
-            docker compose -f docker-compose.prod.yml down
+            echo "🚀 Start nginx with new image..."
             docker compose -f docker-compose.prod.yml up -d
+
+            echo "🔍 Check dist contents in nginx..."
+            if ! docker exec schedule_app-nginx-1 ls -la /usr/share/nginx/html >/dev/null 2>&1; then
+              echo "⚠️ Dist folder not found. Rolling back ALL app containers (DB is preserved)..."
+
+              BACKUP_DIR=image_backups
+              BACKEND_IMAGE=$(ls -t ${BACKUP_DIR}/backend_*.tar 2>/dev/null | head -n1)
+              NGINX_IMAGE=$(ls -t ${BACKUP_DIR}/nginx_*.tar 2>/dev/null | head -n1)
+
+              if [ -f "$BACKEND_IMAGE" ] && [ -f "$NGINX_IMAGE" ]; then
+                docker load -i "$BACKEND_IMAGE"
+                docker load -i "$NGINX_IMAGE"
+
+                # DBコンテナは止めずに、アプリケーションだけ再起動
+                docker compose -f docker-compose.prod.yml stop backend nginx frontend || true
+                docker compose -f docker-compose.prod.yml rm -f backend nginx frontend || true
+                docker compose -f docker-compose.prod.yml up -d --no-build
+
+                echo "✅ Rolled back to stable version (DB preserved)."
+              else
+                echo "❌ No backup images found. Manual intervention required!"
+                exit 1
+              fi
+            else
+              echo "✅ Deployment successful. All containers running with new images."
+            fi
 
       # 5. 失敗時のログ収集
       - name: Collect docker logs on failure
