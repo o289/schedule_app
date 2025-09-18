@@ -76,9 +76,8 @@ jobs:
             cd /home/${{ secrets.VPS_USER }}/schedule_app
 
             # 古いイメージを残しつつ新しいタグでビルド
-            docker compose -f docker-compose.prod.yml build --build-arg IMAGE_TAG=${IMAGE_TAG}
-            docker tag schedule_app-backend:latest schedule_app-backend:${IMAGE_TAG}
-            docker tag schedule_app-nginx:latest schedule_app-nginx:${IMAGE_TAG}
+            docker build -t schedule_app-backend:${IMAGE_TAG} -t schedule_app-backend:latest ./backend
+            docker build -t schedule_app-nginx:${IMAGE_TAG} -t schedule_app-nginx:latest ./frontend
 
             # 新しいタグ付きイメージを使って起動
             docker compose -f docker-compose.prod.yml pull || true
