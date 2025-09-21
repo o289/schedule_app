@@ -45,7 +45,8 @@ jobs:
 
             echo "💾 Taking database backup..."
             docker compose -f docker-compose.prod.yml exec -T db \
-              pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" > backups/backup_$(date +%F_%H-%M).sql
+              sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' \
+              > backups/backup_$(date +%F_%H-%M).sql
 
       
       # 3. リポジトリを配置 or 更新
