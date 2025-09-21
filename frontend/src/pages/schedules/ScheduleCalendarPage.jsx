@@ -1,4 +1,8 @@
 import { Link } from "react-router-dom";
+import { useCategory } from "../categories/categoryHandlers"
+import { useDateTime } from "../schedules/useDateTime"
+import { useSchedule } from "../schedules/useSchedule";
+
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -6,7 +10,6 @@ import interactionPlugin from "@fullcalendar/interaction";
 import CalendarBase from "../../components/CalendarBase";
 
 import ScheduleForm from "./ScheduleForm";
-import useScheduleCalendar from "./useScheduleCalendar";
 
 import "./ScheduleCalendarPage.css"; // ← CSSを読み込む
 import "./ScheduleForm.css"
@@ -14,21 +17,27 @@ import "./ScheduleForm.css"
 
 
 export default function ScheduleCalendarPage() {
+  const { categories, setCategories } = useCategory();
+
   const {
-    events,
-    categories,
-    error,
+    schedules,
+    handleCreate,
+    handleChange,
     isCreating,
     setIsCreating,
     formData,
-    handleChange,
-    handleCreate,
+    error
+  } = useSchedule();
+
+  const {
     selectedDates,
     addDate,
     updateDate,
     removeDate,
     handleDateClick,
-  } = useScheduleCalendar();
+    events,
+
+  } = useDateTime(schedules);
 
   return (
     <div style={{ padding: "1rem" }}>

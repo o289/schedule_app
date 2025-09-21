@@ -26,10 +26,29 @@
   .category-form input,
   .category-form select {
     padding: 6px 10px;
+    color: #000;
+    background-color: #ddd;
     border: 1px solid #ccc;
     border-radius: 6px;
     margin-right: 8px;
     font-size: 14px;
+  }
+
+  /* フォーカス時のスタイル */
+  .category-form input:focus,
+  .category-form select:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
+  }
+
+  /* 幅をスマホでも扱いやすく */
+  @media (max-width: 768px) {
+    .category-form input,
+    .category-form select {
+      width: 100%;
+      margin-bottom: 8px;
+    }
   }
   
   /* 共通ボタン */

@@ -33,15 +33,10 @@ export default function MePage() {
 
       <div className="profile-body">
         <p><span className="label">Email:</span>{user.email}</p>
-      </div>
-
-      <div className="profile-footer">
         <button onClick={onLogout} className="btn-link-me">
             ログアウト
         </button>
       </div>
-
-      
     </div>
   );
 }

@@ -1,112 +1,37 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { apiFetch } from "../../api/client";
 import CategoryForm from "./CategoryForm";
-// import { createCategoryHandlers } from "./categoryHandlers";
+import {  useCategory } from "./categoryHandlers";
 
 import "./CategoryListPage.css"
 
 export default function CategoryListPage() {
-  const { accessToken, refreshToken, handleRefresh } = useAuth();
-  const [categories, setCategories] = useState([]);
-  const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ name: "", color: "" });
-  const [isEditMode, setIsEditMode] = useState(false); // 編集モード追加
-
-
-  const [isCreating, setIsCreating] = useState(false);
-  const [newForm, setNewForm] = useState({ name: "", color: "gray" });
-  const [error, setError] = useState("");
-
+  const { id } = useParams()
+  const {
+        categories,
+        fetchCategories,
+        handleCreate,
+        handleNewChange,
+        newForm,
+        isCreating,
+        setIsCreating,
+        handleUpdate,
+        editForm,
+        setEditingId,
+        isEditMode,
+        setIsEditMode,
+        handleChange,
+        handleDelete,
+        handleEditClick,
+        editingId,
+        error
+  } = useCategory(id)
 
   useEffect(() => {
     fetchCategories();
   }, []);
-
-  // --- Category 専用ハンドラを注入 ---
-  // const {
-  //   handleNewChange,
-  //   handleCreate,
-  //   handleEditClick,
-  //   handleChange,
-  //   handleUpdate,
-  //   handleDelete,
-  // } = createCategoryHandlers({
-  //   accessToken,
-  //   refreshToken,
-  //   handleRefresh,
-  //   fetchCategories,
-  //   setCategories,
-  //   setIsCreating,
-  //   setNewForm,
-  //   setError,
-  //   setEditingId,
-  //   setEditForm,
-  // });
-
-  const fetchCategories = async () => {
-    const res = await apiFetch("/categories/", { method: "GET" }, { accessToken, refreshToken, handleRefresh } );
-    console.log("fetched categories:", res);  // ← ここ追加
-    setCategories(res);
-  };
-
-  const handleNewChange = (e) => {
-    setNewForm({ ...newForm, [e.target.name]: e.target.value });
-  };
-
-  const handleCreate = async () => {
-    await apiFetch(
-      "/categories/",
-      {
-        method: "POST",
-        body: JSON.stringify(newForm),
-      },
-      { accessToken, refreshToken, handleRefresh }
-    );
-    // 初期化
-    setNewForm({ name: "", color: "gray" });
-    setIsCreating(false);
-    fetchCategories();
-  };
-
-  
-  // 編集
-  const handleEditClick = (category) => {
-    if (!isEditMode) return; // 編集モードOFFなら何もしない
-    setEditingId(category.id);
-    setEditForm({ name: category.name, color: category.color });
-  };
-
-  const handleChange = (e) => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
-  };
-
-  const handleUpdate = async () => {
-    await apiFetch(
-      `/categories/${editingId}`,
-      {
-        method: "PUT",
-        body: JSON.stringify(editForm),
-      },
-      { accessToken, refreshToken, handleRefresh }
-    );
-    setEditingId(null);
-    setEditForm({ name: "", color: "" });
-    fetchCategories();
-  };
-
-  // 削除
-  const handleDelete = async (id) => {
-    if (!window.confirm("本当に削除しますか？")) return;
-
-      await apiFetch(`/categories/${id}`, { method: "DELETE" }, { accessToken, refreshToken, handleRefresh } );
-      // 即時反映（サーバーの再取得前にUI更新）
-      setCategories((prev) => prev.filter((c) => String(c.id) !== String(id)));
-
-      // 念のためサーバーから再取得して同期
-      fetchCategories();
-    
-  };
 
   return (
     <div style={{ padding: "2rem" }}>

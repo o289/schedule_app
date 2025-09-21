@@ -12,27 +12,50 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 1. Secretsから.env.prodを生成（改行を保持）
+      - name: Create local .env.prod from secrets
+        run: |
+          cat <<'EOF' > .env.prod
+          ${{ secrets.ENV_PROD_FILE }}
+          EOF
+      # env.prodをプロジェクトにコピー
+      - name: Copy .env.prod to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: ".env.prod"
+          target: "/home/${{ secrets.VPS_USER }}/schedule_app/"
 
-      # 1. DBバックアップ
+      # 2. DBバックアップ
       - name: Backup DB before deploy
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          # 致命的: DBバックアップ失敗はデプロイ失敗に直結するため
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app || exit 0
             mkdir -p backups
-            docker compose -f docker-compose.prod.yml exec -T db \
-              pg_dump -U $POSTGRES_USER $POSTGRES_DB > backups/backup_$(date +%F_%H-%M).sql || true
 
-      # 2. リポジトリを配置 or 更新
+            echo "🔄 Restarting DB container to ensure env is loaded..."
+            docker compose -f docker-compose.prod.yml up -d db
+
+            echo "💾 Taking database backup..."
+            docker compose -f docker-compose.prod.yml exec -T db \
+              pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" > backups/backup_$(date +%F_%H-%M).sql
+
+      
+      # 3. リポジトリを配置 or 更新
       - name: Ensure repo exists on VPS
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          # 致命的: リポジトリの状態が正しくないとデプロイできないため
           script: |
             cd /home/${{ secrets.VPS_USER }}
             if [ ! -d "schedule_app" ]; then
@@ -45,22 +68,6 @@ jobs:
               git reset --hard origin/main
             fi
 
-      # 3. Secretsから.env.prodを生成（改行を保持）
-      - name: Create local .env.prod from secrets
-        run: |
-          cat <<'EOF' > .env.prod
-          ${{ secrets.ENV_PROD_FILE }}
-          EOF
-
-      - name: Copy .env.prod to VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: ".env.prod"
-          target: "/home/${{ secrets.VPS_USER }}/schedule_app/"
-
       # 4. デプロイ（frontendコンテナを完全に作り直し）
       - name: Deploy App (with no-cache build + rollback check)
         id: deploy-step
@@ -69,6 +76,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          # 致命的: デプロイ失敗時はロールバックを行うため
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             
@@ -112,6 +120,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          # 補助的: ログ収集失敗は致命的ではないため継続可能
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             docker compose -f docker-compose.prod.yml logs --tail=200 > deploy-error.log
@@ -125,6 +134,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "/home/${{ secrets.VPS_USER }}/schedule_app/deploy-error.log"
           target: "./logs/"
+        # 補助的: ログダウンロード失敗は致命的ではないため継続可能
 
       - name: Upload logs as artifact
         if: failure()
@@ -132,6 +142,7 @@ jobs:
         with:
           name: deploy-error-logs
           path: logs/deploy-error.log
+        # 補助的: アップロード失敗は致命的ではないため継続可能
 
       # 6. 失敗時のロールバック（前の安定版に戻す）
       - name: Rollback to previous image
@@ -141,24 +152,39 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          # 致命的: ロールバック失敗はアプリ継続稼働に直結するため必須
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             echo "🚨 Deployment failed. Rolling back..."
 
-            # 最新のバックアップイメージをロード
             BACKUP_DIR=image_backups
             BACKEND_IMAGE=$(ls -t ${BACKUP_DIR}/backend_*.tar 2>/dev/null | head -n1)
             NGINX_IMAGE=$(ls -t ${BACKUP_DIR}/nginx_*.tar 2>/dev/null | head -n1)
 
             if [ -f "$BACKEND_IMAGE" ]; then
+              echo "🔄 Loading backend image from backup: $BACKEND_IMAGE"
               docker load -i "$BACKEND_IMAGE"
-            fi
-            if [ -f "$NGINX_IMAGE" ]; then
-              docker load -i "$NGINX_IMAGE"
+            else
+              echo "⚠️ No backend backup image found."
             fi
 
-            docker compose -f docker-compose.prod.yml down
-            docker compose -f docker-compose.prod.yml up -d --no-build
+            if [ -f "$NGINX_IMAGE" ]; then
+              echo "🔄 Loading nginx image from backup: $NGINX_IMAGE"
+              docker load -i "$NGINX_IMAGE"
+            else
+              echo "⚠️ No nginx backup image found."
+            fi
+
+            echo "🛑 Stopping backend and nginx containers..."
+            docker compose -f docker-compose.prod.yml stop backend nginx || true
+
+            echo "🗑️ Removing backend and nginx containers..."
+            docker compose -f docker-compose.prod.yml rm -f backend nginx || true
+
+            echo "🚀 Starting backend and nginx containers with restored images..."
+            docker compose -f docker-compose.prod.yml up -d --no-build backend nginx
+
+            echo "✅ Rollback completed. Backend and nginx containers restored. DB container is preserved."
 
       # 7. 成功時にイメージを保存（latestイメージをtarアーカイブ化）
       - name: Save Docker images on success
@@ -168,6 +194,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          # 補助的: イメージ保存失敗は致命的ではないため継続可能
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             mkdir -p image_backups

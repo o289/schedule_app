@@ -1,35 +1,37 @@
 import { useState, useEffect } from "react";   // ← これを追加
+import { useCategory } from "../categories/categoryHandlers"
 import ScheduleForm from "./ScheduleForm";
-import useScheduleDetail from "./useScheduleDetail"; 
 import { useParams, Link } from "react-router-dom";
 import { useTodo } from "../todos/useTodo";
+import { useSchedule } from "../schedules/useSchedule";
+import { useDateTime } from "../schedules/useDateTime"
 import TodoList from "../todos/TodoList";
 import TodoForm from "../todos/TodoForm";
+import { darkenColor } from "../../utils/color";
 
 import "./ScheduleDetail.css"
 
 export default function ScheduleDetailPage() {
     const { id } = useParams();
     
+    const { categories, setCategories } = useCategory();
     const { todos, fetchTodos, createTodo, updateTodo, deleteTodo } = useTodo(id);
 
     const [todoForm, setTodoForm] = useState({ title: "", priority: "", due_date: "" || null});
     const [showTodoForm, setShowTodoForm] = useState(false);
 
+
     const {
         schedule,
-        categories,
-        error,
         isEditMode,
         setIsEditMode,
         formData,
         handleChange,
         handleUpdate,
         handleDelete,
-        darkenColor,
-    } = useScheduleDetail(id);
+        error
+    } = useSchedule(id);
     
-
     useEffect(() => {
         if (id) {
           fetchTodos();
@@ -89,7 +91,7 @@ export default function ScheduleDetailPage() {
 
                     <div className="schedule-actions">
                     <Link to="/schedules" className="btn-link">
-                        一覧へ戻る
+                        ←
                     </Link>
                     <div>
                         <button className="btn-edit" onClick={() => setIsEditMode(true)}>

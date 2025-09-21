@@ -9,6 +9,8 @@ export default function ScheduleForm({
   categories = [],
   useDateTime = false, // ← 追加
 }) {
+  
+
   return (
     <form onSubmit={onSubmit} className="schedule-form">
   <div className="form-group">

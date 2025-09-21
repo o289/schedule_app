@@ -17,9 +17,8 @@ export default function TopPage() {
                 </p>
                 {is_login ? (
                     <div className="hero-actions">
-                        <h2>{user.name}さんようこそ</h2>
                         <Link to="/schedules" className="btn-top btn-primary">
-                            スケジュールを見る
+                            スケジュール管理
                         </Link>
                         <Link to="/categories" className="btn-top btn-secondary">
                             カテゴリ管理
@@ -37,7 +36,6 @@ export default function TopPage() {
                     </div>
                 )}
                 
-                 
             </div>
 
             <div className="features">

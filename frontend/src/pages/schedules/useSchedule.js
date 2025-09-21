@@ -1,14 +1,20 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { apiFetch } from "../../api/client";
-import { useNavigate } from "react-router-dom";
+import { useCategory } from "../categories/categoryHandlers"
 
-export default function useScheduleDetail(id) {
+export function useSchedule(id = null) {
     const { accessToken, refreshToken, handleRefresh } = useAuth();
     const [schedule, setSchedule] = useState(null);
-    const [categories, setCategories] = useState([]); // カテゴリ一覧
-    const [error, setError] = useState("");
+    const [schedules, setSchedules] = useState([]);
+    
+    const { fetchCategories } = useCategory()
+
+    const [isCreating, setIsCreating] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
+    const [error, setError] = useState("");
+    
     const [formData, setFormData] = useState({
         title: "",
         start_time: "",
@@ -19,37 +25,24 @@ export default function useScheduleDetail(id) {
 
     const navigate = useNavigate();
 
-    // --- 色計算関数（UI 側で利用可能にするため残す） ---
-    function darkenColor(hex, amount = 20) {
-        let col = hex.startsWith("#") ? hex.slice(1) : hex;
-        if (col.length === 3) col = col.split("").map((c) => c + c).join("");
+    const base_url = "/schedules/"
 
-        const num = parseInt(col, 16);
-        let r = (num >> 16) - amount;
-        let g = ((num >> 8) & 0x00ff) - amount;
-        let b = (num & 0x0000ff) - amount;
-
-        r = r < 0 ? 0 : r;
-        g = g < 0 ? 0 : g;
-        b = b < 0 ? 0 : b;
-
-        return `rgb(${r}, ${g}, ${b})`;
-    }
-
-    // --- カテゴリ一覧取得 ---
-    const fetchCategories = async () => {
+    // --- API処理 ---
+    
+    // 一覧
+    const fetchSchedules = async () => {
         const res = await apiFetch(
-            "/categories/",
+            base_url,
             { method: "GET" },
             { accessToken, refreshToken, handleRefresh }
         );
-        setCategories(res);
+        setSchedules(res);
     };
 
-    // --- スケジュール取得 ---
+    // 詳細
     const fetchSchedule = async () => {
         const res = await apiFetch(
-            `/schedules/${id}`,
+            `${base_url}${id}`,
             { method: "GET" },
             { accessToken, refreshToken, handleRefresh }
         );
@@ -63,12 +56,26 @@ export default function useScheduleDetail(id) {
         });
     };
 
-    useEffect(() => {
-        if (id) {
-            fetchSchedule();
-            fetchCategories();
+    // 作成
+    const handleCreate = async (e) => {
+        e.preventDefault();
+        for (const date of selectedDates) {
+            const payload = {
+                ...formData,
+                start_time: `${date}T${formData.start_time}`,
+                end_time: `${date}T${formData.end_time}`,
+            };
+            await apiFetch(
+                base_url,
+                { method: "POST", body: JSON.stringify(payload) },
+                { accessToken, refreshToken, handleRefresh }
+            );
         }
-    }, [id]);
+        await fetchSchedules();
+        resetForm();
+        setIsCreating(false);
+        
+    };
 
     // --- 入力変更 ---
     const handleChange = (e) => {
@@ -78,7 +85,7 @@ export default function useScheduleDetail(id) {
     // --- 更新 ---
     const handleUpdate = async (e) => {
         await apiFetch(
-            `/schedules/${id}`,
+            `${base_url}${id}`,
             {
                 method: "PUT",
                 body: JSON.stringify(formData),
@@ -94,23 +101,56 @@ export default function useScheduleDetail(id) {
     const handleDelete = async () => {
         if (!window.confirm("本当に削除しますか？")) return;
         await apiFetch(
-            `/schedules/${id}`,
+            `${base_url}${id}`,
             { method: "DELETE" },
             { accessToken, refreshToken, handleRefresh }
         );
         navigate("/schedules");
     };
 
+    // フォームを初期値に戻す
+    const resetForm = () => {
+        setSelectedDates([getNowDateTime().slice(0, 10)]);
+        setFormData({
+            title: "",
+            start_time: "",
+            end_time: "",
+            note: "",
+            category_id: "",
+        });
+    };
+
+
+
+    // --- useEffect ---
+    useEffect(() => {
+        fetchSchedules();
+        fetchCategories();
+    }, []);
+
+    
+    useEffect(() => {
+        if (id) {
+            fetchSchedule();
+            fetchCategories();
+        }
+    }, [id]);
+
+
     return {
         schedule,
-        categories,
-        error,
-        isEditMode,
-        setIsEditMode,
+        schedules,
+        fetchSchedule,
         formData,
+        fetchSchedule,
+        handleCreate,        
+        isCreating,
+        setIsCreating,
         handleChange,
         handleUpdate,
+        isEditMode,
+        setIsEditMode,
         handleDelete,
-        darkenColor,
-    };
+        error
+    }
 }
