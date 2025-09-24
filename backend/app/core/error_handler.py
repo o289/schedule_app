@@ -1,7 +1,7 @@
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.exception_handlers import RequestValidationError
-from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.exceptions import HTTPException 
 from fastapi import status
 
 # HTTPException ハンドラ

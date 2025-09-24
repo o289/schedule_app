@@ -4,7 +4,7 @@ from typing import Optional
 
 from .config import settings
 
-from jose import JWTError, jwt  # python-jose を利用
+from jose import jwt  # python-jose を利用
 
 
 def hash_password(password: str) -> str:

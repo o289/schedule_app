@@ -115,7 +115,8 @@ export default function CalendarBase({ events, handleDateClick, buttonEvent}) {
       const color = arg.event.extendedProps.categoryColor || "gray";
       return (
         <Link
-          to={`/schedules/${arg.event.id}`}
+          to={`/schedules/${arg.event.extendedProps.scheduleId}`}
+          state={{ dateId: arg.event.extendedProps.dateId }}
           className="fc-event-link"
           style={{ "--hover-color": color }}
         >

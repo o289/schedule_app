@@ -19,9 +19,10 @@ import "./ScheduleForm.css"
 export default function ScheduleCalendarPage() {
   const { categories, setCategories } = useCategory();
 
+
   const {
     schedules,
-    handleCreate,
+    handleScheduleCreate,
     handleChange,
     isCreating,
     setIsCreating,
@@ -30,10 +31,6 @@ export default function ScheduleCalendarPage() {
   } = useSchedule();
 
   const {
-    selectedDates,
-    addDate,
-    updateDate,
-    removeDate,
     handleDateClick,
     events,
 
@@ -42,42 +39,15 @@ export default function ScheduleCalendarPage() {
   return (
     <div style={{ padding: "1rem" }}>
       {isCreating && (
-          <>
-            <ScheduleForm
+          <ScheduleForm
               formData={formData}
               onChange={handleChange}
-              onSubmit={handleCreate}
+              onSubmit={handleScheduleCreate}
               submitLabel="作成"
+              onCancel={ () => setIsCreating(false) }
               categories={categories}
               useDateTime={false}
-            />
-            <div className="form-group">
-              <label>日付</label>
-              {selectedDates.map((date, idx) => (
-                  <div key={idx} className="date-row">
-                  <input
-                      type="date"
-                      value={date}
-                      onChange={(e) => updateDate(idx, e.target.value)}
-                      required
-                  />
-                  <button
-                      type="button"
-                      className="btn-category btn-cancel"
-                      onClick={() => removeDate(idx)}
-                  >
-                      削除
-                  </button>
-                  </div>
-              ))}
-              <button type="button" className="btn-category btn-submit" onClick={addDate}>
-                  ＋日付追加
-              </button>
-              </div>
-            <button onClick={() => setIsCreating(false)} className="btn-category btn-cancel">
-              キャンセル
-            </button>
-        </>
+          />
       )}
 
       {error && <p style={{ color: "red" }}>{error}</p>}

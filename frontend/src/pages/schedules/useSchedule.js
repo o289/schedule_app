@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { apiFetch } from "../../api/client";
 import { useCategory } from "../categories/categoryHandlers"
+import { useDateTime } from "../schedules/useDateTime"
 
 export function useSchedule(id = null) {
     const { accessToken, refreshToken, handleRefresh } = useAuth();
@@ -11,15 +12,28 @@ export function useSchedule(id = null) {
     
     const { fetchCategories } = useCategory()
 
+    const { 
+        selectedDate,
+        selectedDates,
+        setSelectedDate,
+        setSelectedDates,
+        getNowDateTime, 
+        getNowPlusOneHour
+    } = useDateTime(schedules)
+
     const [isCreating, setIsCreating] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [error, setError] = useState("");
     
     const [formData, setFormData] = useState({
         title: "",
-        start_time: "",
-        end_time: "",
         note: "",
+        dates: [
+            {
+                start_date: getNowDateTime(),
+                end_date: getNowPlusOneHour()
+            }
+        ],
         category_id: "",
     });
 
@@ -49,28 +63,20 @@ export function useSchedule(id = null) {
         setSchedule(res);
         setFormData({
             title: res.title,
-            start_time: res.start_time.slice(0, 16),
-            end_time: res.end_time.slice(0, 16),
             note: res.note || "",
+            dates: res.dates || [],
             category_id: res.category_id,
         });
     };
 
     // 作成
-    const handleCreate = async (e) => {
-        e.preventDefault();
-        for (const date of selectedDates) {
-            const payload = {
-                ...formData,
-                start_time: `${date}T${formData.start_time}`,
-                end_time: `${date}T${formData.end_time}`,
-            };
-            await apiFetch(
-                base_url,
-                { method: "POST", body: JSON.stringify(payload) },
-                { accessToken, refreshToken, handleRefresh }
-            );
-        }
+    const handleScheduleCreate = async (e) => {
+        await apiFetch(
+            base_url,
+            { method: "POST", body: JSON.stringify(formData) },
+            { accessToken, refreshToken, handleRefresh }
+        );
+
         await fetchSchedules();
         resetForm();
         setIsCreating(false);
@@ -83,7 +89,7 @@ export function useSchedule(id = null) {
     };
 
     // --- 更新 ---
-    const handleUpdate = async (e) => {
+    const handleScheduleUpdate = async (e) => {
         await apiFetch(
             `${base_url}${id}`,
             {
@@ -98,7 +104,7 @@ export function useSchedule(id = null) {
     };
 
     // --- 削除 ---
-    const handleDelete = async () => {
+    const handleScheduleDelete = async () => {
         if (!window.confirm("本当に削除しますか？")) return;
         await apiFetch(
             `${base_url}${id}`,
@@ -113,26 +119,23 @@ export function useSchedule(id = null) {
         setSelectedDates([getNowDateTime().slice(0, 10)]);
         setFormData({
             title: "",
-            start_time: "",
-            end_time: "",
             note: "",
+            dates: [
+                {
+                start_date: getNowDateTime(),
+                end_date: getNowPlusOneHour()
+            }
+            ],
             category_id: "",
         });
     };
-
-
-
-    // --- useEffect ---
-    useEffect(() => {
-        fetchSchedules();
-        fetchCategories();
-    }, []);
 
     
     useEffect(() => {
         if (id) {
             fetchSchedule();
-            fetchCategories();
+        } else {
+            fetchSchedules();
         }
     }, [id]);
 
@@ -143,14 +146,14 @@ export function useSchedule(id = null) {
         fetchSchedule,
         formData,
         fetchSchedule,
-        handleCreate,        
+        handleScheduleCreate,        
         isCreating,
         setIsCreating,
         handleChange,
-        handleUpdate,
+        handleScheduleUpdate,
         isEditMode,
         setIsEditMode,
-        handleDelete,
+        handleScheduleDelete,
         error
     }
 }

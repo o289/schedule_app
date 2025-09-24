@@ -1,5 +1,4 @@
 name: Deploy to VPS with Backup and Rollback (Image Tag)
-
 on:
   push:
     branches:
@@ -9,6 +8,25 @@ jobs:
   deploy: 
     runs-on: ubuntu-latest
     steps:
+      # - name: Check latest Daily DB Backup workflow run status
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     REPO: ${{ github.repository }}
+      #   run: |
+      #     echo "Checking latest Daily DB Backup workflow run status..."
+      #     WORKFLOW_NAME="Daily DB Backup"
+      #     LATEST_RUN_STATUS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+      #       "https://api.github.com/repos/$REPO/actions/workflows" | \
+      #       jq -r --arg name "$WORKFLOW_NAME" '.workflows[] | select(.name == $name) | .id' | \
+      #       xargs -I {} curl -s -H "Authorization: token $GITHUB_TOKEN" \
+      #       "https://api.github.com/repos/$REPO/actions/workflows/{}/runs?per_page=1" | \
+      #       jq -r '.workflow_runs[0].conclusion')
+      #     if [ "$LATEST_RUN_STATUS" != "success" ]; then
+      #       echo "Latest Daily DB Backup workflow run did not succeed. Aborting deployment."
+      #       exit 1
+      #     fi
+      #     echo "Latest Daily DB Backup workflow run succeeded. Continuing deployment."
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -47,7 +65,23 @@ jobs:
             docker compose -f docker-compose.prod.yml exec -T db \
               sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' \
               > backups/backup_$(date +%F_%H-%M).sql
-
+      
+      # 2.5 Alembicマイグレーション（新しいファイルがあれば実行）
+      - name: Run Alembic migrations (if new files exist)
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/schedule_app
+            # Check for new migration files
+            if [ "$(ls -A backend/alembic/versions/*.py 2>/dev/null)" ]; then
+              echo "🗄️ Running Alembic migrations..."
+              docker compose -f docker-compose.prod.yml run --rm backend alembic upgrade head
+            else
+              echo "ℹ️ No Alembic migration files detected, skipping."
+            fi
       
       # 3. リポジトリを配置 or 更新
       - name: Ensure repo exists on VPS
@@ -202,3 +236,4 @@ jobs:
             docker save -o image_backups/backend_$(date +%F).tar schedule_app-backend:latest
             docker save -o image_backups/nginx_$(date +%F).tar schedule_app-nginx:latest
             ls -lh image_backups/
+          

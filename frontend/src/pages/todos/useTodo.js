@@ -23,7 +23,7 @@ export function useTodo(scheduleId) {
     };
 
     // 作成
-    const createTodo = async (newTodo) => {
+    const handleTodoCreate = async (newTodo) => {
         await apiFetch(
             `${base_todo_url}`,
             {
@@ -36,7 +36,7 @@ export function useTodo(scheduleId) {
     };
 
     // 更新（例: 完了トグル）
-    const updateTodo = async (todoId, payload) => {
+    const handleTodoUpdate = async (todoId, payload) => {
         await apiFetch(
             `${base_todo_url}${todoId}`,
             {
@@ -49,7 +49,7 @@ export function useTodo(scheduleId) {
     };
 
     // 削除
-    const deleteTodo = async (todoId) => {
+    const handleTodoDelete = async (todoId) => {
         await apiFetch(
             `${base_todo_url}${todoId}`,
             { method: "DELETE" },
@@ -58,5 +58,5 @@ export function useTodo(scheduleId) {
         fetchTodos();
     };
 
-    return { todos, error, fetchTodos, createTodo, updateTodo, deleteTodo };
+    return { todos, error, fetchTodos, handleTodoCreate, handleTodoUpdate, handleTodoDelete };
 }
