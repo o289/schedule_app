@@ -19,6 +19,7 @@ venv/
 *.log
 docker-data/
 certs/
+postgres_data/
 
 # OS files
 .DS_Store
@@ -28,6 +29,3 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Docker
-postgres_data/
-certs/

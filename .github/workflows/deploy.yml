@@ -66,23 +66,6 @@ jobs:
               sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' \
               > backups/backup_$(date +%F_%H-%M).sql
       
-      # 2.5 Alembicマイグレーション（新しいファイルがあれば実行）
-      - name: Run Alembic migrations (if new files exist)
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            cd /home/${{ secrets.VPS_USER }}/schedule_app
-            # Check for new migration files
-            if [ "$(ls -A backend/alembic/versions/*.py 2>/dev/null)" ]; then
-              echo "🗄️ Running Alembic migrations..."
-              docker compose -f docker-compose.prod.yml run --rm backend alembic upgrade head
-            else
-              echo "ℹ️ No Alembic migration files detected, skipping."
-            fi
-      
       # 3. リポジトリを配置 or 更新
       - name: Ensure repo exists on VPS
         uses: appleboy/ssh-action@v1.0.0
@@ -103,7 +86,24 @@ jobs:
               git reset --hard origin/main
             fi
 
-      # 4. デプロイ（frontendコンテナを完全に作り直し）
+      # 4. Alembicマイグレーション（新しいファイルがあれば実行）
+      - name: Run Alembic migrations (if new files exist)
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/schedule_app
+            # Check for new migration files
+            if [ "$(ls -A backend/alembic/versions/*.py 2>/dev/null)" ]; then
+              echo "🗄️ Running Alembic migrations..."
+              docker compose -f docker-compose.prod.yml run --rm backend alembic upgrade head
+            else
+              echo "ℹ️ No Alembic migration files detected, skipping."
+            fi
+
+      # 5. デプロイ（frontendコンテナを完全に作り直し）
       - name: Deploy App (with no-cache build + rollback check)
         id: deploy-step
         uses: appleboy/ssh-action@v1.0.0
@@ -147,7 +147,7 @@ jobs:
               echo "✅ Deployment successful. All containers running with new images."
             fi
 
-      # 5. 失敗時のログ収集
+      # 6. 失敗時のログ収集
       - name: Collect docker logs on failure
         if: failure()
         uses: appleboy/ssh-action@v1.0.0
@@ -179,7 +179,7 @@ jobs:
           path: logs/deploy-error.log
         # 補助的: アップロード失敗は致命的ではないため継続可能
 
-      # 6. 失敗時のロールバック（前の安定版に戻す）
+      # 7. 失敗時のロールバック（前の安定版に戻す）
       - name: Rollback to previous image
         if: failure()
         uses: appleboy/ssh-action@v1.0.0
@@ -221,7 +221,7 @@ jobs:
 
             echo "✅ Rollback completed. Backend and nginx containers restored. DB container is preserved."
 
-      # 7. 成功時にイメージを保存（latestイメージをtarアーカイブ化）
+      # 8. 成功時にイメージを保存（latestイメージをtarアーカイブ化）
       - name: Save Docker images on success
         if: success()
         uses: appleboy/ssh-action@v1.0.0
