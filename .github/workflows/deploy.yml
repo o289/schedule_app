@@ -78,7 +78,7 @@ jobs:
             # Check for new migration files
             if [ "$(ls -A backend/alembic/versions/*.py 2>/dev/null)" ]; then
               echo "🗄️ Running Alembic migrations..."
-              docker compose -f docker-compose.prod.yml run --rm backend alembic -c backend/alembic.ini upgrade head
+              docker compose -f docker-compose.prod.yml run --rm backend alembic -c alembic.ini upgrade head
             else
               echo "ℹ️ No Alembic migration files detected, skipping."
             fi
