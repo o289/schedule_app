@@ -5,30 +5,32 @@ on:
       - main
 
 jobs:
-  deploy: 
+  build:
     runs-on: ubuntu-latest
     steps:
-      # - name: Check latest Daily DB Backup workflow run status
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     REPO: ${{ github.repository }}
-      #   run: |
-      #     echo "Checking latest Daily DB Backup workflow run status..."
-      #     WORKFLOW_NAME="Daily DB Backup"
-      #     LATEST_RUN_STATUS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-      #       "https://api.github.com/repos/$REPO/actions/workflows" | \
-      #       jq -r --arg name "$WORKFLOW_NAME" '.workflows[] | select(.name == $name) | .id' | \
-      #       xargs -I {} curl -s -H "Authorization: token $GITHUB_TOKEN" \
-      #       "https://api.github.com/repos/$REPO/actions/workflows/{}/runs?per_page=1" | \
-      #       jq -r '.workflow_runs[0].conclusion')
-      #     if [ "$LATEST_RUN_STATUS" != "success" ]; then
-      #       echo "Latest Daily DB Backup workflow run did not succeed. Aborting deployment."
-      #       exit 1
-      #     fi
-      #     echo "Latest Daily DB Backup workflow run succeeded. Continuing deployment."
-
       - name: Checkout repository
         uses: actions/checkout@v4
+
+        # 定期実行のDBバックアップで失敗したら、デプロイを走らせない
+        # - name: Check latest Daily DB Backup workflow run status
+        #   env:
+        #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #     REPO: ${{ github.repository }}
+        #   run: |
+        #     echo "Checking latest Daily DB Backup workflow run status..."
+        #     WORKFLOW_NAME="Daily DB Backup"
+        #     LATEST_RUN_STATUS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+        #       "https://api.github.com/repos/$REPO/actions/workflows" | \
+        #       jq -r --arg name "$WORKFLOW_NAME" '.workflows[] | select(.name == $name) | .id' | \
+        #       xargs -I {} curl -s -H "Authorization: token $GITHUB_TOKEN" \
+        #       "https://api.github.com/repos/$REPO/actions/workflows/{}/runs?per_page=1" | \
+        #       jq -r '.workflow_runs[0].conclusion')
+        #     if [ "$LATEST_RUN_STATUS" != "success" ]; then
+        #       echo "Latest Daily DB Backup workflow run did not succeed. Aborting deployment."
+        #       exit 1
+        #     fi
+        #     echo "Latest Daily DB Backup workflow run succeeded. Continuing deployment."
+
 
       # 1. Secretsから.env.prodを生成（改行を保持）
       - name: Create local .env.prod from secrets
@@ -55,7 +57,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           # 致命的: DBバックアップ失敗はデプロイ失敗に直結するため
           script: |
-            cd /home/${{ secrets.VPS_USER }}/schedule_app || exit 0
+            cd /home/${{ secrets.VPS_USER }}/schedule_app || exit 1
             mkdir -p backups
 
             echo "🔄 Restarting DB container to ensure env is loaded..."
@@ -86,7 +88,21 @@ jobs:
               git reset --hard origin/main
             fi
 
-      # 4. Alembicマイグレーション（新しいファイルがあれば実行）
+      - name: Build backend and nginx images (no-cache)
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/schedule_app
+            echo "🔨 Build backend and nginx images (no-cache)..."
+            docker compose -f docker-compose.prod.yml build --no-cache backend nginx
+
+  migrate:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Run Alembic migrations (if new files exist)
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -103,7 +119,10 @@ jobs:
               echo "ℹ️ No Alembic migration files detected, skipping."
             fi
 
-      # 5. デプロイ（frontendコンテナを完全に作り直し）
+  deploy:
+    needs: migrate
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy App (with no-cache build + rollback check)
         id: deploy-step
         uses: appleboy/ssh-action@v1.0.0
@@ -115,9 +134,6 @@ jobs:
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             
-            echo "🔨 Build nginx image (no-cache)..."
-            docker compose -f docker-compose.prod.yml build --no-cache nginx
-
             echo "🚀 Start nginx with new image..."
             docker compose -f docker-compose.prod.yml up -d
 
@@ -236,4 +252,3 @@ jobs:
             docker save -o image_backups/backend_$(date +%F).tar schedule_app-backend:latest
             docker save -o image_backups/nginx_$(date +%F).tar schedule_app-nginx:latest
             ls -lh image_backups/
-          
