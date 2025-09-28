@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, DateTime
+from sqlalchemy import Column, String, ForeignKey, DateTime, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -21,7 +21,7 @@ class Schedule(BaseTable):
     category = relationship("Category", back_populates="schedules")
 
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    user = relationship("User", back_populates="schedules")  # ← これを追加
+    user = relationship("User", back_populates="schedules")  
 
     todos = relationship("Todo", back_populates="schedule", cascade="all, delete")
 
@@ -30,7 +30,11 @@ class ScheduleDate(BaseTable):
     __tablename__ = "schedule_dates"
 
     schedule_id = Column(UUID(as_uuid=True), ForeignKey("schedules.id"), nullable=False)
-    start_date = Column(DateTime, nullable=True)
-    end_date = Column(DateTime, nullable=True)
+    start_date = Column(DateTime, nullable=False)
+    end_date = Column(DateTime, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("end_date >= start_date", name="chk_end_after_start"),
+    )
 
     schedule = relationship("Schedule", back_populates="dates")

@@ -7,13 +7,13 @@ from alembic import context
 
 # 追加: アプリ側の設定をimport
 from app.core.config import settings
-from app.core.database import Base
+from app.core.database import BaseTable
 
-
+#
 
 # Alembicが参照するメタデータ
 import app.models 
-target_metadata = Base.metadata
+target_metadata = BaseTable.metadata
 
 
 

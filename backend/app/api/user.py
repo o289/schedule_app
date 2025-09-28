@@ -13,12 +13,7 @@ from app.schemas.user import UserCreate, UserResponse, UserLogin, TokenResponse
 
 # セキュリティ（JWT）
 from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.api.deps import get_current_user
-
-# 型・ユーティリティ
-from datetime import timedelta
-from typing import Optional
 
 # モデル達（User認証用に参照）
 from app.models.user import User

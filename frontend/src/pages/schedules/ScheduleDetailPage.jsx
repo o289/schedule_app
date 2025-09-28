@@ -83,6 +83,7 @@ export default function ScheduleDetailPage() {
                 onSubmit={handleScheduleUpdate}
                 submitLabel="保存"
                 categories={categories}
+                onCancel={ () => setIsEditMode(false) }
             />
         )}
         </div>

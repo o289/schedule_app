@@ -5,6 +5,7 @@ from uuid import UUID
 from app.core.database import get_db
 from app.api.deps import get_current_user
 from app.models.user import User
+# from app.models.category import Category
 from app.schemas.schedule import ScheduleCreate, ScheduleUpdate, ScheduleResponse
 from app.crud.schedule import ScheduleRepository
 
@@ -17,11 +18,11 @@ def create_schedule(
     schedule_in: ScheduleCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-):
+):  
     repo = ScheduleRepository(db)
     # user_id を渡すことで他人のカテゴリに紐づけられないよう制御できる
-    
     schedule = repo.create(current_user.id,schedule_in)
+    
     return schedule
 
 
@@ -44,8 +45,10 @@ def get_schedule(
 ):
     repo = ScheduleRepository(db)
     schedule = repo.get(schedule_id)
+    
     if not schedule or schedule.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="スケジュールが見つかりません")
+    
     return schedule
 
 
@@ -59,8 +62,10 @@ def update_schedule(
 ):
     repo = ScheduleRepository(db)
     schedule = repo.get(schedule_id)
+    
     if not schedule or schedule.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="スケジュールが見つかりません")
+    
     return repo.update(schedule_id, schedule_in)
 
 
@@ -73,6 +78,8 @@ def delete_schedule(
 ):
     repo = ScheduleRepository(db)
     success = repo.delete(schedule_id, current_user.id)
+    
     if not success:
         raise HTTPException(status_code=404, detail="スケジュールが見つかりません")
+    
     return None

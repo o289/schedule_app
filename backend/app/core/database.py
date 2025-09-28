@@ -5,7 +5,6 @@ from sqlalchemy.orm import sessionmaker, Session
 from app.core.config import settings
 from sqlalchemy.ext.declarative import declarative_base
 
-import uuid
 
 engine = create_engine(settings.DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

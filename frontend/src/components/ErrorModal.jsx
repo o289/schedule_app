@@ -1,8 +1,30 @@
 // frontend/src/components/ErrorModal.jsx
 import "./ErrorModal.css";
+import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
 
-export default function ErrorModal({ error, onClose, onLogout }) {
+export default function ErrorModal({ error, onClose }) {
   if (!error) return null; // エラーがなければ表示しない
+
+  // デフォルトに関する処理
+  // 通常はエラーモーダルをとじる
+  // もし特殊処理がある場合は引数で受け取らせる
+  const [close, setClose] = useState(false)
+  const defaultClose = () => {
+    setClose(false)
+  };
+  const handleClose = () => {
+    defaultClose()
+    if (onClose) onClose();
+  }
+
+
+  const { handleLogout } = useAuth()
+  const onLogout= () => {
+    handleLogout();
+    navigate("/");
+  }
+
 
   return (
     <div className="error-modal-overlay">
@@ -20,7 +42,7 @@ export default function ErrorModal({ error, onClose, onLogout }) {
               ログアウト
             </button>
           ) : (
-            <button onClick={onClose} className="btn-close">
+            <button onClick={handleClose} className="btn-close">
               閉じる
             </button>
           )}

@@ -1,54 +1,54 @@
 .todo-form {
-    background: #fff;
-    border-radius: 10px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    margin: 1.5rem 0;
-    max-width: 500px;
-  }
-  
-  .todo-form div {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1rem;
-  }
-  
-  .todo-form label {
-    font-size: 0.9rem;
-    font-weight: bold;
-    margin-bottom: 0.4rem;
-    color: #333;
-  }
-  
-  .todo-form input,
-  .todo-form select,
-  .todo-form textarea {
-    padding: 0.6rem 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 1rem;
-    transition: border-color 0.2s ease;
-  }
-  
-  .todo-form input:focus,
-  .todo-form select:focus,
-  .todo-form textarea:focus {
-    border-color: #4a90e2;
-    outline: none;
-  }
-  
-  .todo-form button[type="submit"] {
-    padding: 0.7rem 1.2rem;
-    border: none;
-    border-radius: 6px;
-    background-color: #4a90e2;
-    color: white;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-  
-  .todo-form button[type="submit"]:hover {
-    background-color: #357ab8;
-  }
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  margin: 1.5rem 0;
+  max-width: 500px;
+}
+
+.todo-form div {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.todo-form label {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 0.4rem;
+  color: #333;
+}
+
+.todo-form input,
+.todo-form select,
+.todo-form textarea {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.todo-form input:focus,
+.todo-form select:focus,
+.todo-form textarea:focus {
+  border-color: #4a90e2;
+  outline: none;
+}
+
+.todo-form button[type="submit"] {
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #4a90e2;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.todo-form button[type="submit"]:hover {
+  background-color: #357ab8;
+}

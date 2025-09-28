@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from .base import BaseRepository
 from app.models.schedule import Schedule, ScheduleDate
-from app.schemas.schedule import ScheduleCreate, ScheduleUpdate, ScheduleDateResponse
+from app.schemas.schedule import ScheduleCreate, ScheduleUpdate
 from uuid import UUID
 
 class ScheduleRepository(BaseRepository):
@@ -22,13 +22,16 @@ class ScheduleRepository(BaseRepository):
         )
         return self.base_add(schedule)
 
+
     # --- 取得（ID指定） ---
     def get(self, schedule_id: UUID) -> Schedule | None:
         return self.base_get(schedule_id)
-        
+
+    
     # --- ユーザーの全スケジュール取得 ---
     def get_by_user(self, user_id: UUID) -> list[Schedule]:
         return self.base_list(user_id=user_id)
+
 
     # --- 削除 ---
     def delete(self, schedule_id: UUID, user_id: UUID) -> bool:
@@ -40,6 +43,7 @@ class ScheduleRepository(BaseRepository):
         if not obj:
             return False
         return self.base_delete(obj)  # ← オブジェクトを渡す
+
 
     # --- 更新 ---
     def update(self, schedule_id: UUID, schedule_in: ScheduleUpdate) -> Schedule | None:
@@ -57,7 +61,7 @@ class ScheduleRepository(BaseRepository):
             existing_dates = {d.id: d for d in schedule.dates}
             incoming_dates = {d.id: d for d in schedule_in.dates if d.id is not None}
 
-            # 更新
+            # スケジュールの更新
             for date_id, date_in in incoming_dates.items():
                 if date_id in existing_dates:
                     existing = existing_dates[date_id]
@@ -66,7 +70,7 @@ class ScheduleRepository(BaseRepository):
                     if date_in.end_date is not None:
                         existing.end_date = date_in.end_date
 
-            # 新規追加
+            # 日にちの新規追加
             for date_in in schedule_in.dates:
                 if date_in.id is None:
                     schedule.dates.append(
@@ -76,7 +80,7 @@ class ScheduleRepository(BaseRepository):
                         )
                     )
 
-            # 削除
+            # 日にちの削除
             incoming_ids = {d.id for d in schedule_in.dates if d.id is not None}
             for existing in list(schedule.dates):
                 if existing.id not in incoming_ids:

@@ -8,8 +8,8 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
 import CalendarBase from "../../components/CalendarBase";
-
 import ScheduleForm from "./ScheduleForm";
+import ErrorModal from "../../components/ErrorModal";
 
 import "./ScheduleCalendarPage.css"; // ← CSSを読み込む
 import "./ScheduleForm.css"
@@ -17,7 +17,7 @@ import "./ScheduleForm.css"
 
 
 export default function ScheduleCalendarPage() {
-  const { categories, setCategories } = useCategory();
+  const { categories } = useCategory();
 
 
   const {
@@ -33,12 +33,11 @@ export default function ScheduleCalendarPage() {
   const {
     handleDateClick,
     events,
-
   } = useDateTime(schedules);
 
   return (
     <div style={{ padding: "1rem" }}>
-      {isCreating && (
+      {isCreating ? (
           <ScheduleForm
               formData={formData}
               onChange={handleChange}
@@ -46,21 +45,20 @@ export default function ScheduleCalendarPage() {
               submitLabel="作成"
               onCancel={ () => setIsCreating(false) }
               categories={categories}
-              useDateTime={false}
           />
-      )}
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      {/* 作成モード中はカレンダー非表示 */}
-      {!isCreating && (
-        <>
-          <CalendarBase
+      ) : (
+        <CalendarBase
             events={events}
             handleDateClick={handleDateClick}
             buttonEvent={ () => setIsCreating(true) }
           />
-        </>
+      )}
+      
+
+      {error && (
+        <ErrorModal
+          error={error}
+        />
       )}
     </div>
   );

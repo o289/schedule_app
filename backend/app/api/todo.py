@@ -39,8 +39,6 @@ def create_todo(
     schedule = db.query(Schedule).filter(Schedule.id == schedule_id).first()
     if not schedule or schedule.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="権限がありません")
-    
-    print("受け取った todo_in:", todo_in.model_dump(), flush=True)
 
     repo = TodoRepository(db)
     return repo.create(schedule_id, todo_in)

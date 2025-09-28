@@ -31,7 +31,6 @@ jobs:
         #     fi
         #     echo "Latest Daily DB Backup workflow run succeeded. Continuing deployment."
 
-
       # 1. Secretsから.env.prodを生成（改行を保持）
       - name: Create local .env.prod from secrets
         run: |
@@ -67,7 +66,7 @@ jobs:
             docker compose -f docker-compose.prod.yml exec -T db \
               sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' \
               > backups/backup_$(date +%F_%H-%M).sql
-      
+
       # 3. リポジトリを配置 or 更新
       - name: Ensure repo exists on VPS
         uses: appleboy/ssh-action@v1.0.0
@@ -133,7 +132,7 @@ jobs:
           # 致命的: デプロイ失敗時はロールバックを行うため
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
-            
+
             echo "🚀 Start nginx with new image..."
             docker compose -f docker-compose.prod.yml up -d
 

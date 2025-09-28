@@ -1,99 +1,128 @@
 import { useState, useEffect } from "react";
 
-
 export function useDateTime(schedules) {
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [events, setEvents] = useState([]);
-    
-    // --- 日付補助関数 ---
-    function getNowDateTime() {
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        return now.toISOString().slice(0, 16);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [events, setEvents] = useState([]);
+
+  // --- 日付補助関数 ---
+  function getNowDateTime() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 16);
+  }
+
+  function getNowPlusOneHour() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset() + 60);
+    return now.toISOString().slice(0, 16);
+  }
+
+  const handleDateClick = (info) => {
+    setSelectedDate(info.dateStr);
+  };
+
+  useEffect(() => {
+    if (!schedules) {
+      setEvents([]);
+      return;
     }
 
-    function getNowPlusOneHour() {
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset() + 60);
-        return now.toISOString().slice(0, 16);
-    }
-    
-    const handleDateClick = (info) => {
-        setSelectedDate(info.dateStr);
-    };
+    // 各 schedule の中の dates を展開して FullCalendar 用イベントに変換
+    const allEvents = schedules.flatMap((s) =>
+      (s.dates || []).map((d) => ({
+        id: d.id,
+        scheduleId: s.id,
+        title: s.title,
+        start: d.start_date,
+        end: d.end_date,
+        categoryColor: s.category?.color || "gray",
+      }))
+    );
 
-    useEffect(() => {
-        if (!schedules) {
-            setEvents([]);
-            return;
-        }
+    setEvents(allEvents);
+  }, [schedules]);
 
-        // 各 schedule の中の dates を展開して FullCalendar 用イベントに変換
-        const allEvents = schedules.flatMap((s) =>
-            (s.dates || []).map((d) => ({
-                id: d.id,
-                scheduleId: s.id,
-                title: s.title,
-                start: d.start_date,
-                end: d.end_date,
-                categoryColor: s.category?.color || "gray",
-            }))
-        );
-
-        setEvents(allEvents);
-    }, [schedules]);
-
-    return {
-        selectedDate,
-        setSelectedDate,
-        events,
-        handleDateClick,
-        getNowDateTime,
-        getNowPlusOneHour,
-    }
+  return {
+    selectedDate,
+    setSelectedDate,
+    events,
+    handleDateClick,
+    getNowDateTime,
+    getNowPlusOneHour,
+  };
 }
 
-
 export function handleDateTime(formData, onChange) {
-    const [dates, setDates] = useState(formData.dates && formData.dates.length > 0 ? formData.dates : [{ start_date: "", end_date: "" }]);
-    const [tempStart, setTempStart] = useState("");
-    const [tempEnd, setTempEnd] = useState("");
+  const { getNowDateTime, getNowPlusOneHour } = useDateTime();
 
-    const handleDateChange = (index, field, value) => {
-        const newDates = dates.map((date, i) => {
-        if (i === index) {
-            return { ...date, [field]: value };
-        }
-        return date;
-        });
-        setDates(newDates);
-        onChange({ target: { name: "dates", value: newDates } });
-    };
+  const [dates, setDates] = useState(
+    formData.dates && formData.dates.length > 0
+      ? formData.dates
+      : [{ start_date: "", end_date: "" }]
+  );
+  const [tempStart, setTempStart] = useState(getNowDateTime);
+  const [tempEnd, setTempEnd] = useState(getNowPlusOneHour);
 
-    const addDate = () => {
-        if (!tempStart || !tempEnd) return;
-        const newDates = [...dates, { start_date: tempStart, end_date: tempEnd }];
-        setDates(newDates);
-        onChange({ target: { name: "dates", value: newDates } });
-        setTempStart("");
-        setTempEnd("");
-    };
+  const [datesDisable, setDatesDisable] = useState(false);
 
-    const removeDate = (index) => {
-        const newDates = dates.filter((_, i) => i !== index);
-        setDates(newDates);
-        onChange({ target: { name: "dates", value: newDates } });
-    };
+  const handleDateChange = (index, field, value) => {
+    const newDates = dates.map((date, i) => {
+      if (i === index) {
+        return { ...date, [field]: value };
+      }
+      return date;
+    });
+    setDates(newDates);
+    onChange({ target: { name: "dates", value: newDates } });
+  };
 
-    return {
-        dates,
-        setDates,
-        tempStart,
-        setTempStart,
-        tempEnd,
-        setTempEnd,
-        handleDateChange,
-        addDate,
-        removeDate
+  const addDate = () => {
+    if (!tempStart || !tempEnd) return;
+    const newDate = { start_date: tempStart, end_date: tempEnd };
+
+    if (tempStart >= tempEnd) return;
+    // 予定の時刻の重複を禁止しているので、同じ日にちに同じ時刻スタートの予定を追加できないようにするため
+    if (dates.some((date) => date.start_date === newDate.start_date)) return;
+
+    const newDates = [...dates, newDate];
+    setDates(newDates);
+    onChange({ target: { name: "dates", value: newDates } });
+
+    // 初期値に開始時刻を現在時刻、終了時刻に現在時刻＋1時間を設定
+    // こうすることで、日付のフォームの入力後に時刻が空白になることを防ぐ。
+    setTempStart(getNowDateTime);
+    setTempEnd(getNowPlusOneHour);
+  };
+
+  useEffect(() => {
+    if (
+      !tempStart ||
+      (!tempEnd &&
+        tempStart >= tempEnd &&
+        dates.some((date) => date.start_date === newDate.start_date))
+    ) {
+      setDatesDisable(true);
+    } else {
+      setDatesDisable(false);
     }
+  }, []);
+
+  const removeDate = (index) => {
+    const newDates = dates.filter((_, i) => i !== index);
+    setDates(newDates);
+    onChange({ target: { name: "dates", value: newDates } });
+  };
+
+  return {
+    dates,
+    setDates,
+    tempStart,
+    setTempStart,
+    tempEnd,
+    setTempEnd,
+    handleDateChange,
+    addDate,
+    removeDate,
+    datesDisable,
+  };
 }

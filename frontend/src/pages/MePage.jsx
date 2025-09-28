@@ -1,17 +1,17 @@
-import { useAuth } from "../context/AuthContext.jsx";
 import { useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 
-import "./ProfileCard.css"
+import "./ProfileCard.css";
 
 export default function MePage() {
   const { user, handleLogout } = useAuth();
   const navigate = useNavigate();
 
-  const onLogout= () =>{
+  const onLogout = () => {
     handleLogout();
     navigate("/");
-  }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -32,9 +32,12 @@ export default function MePage() {
       </div>
 
       <div className="profile-body">
-        <p><span className="label">Email:</span>{user.email}</p>
+        <p>
+          <span className="label">Email:</span>
+          {user.email}
+        </p>
         <button onClick={onLogout} className="btn-link-me">
-            ログアウト
+          ログアウト
         </button>
       </div>
     </div>

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from uuid import UUID
 from datetime import datetime
 from typing import Optional, List
@@ -9,8 +9,16 @@ class ScheduleDateBase(BaseModel):
     start_date: datetime 
     end_date: datetime 
 
+    @validator("end_date")
+    def check_dates(cls, v, values):
+        if "start_date" in values and v <= values["start_date"]:
+            raise ValueError("end_date must be after start_date")
+        return v
+
 class ScheduleDateCreate(ScheduleDateBase):
     pass
+
+
 class ScheduleDateUpdate(BaseModel):
     id: Optional[UUID] = None
     start_date: Optional[datetime] = None
@@ -47,3 +55,5 @@ class ScheduleResponse(ScheduleBase):
 
     class Config:
         from_attributes = True
+
+        
