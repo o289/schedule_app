@@ -90,8 +90,8 @@ export function handleDateTime(formData, onChange) {
 
     // 初期値に開始時刻を現在時刻、終了時刻に現在時刻＋1時間を設定
     // こうすることで、日付のフォームの入力後に時刻が空白になることを防ぐ。
-    setTempStart(getNowDateTime);
-    setTempEnd(getNowPlusOneHour);
+    setTempStart(tempStart);
+    setTempEnd(tempEnd);
   };
 
   useEffect(() => {

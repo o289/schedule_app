@@ -2,7 +2,7 @@ import "./ScheduleForm.css"
 import { useState, useEffect } from "react";
 import { handleDateTime } from "./useDateTime";
 
-import ScheduleDatesModal from "./DatasModal";
+import ScheduleDatesModal from "./DatesModal";
 
 export default function ScheduleForm(
   {

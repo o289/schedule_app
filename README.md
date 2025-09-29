@@ -17,11 +17,7 @@
 
 
 **デプロイ先**  
-- Backend: Render / Railway  
-- Frontend: Vercel / Netlify  
-- DB: PostgreSQL（クラウドホスティング）
-
----
+- 無料VPS
 
 ## 2. データベース設計・モデル設計
 **ER図（Mermaid表記）**  

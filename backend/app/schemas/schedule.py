@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, conlist
 from uuid import UUID
 from datetime import datetime
 from typing import Optional, List
@@ -30,7 +30,7 @@ class ScheduleDateResponse(ScheduleDateBase):
         from_attributes = True
 
 
-# --- 共通 ---
+# --- 本クラス ---
 class ScheduleBase(BaseModel):
     title: Optional[str] = None
     note: Optional[str] = None
@@ -39,18 +39,18 @@ class ScheduleBase(BaseModel):
 # --- 作成 ---
 class ScheduleCreate(ScheduleBase):
     title: str
-    dates: List[ScheduleDateCreate]
+    dates: conlist(ScheduleDateBase, min_length=1)
     category_id: UUID
 
 # --- 更新 ---
 class ScheduleUpdate(ScheduleBase):
-    dates: Optional[List[ScheduleDateUpdate]] = None
+    dates: Optional[conlist(ScheduleDateBase, min_length=1)] = None
 
 
 # --- レスポンス ---
 class ScheduleResponse(ScheduleBase):
     id: UUID
-    dates: List[ScheduleDateResponse] = []
+    dates: List[ScheduleDateResponse] 
     category: CategoryBase  # ← レスポンス専用にネスト
 
     class Config:

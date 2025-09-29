@@ -11,25 +11,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-        # 定期実行のDBバックアップで失敗したら、デプロイを走らせない
-        # - name: Check latest Daily DB Backup workflow run status
-        #   env:
-        #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #     REPO: ${{ github.repository }}
-        #   run: |
-        #     echo "Checking latest Daily DB Backup workflow run status..."
-        #     WORKFLOW_NAME="Daily DB Backup"
-        #     LATEST_RUN_STATUS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-        #       "https://api.github.com/repos/$REPO/actions/workflows" | \
-        #       jq -r --arg name "$WORKFLOW_NAME" '.workflows[] | select(.name == $name) | .id' | \
-        #       xargs -I {} curl -s -H "Authorization: token $GITHUB_TOKEN" \
-        #       "https://api.github.com/repos/$REPO/actions/workflows/{}/runs?per_page=1" | \
-        #       jq -r '.workflow_runs[0].conclusion')
-        #     if [ "$LATEST_RUN_STATUS" != "success" ]; then
-        #       echo "Latest Daily DB Backup workflow run did not succeed. Aborting deployment."
-        #       exit 1
-        #     fi
-        #     echo "Latest Daily DB Backup workflow run succeeded. Continuing deployment."
+      # 0. 定期実行のDBバックアップで失敗したら、デプロイを走らせない
+      - name: Check latest Daily DB Backup workflow run status
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "Checking latest Daily DB Backup workflow run status..."
+          WORKFLOW_NAME="Daily DB Backup"
+          LATEST_RUN_STATUS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$REPO/actions/workflows" | \
+            jq -r --arg name "$WORKFLOW_NAME" '.workflows[] | select(.name == $name) | .id' | \
+            xargs -I {} curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$REPO/actions/workflows/{}/runs?per_page=1" | \
+            jq -r '.workflow_runs[0].conclusion')
+          if [ "$LATEST_RUN_STATUS" != "success" ]; then
+            echo "Latest Daily DB Backup workflow run did not succeed. Aborting deployment."
+            exit 1
+          fi
+          echo "Latest Daily DB Backup workflow run succeeded. Continuing deployment."
 
       # 1. Secretsから.env.prodを生成（改行を保持）
       - name: Create local .env.prod from secrets
@@ -47,7 +47,21 @@ jobs:
           source: ".env.prod"
           target: "/home/${{ secrets.VPS_USER }}/schedule_app/"
 
-      # 2. DBバックアップ
+      # 2.1 不正データを削除
+      - name: Clean invalid schedules before backup
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/schedule_app
+            echo "🧹 Cleaning invalid schedules (dates = empty)..."
+            docker compose -f docker-compose.prod.yml exec -T db \
+              psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
+              "DELETE FROM schedules s WHERE NOT EXISTS (SELECT 1 FROM schedule_dates d WHERE d.schedule_id = s.id);"
+
+      # 2.2 DBバックアップ
       - name: Backup DB before deploy
         uses: appleboy/ssh-action@v1.0.0
         with:
