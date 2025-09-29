@@ -58,8 +58,7 @@ jobs:
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             echo "🧹 Cleaning invalid schedules (dates = empty)..."
             docker compose -f docker-compose.prod.yml exec -T db \
-              psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
-              "DELETE FROM schedules s WHERE NOT EXISTS (SELECT 1 FROM schedule_dates d WHERE d.schedule_id = s.id);"
+              sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DELETE FROM schedules s WHERE NOT EXISTS (SELECT 1 FROM schedule_dates d WHERE d.schedule_id = s.id);"'
 
       # 2.2 DBバックアップ
       - name: Backup DB before deploy
