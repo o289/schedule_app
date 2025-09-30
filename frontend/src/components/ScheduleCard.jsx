@@ -11,8 +11,9 @@ export default function ScheduleCard({
   handleTodoUpdate,
   handleTodoDelete,
   handleScheduleDelete,
+  showTodoForm,
 }) {
-  const [showTodoForm, setShowTodoForm] = useState(false);
+  // const [showTodoForm, setShowTodoForm] = useState(false);
 
   return (
     <>
@@ -55,7 +56,7 @@ export default function ScheduleCard({
             <button
               className="btn-edit"
               style={{ marginLeft: "1rem" }}
-              onClick={() => setShowTodoForm(true)}
+              onClick={showTodoForm}
             >
               Todo追加
             </button>

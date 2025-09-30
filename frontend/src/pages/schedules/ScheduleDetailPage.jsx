@@ -55,6 +55,7 @@ export default function ScheduleDetailPage() {
                     handleTodoUpdate={handleTodoUpdate}
                     handleTodoDelete={handleTodoDelete}
                     handleScheduleDelete={handleScheduleDelete}
+                    showTodoForm={ () => setShowTodoForm(true) }
                 />
             ) : (
                 <div>
