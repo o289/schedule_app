@@ -7,9 +7,6 @@
   max-width: 500px;
 }
 
-
-
-
 .todo-form div {
   display: flex;
   flex-direction: column;
@@ -39,7 +36,7 @@
 .todo-form input:focus,
 .todo-form select:focus,
 .todo-form textarea:focus {
-  border-color: #4a90e2;            /* 青系のアクセント */
+  border-color: #4a90e2; /* 青系のアクセント */
   box-shadow: 0 0 4px rgba(74, 144, 226, 0.3);
   outline: none;
 }

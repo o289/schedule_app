@@ -52,6 +52,10 @@ export function useDateTime(schedules) {
   };
 }
 
+
+
+// scheduleのdatesに追加するための関数
+// 
 export function handleDateTime(formData, onChange) {
   const { getNowDateTime, getNowPlusOneHour } = useDateTime();
 

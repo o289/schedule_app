@@ -15,10 +15,9 @@
   color: black !important;
 }
 
-
 /* 自作リンクのスタイル */
 .fc-event-link {
-  color: black;                  /* 非 hover 時: 黒文字 */
+  color: black; /* 非 hover 時: 黒文字 */
   text-decoration: none;
   display: block;
   padding: 2px 4px;
@@ -30,13 +29,12 @@
 /* hover 時にカテゴリ色を反映 */
 .fc-event-link:hover {
   background-color: var(--hover-color); /* カテゴリカラー */
-  color: white;                         /* 白文字 */
+  color: white; /* 白文字 */
 }
 
-.fc-event-title{
+.fc-event-title {
   font-weight: 500;
 }
-
 
 /* 日付入力行 */
 .date-row {

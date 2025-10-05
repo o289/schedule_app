@@ -1,6 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
-export async function apiFetch(url, options = {}, auth=null) {
+export async function apiFetch(url, options = {}, auth = null) {
   let accessToken = null;
   let refreshToken = null;
   let handleRefresh = null;
@@ -12,14 +12,14 @@ export async function apiFetch(url, options = {}, auth=null) {
 
   const headers = {
     ...options.headers,
-    ...(accessToken && { "Authorization": `Bearer ${accessToken}` }),
+    ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
     "Content-Type": "application/json",
   };
 
   let res = await fetch(`${API_URL}${url}`, { ...options, headers });
-  let data = await res.json().catch(() => ({}))
-  
-  if (!res.ok){
+  let data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
     // レスポンス内容
     const errorObj = {
       code: res.status,
@@ -28,36 +28,44 @@ export async function apiFetch(url, options = {}, auth=null) {
     };
 
     // ステータスコードによる分岐
-    switch (res.status){
+    switch (res.status) {
       case 400:
-        message = message || "入力内容に誤りがあります。もう一度ご確認ください。"
+        message =
+          message || "入力内容に誤りがあります。もう一度ご確認ください。";
         break;
       case 401:
-        if (refreshToken && handleRefresh){
+        if (refreshToken && handleRefresh) {
           const refreshed = await handleRefresh();
           if (refreshed) {
             // Context から最新の accessToken を取得し直す
-            
+
             // リフレッシュ成功 → 再試行
             const retryHeaders = {
               ...options.headers,
-              "Authorization": `Bearer ${refreshed}`, // Context側で更新済みを参照
+              Authorization: `Bearer ${refreshed}`, // Context側で更新済みを参照
               "Content-Type": "application/json",
             };
 
-            const retryRes = await fetch(`${API_URL}${url}`, { ...options, headers: retryHeaders });
+            const retryRes = await fetch(`${API_URL}${url}`, {
+              ...options,
+              headers: retryHeaders,
+            });
 
             if (retryRes.ok) {
-              const retryData = await retryRes.json().catch(() => ({}))
+              const retryData = await retryRes.json().catch(() => ({}));
               return await retryData; // ← リトライ成功時は throw しない
             }
           } else {
             errorObj.message = "長時間操作がなかったためセッションが切れました";
-            errorObj.details = { ...errorObj.details, showLogout: true, action_plan: "再度ログインしてください。" };
+            errorObj.details = {
+              ...errorObj.details,
+              showLogout: true,
+              action_plan: "再度ログインしてください。",
+            };
           }
-        };
+        }
         break;
-      
+
       case 403:
         errorObj.message = "この操作を行う権限がありません。";
         break;
@@ -65,16 +73,19 @@ export async function apiFetch(url, options = {}, auth=null) {
         errorObj.message = "お探しのページやデータが見つかりませんでした。";
         break;
       case 500:
-        errorObj.message = "サーバーでエラーが発生しました。しばらくしてからもう一度お試しください。"
+        errorObj.message =
+          "サーバーでエラーが発生しました。しばらくしてからもう一度お試しください。";
         break;
-      
+
       case 204:
-        return
+        return;
 
       default:
-        errorObj.message = errorObj.message || "予期しないエラーが発生しました。時間を置いて再度お試しください。";
+        errorObj.message =
+          errorObj.message ||
+          "予期しないエラーが発生しました。時間を置いて再度お試しください。";
         break;
-    };
+    }
     // UI表示
     // AuthProviderのエラーUIに渡す
     if (auth?.setError) {
@@ -82,7 +93,7 @@ export async function apiFetch(url, options = {}, auth=null) {
     }
 
     throw errorObj;
-  };
+  }
 
   return data;
 }

@@ -16,7 +16,11 @@ export default function TodoList({ todos, onToggle, onDelete }) {
               <span>{t.title}</span>
             </label>
             <div className="todo-meta">
-              {t.priority && <span className={`priority ${t.priority}`}>優先度: {t.priority}</span>}
+              {t.priority && (
+                <span className={`priority ${t.priority}`}>
+                  優先度: {t.priority}
+                </span>
+              )}
               {t.due_date && (
                 <span className="due-date">
                   期限: {new Date(t.due_date).toLocaleDateString("ja-JP")}
@@ -24,10 +28,7 @@ export default function TodoList({ todos, onToggle, onDelete }) {
               )}
             </div>
           </div>
-          <button
-            onClick={() => onDelete(t.id)}
-            className="btn-delete"
-          >
+          <button onClick={() => onDelete(t.id)} className="btn-delete">
             削除
           </button>
         </div>

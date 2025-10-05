@@ -1,28 +1,28 @@
-.dates-modal{
+.dates-modal {
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
 }
 
-.dates-modal-contents{
+.dates-modal-contents {
   position: absolute;
-    top: 20%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: white;
-    border: 1px solid #ccc;
-    padding: 16px;
-    z-index:  1001;
-    max-height: 300px;
-    overflow-y: auto;
-    width: 300px;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 16px;
+  z-index: 1001;
+  max-height: 300px;
+  overflow-y: auto;
+  width: 300px;
 }
 
-.dates-modal-card{
+.dates-modal-card {
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 12px;
@@ -31,7 +31,7 @@
   background: #fafbfc;
 }
 
-.dates-modal-contents.dates-modal-delete{
+.dates-modal-contents.dates-modal-delete {
   background-color: #fc5959ff;
   border: none;
   border-radius: 4px;
@@ -39,6 +39,6 @@
   cursor: pointer;
 }
 
-.dates-modal-contents.dates-modal-delete:disabled{
+.dates-modal-contents.dates-modal-delete:disabled {
   background-color: rgb(255, 197, 197);
 }

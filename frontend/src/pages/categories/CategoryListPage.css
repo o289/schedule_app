@@ -1,95 +1,95 @@
 /* カテゴリ一覧全体 */
 .category-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  /* 各カテゴリアイテム（カード風） */
-  .category-item {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .category-item.editing {
-    background: #fff8dc; /* 薄い黄色で編集中を強調 */
-    border-color: #f0c36d;
-  }
-  
-  /* 入力フォーム */
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 各カテゴリアイテム（カード風） */
+.category-item {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-item.editing {
+  background: #fff8dc; /* 薄い黄色で編集中を強調 */
+  border-color: #f0c36d;
+}
+
+/* 入力フォーム */
+.category-form input,
+.category-form select {
+  padding: 6px 10px;
+  color: #000;
+  background-color: #ddd;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+/* フォーカス時のスタイル */
+.category-form input:focus,
+.category-form select:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
+}
+
+/* 幅をスマホでも扱いやすく */
+@media (max-width: 768px) {
   .category-form input,
   .category-form select {
-    padding: 6px 10px;
-    color: #000;
-    background-color: #ddd;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    margin-right: 8px;
-    font-size: 14px;
+    width: 100%;
+    margin-bottom: 8px;
   }
+}
 
-  /* フォーカス時のスタイル */
-  .category-form input:focus,
-  .category-form select:focus {
-    border-color: #4a90e2;
-    outline: none;
-    box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
-  }
+/* 共通ボタン */
+.btn-category {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 5px;
+}
 
-  /* 幅をスマホでも扱いやすく */
-  @media (max-width: 768px) {
-    .category-form input,
-    .category-form select {
-      width: 100%;
-      margin-bottom: 8px;
-    }
-  }
-  
-  /* 共通ボタン */
-  .btn-category {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    margin-left: 5px;
-  }
-  
-  /* ボタンバリエーション */
-  .btn-save {
-    background-color: #4a90e2;
-    color: white;
-  }
-  
-  .btn-cancel {
-    background-color: #ccc;
-    color: black;
-  }
-  
-  .btn-category.btn-edit {
-    background-color: #ff9800;
-    color: white;
-  }
-  .btn-category.btn-edit:hover {
-    background-color: #ff7b00;
-    color: white;   /* ← hover 時も明示的に指定 */
-  }
+/* ボタンバリエーション */
+.btn-save {
+  background-color: #4a90e2;
+  color: white;
+}
 
-  .btn-delete {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    background-color: #e74c3c;
-    color: white;
-    cursor: pointer;
-  }
-  
-  .btn-delete:hover {
-    background-color: #c0392b;
-  }
+.btn-cancel {
+  background-color: #ccc;
+  color: black;
+}
+
+.btn-category.btn-edit {
+  background-color: #ff9800;
+  color: white;
+}
+.btn-category.btn-edit:hover {
+  background-color: #ff7b00;
+  color: white; /* ← hover 時も明示的に指定 */
+}
+
+.btn-delete {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #e74c3c;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-delete:hover {
+  background-color: #c0392b;
+}

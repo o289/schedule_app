@@ -9,22 +9,20 @@ export default function ErrorModal({ error, onClose }) {
   // デフォルトに関する処理
   // 通常はエラーモーダルをとじる
   // もし特殊処理がある場合は引数で受け取らせる
-  const [close, setClose] = useState(false)
+  const [close, setClose] = useState(false);
   const defaultClose = () => {
-    setClose(false)
+    setClose(false);
   };
   const handleClose = () => {
-    defaultClose()
+    defaultClose();
     if (onClose) onClose();
-  }
+  };
 
-
-  const { handleLogout } = useAuth()
-  const onLogout= () => {
+  const { handleLogout } = useAuth();
+  const onLogout = () => {
     handleLogout();
     navigate("/");
-  }
-
+  };
 
   return (
     <div className="error-modal-overlay">

@@ -1,36 +1,33 @@
-import "./ScheduleForm.css"
+import "./ScheduleForm.css";
 import { useState, useEffect } from "react";
 import { handleDateTime } from "./useDateTime";
 
 import ScheduleDatesModal from "./DatesModal";
 
-export default function ScheduleForm(
-  {
-    formData,
-    onChange,
-    onSubmit,
-    submitLabel,
-    onCancel,
-    categories = []
-  }
-) {
-  
+export default function ScheduleForm({
+  formData,
+  onChange,
+  onSubmit,
+  submitLabel,
+  onCancel,
+  categories = [],
+}) {
   const [showDatesModal, setShowDatesModal] = useState(false);
-  const [disabled, setDisabled] = useState(true)
-  const { 
-    dates, 
+  const [disabled, setDisabled] = useState(true);
+  const {
+    dates,
     setDates,
     tempStart,
-    setTempStart, 
-    tempEnd, 
+    setTempStart,
+    tempEnd,
     setTempEnd,
-    handleDateChange, 
-    addDate, 
+    handleDateChange,
+    addDate,
     removeDate,
-    datesDisable
-  } = handleDateTime(formData, onChange)
+    datesDisable,
+  } = handleDateTime(formData, onChange);
 
-useEffect(() => {
+  useEffect(() => {
     if (
       formData.title &&
       formData.title.trim() !== "" &&
@@ -44,7 +41,7 @@ useEffect(() => {
   }, [formData.title, dates, formData.category_id]);
 
   return (
-    <form onSubmit={onSubmit} className="schedule-form" >
+    <form onSubmit={onSubmit} className="schedule-form">
       <div className="form-group">
         <label>タイトル</label>
         <input
@@ -73,9 +70,13 @@ useEffect(() => {
             onChange={(e) => setTempEnd(e.target.value)}
             style={{ marginRight: "8px" }}
           />
-          <button type="button" onClick={addDate} disabled={datesDisable}>＋ 日程追加</button>
+          <button type="button" onClick={addDate} disabled={datesDisable}>
+            ＋ 日程追加
+          </button>
         </div>
-        <button type="button" onClick={() => setShowDatesModal(true)}>登録済み日程を見る</button>
+        <button type="button" onClick={() => setShowDatesModal(true)}>
+          登録済み日程を見る
+        </button>
       </div>
 
       {showDatesModal && (
@@ -88,11 +89,7 @@ useEffect(() => {
 
       <div className="form-group">
         <label>メモ</label>
-        <textarea
-          name="note"
-          value={formData.note || ""}
-          onChange={onChange}
-        />
+        <textarea name="note" value={formData.note || ""} onChange={onChange} />
       </div>
 
       <div className="form-group">
@@ -113,13 +110,11 @@ useEffect(() => {
       </div>
 
       <div className="form-actions">
-        <button type="submit" className="btn-submit" disabled={disabled}>{submitLabel}</button>
+        <button type="submit" className="btn-submit" disabled={disabled}>
+          {submitLabel}
+        </button>
         {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="btn-cancel"
-          >
+          <button type="button" onClick={onCancel} className="btn-cancel">
             キャンセル
           </button>
         )}

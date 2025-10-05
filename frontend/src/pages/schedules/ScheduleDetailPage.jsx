@@ -1,92 +1,102 @@
-import { useState, useEffect } from "react";   // ← これを追加
-import { useCategory } from "../categories/categoryHandlers"
+import { useState, useEffect } from "react"; // ← これを追加
+import { useCategory } from "../categories/categoryHandlers";
 import { useParams, useLocation } from "react-router-dom";
 import { useTodo } from "../todos/useTodo";
 import { useSchedule } from "../schedules/useSchedule";
-import { useDateTime } from "../schedules/useDateTime"
+import { useDateTime } from "../schedules/useDateTime";
 
 import TodoForm from "../todos/TodoForm";
 import ScheduleCard from "../../components/ScheduleCard";
 import ScheduleForm from "./ScheduleForm";
 
-
-
 export default function ScheduleDetailPage() {
-    const { id } = useParams();
-    const location = useLocation();
-    const dateId = location.state?.dateId;
+  const { id } = useParams();
+  const location = useLocation();
+  const dateId = location.state?.dateId;
 
-    const { categories, setCategories } = useCategory();
-    const { todos, fetchTodos, handleTodoCreate, handleTodoUpdate, handleTodoDelete } = useTodo(id);
-    const [todoForm, setTodoForm] = useState({ title: "", priority: "", due_date: "" || null});
-    
-    const [showTodoForm, setShowTodoForm] = useState(false);
+  const { categories, setCategories } = useCategory();
+  const {
+    todos,
+    fetchTodos,
+    handleTodoCreate,
+    handleTodoUpdate,
+    handleTodoDelete,
+  } = useTodo(id);
+  const [todoForm, setTodoForm] = useState({
+    title: "",
+    priority: "",
+    due_date: "" || null,
+  });
 
-    const {
-        schedule,
-        isEditMode,
-        setIsEditMode,
-        formData,
-        handleChange,
-        handleScheduleUpdate,
-        handleScheduleDelete,
-        error
-    } = useSchedule(id);
-    
-    useEffect(() => {
-        if (id) {
-            fetchTodos();
-        }
-    }, [id]);
+  const [showTodoForm, setShowTodoForm] = useState(false);
 
-    if (!schedule) return <p>読み込み中...</p>;
+  const {
+    schedule,
+    isEditMode,
+    setIsEditMode,
+    formData,
+    handleChange,
+    handleScheduleUpdate,
+    handleScheduleDelete,
+    error,
+  } = useSchedule(id);
 
-    const selectedDate = schedule.dates?.find(d => d.id === dateId) || schedule.dates?.[0];
+  useEffect(() => {
+    if (id) {
+      fetchTodos();
+    }
+  }, [id]);
 
-    return (
-        <div style={{ padding: "1rem" }}>
+  if (!schedule) return <p>読み込み中...</p>;
+
+  return (
+    <div style={{ padding: "1rem" }}>
       {!isEditMode ? (
-            <div>
-            {!showTodoForm ? (
-                <ScheduleCard
-                    schedule={schedule}
-                    todos={todos || []}
-                    setIsEditMode={setIsEditMode}
-                    handleTodoUpdate={handleTodoUpdate}
-                    handleTodoDelete={handleTodoDelete}
-                    handleScheduleDelete={handleScheduleDelete}
-                    showTodoForm={ () => setShowTodoForm(true) }
-                />
-            ) : (
-                <div>
-                    <TodoForm
-                        formData={todoForm}
-                        onChange={(e) =>
-                            setTodoForm({ ...todoForm, [e.target.name]: e.target.value })
-                        }
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            handleTodoCreate(todoForm);
-                            setTodoForm({ title: "", priority: "", due_date: "" });
-                            setShowTodoForm(false); // 送信後に戻る
-                        }}
-                    />
-                    <button className="btn-cancel" style={{ marginTop: "1rem" }} onClick={() => setShowTodoForm(false)}>キャンセル</button>
-                </div>
-            )}
-            </div>
-
-            
-        ) : (
-            <ScheduleForm
-                formData={formData}
-                onChange={handleChange}
-                onSubmit={handleScheduleUpdate}
-                submitLabel="保存"
-                categories={categories}
-                onCancel={ () => setIsEditMode(false) }
+        <div>
+          {!showTodoForm ? (
+            <ScheduleCard
+              schedule={schedule}
+              todos={todos || []}
+              setIsEditMode={setIsEditMode}
+              handleTodoUpdate={handleTodoUpdate}
+              handleTodoDelete={handleTodoDelete}
+              handleScheduleDelete={handleScheduleDelete}
+              showTodoForm={() => setShowTodoForm(true)}
             />
-        )}
+          ) : (
+            <div>
+              <TodoForm
+                formData={todoForm}
+                onChange={(e) =>
+                  setTodoForm({ ...todoForm, [e.target.name]: e.target.value })
+                }
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleTodoCreate(todoForm);
+                  setTodoForm({ title: "", priority: "", due_date: "" });
+                  setShowTodoForm(false); // 送信後に戻る
+                }}
+              />
+              <button
+                className="btn-cancel"
+                style={{ marginTop: "1rem" }}
+                onClick={() => setShowTodoForm(false)}
+              >
+                キャンセル
+              </button>
+            </div>
+          )}
         </div>
-    );
+      ) : (
+        <ScheduleForm
+          formData={formData}
+          onChange={handleChange}
+          onSubmit={handleScheduleUpdate}
+          submitLabel="保存"
+          categories={categories}
+          onCancel={() => setIsEditMode(false)}
+        />
+      )}
+    </div>
+  );
 }

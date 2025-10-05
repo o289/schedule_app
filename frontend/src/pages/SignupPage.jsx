@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 
-import "../pages/schedules/ScheduleForm.css"
+import "../pages/schedules/ScheduleForm.css";
 
 export default function SignupPage() {
   const { handleSignup } = useAuth();
@@ -25,7 +25,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div style={{ padding: "1rem" }}> 
+    <div style={{ padding: "1rem" }}>
       <form onSubmit={onSubmit} className="schedule-form">
         <div>
           <label>名前</label>

@@ -8,7 +8,7 @@ export async function signup(data) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
-  }); 
+  });
 }
 
 // ログイン
@@ -36,4 +36,4 @@ export async function refresh(refreshToken) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refresh_token: refreshToken }),
   });
-} 
+}

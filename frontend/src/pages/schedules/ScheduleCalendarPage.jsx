@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { useCategory } from "../categories/categoryHandlers"
-import { useDateTime } from "../schedules/useDateTime"
+import { useCategory } from "../categories/categoryHandlers";
+import { useDateTime } from "../schedules/useDateTime";
 import { useSchedule } from "../schedules/useSchedule";
 
 import FullCalendar from "@fullcalendar/react";
@@ -12,13 +12,10 @@ import ScheduleForm from "./ScheduleForm";
 import ErrorModal from "../../components/ErrorModal";
 
 import "./ScheduleCalendarPage.css"; // ← CSSを読み込む
-import "./ScheduleForm.css"
-
-
+import "./ScheduleForm.css";
 
 export default function ScheduleCalendarPage() {
   const { categories } = useCategory();
-
 
   const {
     schedules,
@@ -27,39 +24,31 @@ export default function ScheduleCalendarPage() {
     isCreating,
     setIsCreating,
     formData,
-    error
+    error,
   } = useSchedule();
 
-  const {
-    handleDateClick,
-    events,
-  } = useDateTime(schedules);
+  const { handleDateClick, events } = useDateTime(schedules);
 
   return (
     <div style={{ padding: "1rem" }}>
       {isCreating ? (
-          <ScheduleForm
-              formData={formData}
-              onChange={handleChange}
-              onSubmit={handleScheduleCreate}
-              submitLabel="作成"
-              onCancel={ () => setIsCreating(false) }
-              categories={categories}
-          />
+        <ScheduleForm
+          formData={formData}
+          onChange={handleChange}
+          onSubmit={handleScheduleCreate}
+          submitLabel="作成"
+          onCancel={() => setIsCreating(false)}
+          categories={categories}
+        />
       ) : (
         <CalendarBase
-            events={events}
-            handleDateClick={handleDateClick}
-            buttonEvent={ () => setIsCreating(true) }
-          />
-      )}
-      
-
-      {error && (
-        <ErrorModal
-          error={error}
+          events={events}
+          handleDateClick={handleDateClick}
+          buttonEvent={() => setIsCreating(true)}
         />
       )}
+
+      {error && <ErrorModal error={error} />}
     </div>
   );
 }

@@ -90,7 +90,7 @@
   }
 
   .hero-actions {
-    flex-direction: column;  /* ボタンを縦並び */
+    flex-direction: column; /* ボタンを縦並び */
     align-items: center;
   }
 
@@ -101,7 +101,7 @@
   }
 
   .features {
-    flex-direction: column;  /* カードを縦並び */
+    flex-direction: column; /* カードを縦並び */
     align-items: center;
   }
 

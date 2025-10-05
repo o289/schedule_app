@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import TodoList from "../pages/todos/TodoList";
+import { formatDateTime } from "../utils/date";
 import { darkenColor } from "../utils/color";
 import "./ScheduleCard.css";
+import ScheduleDatesCard from "../components/ScheduleDatesCard";
 
 export default function ScheduleCard({
   schedule,
@@ -13,8 +15,6 @@ export default function ScheduleCard({
   handleScheduleDelete,
   showTodoForm,
 }) {
-  // const [showTodoForm, setShowTodoForm] = useState(false);
-
   return (
     <>
       <div
@@ -63,6 +63,13 @@ export default function ScheduleCard({
           </div>
         </div>
       </div>
+
+      <h3>予定の日にち一覧</h3>
+      {Array.isArray(schedule?.dates) && schedule.dates.length > 0 ? (
+        schedule.dates.map((d) => <ScheduleDatesCard key={d.id} date={d} />)
+      ) : (
+        <p>日程はまだ登録されていません。</p>
+      )}
     </>
   );
 }
