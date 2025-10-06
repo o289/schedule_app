@@ -19,7 +19,7 @@ def list_todos(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    
+
     schedule = db.query(Schedule).filter(Schedule.id == schedule_id).first()
     if not schedule or schedule.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="権限がありません")
@@ -56,12 +56,12 @@ def update_todo(
     todo_item = repo.get(todo_id)
     if not todo_item:
         raise HTTPException(status_code=404, detail="このTodoはありません")
-    
+
     if todo_item.schedule.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="権限がありません")
-    
+
     todo = repo.update(todo_id, todo_in)
-    
+
     if not todo:
         raise HTTPException(status_code=500, detail="更新に失敗しました")
 
@@ -78,7 +78,7 @@ def delete_todo(
     repo = TodoRepository(db)
 
     todo = repo.get(todo_id)
-    
+
     if not todo:
         raise HTTPException(status_code=404, detail="Todo not found")
 
@@ -87,5 +87,5 @@ def delete_todo(
         raise HTTPException(status_code=403, detail="権限がありません")
 
     repo.delete(todo_id=todo_id)
-    
+
     return None

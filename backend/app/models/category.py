@@ -23,9 +23,15 @@ class CategoryColor(str, enum.Enum):
 class Category(BaseTable):
     __tablename__ = "categories"
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     name = Column(String(50), nullable=False)
-    color = Column(Enum(CategoryColor, name="category_color"), nullable=False, default=CategoryColor.gray)
+    color = Column(
+        Enum(CategoryColor, name="category_color"),
+        nullable=False,
+        default=CategoryColor.gray,
+    )
 
     # 制約: ユーザーごとにカテゴリ名がユニーク
     __table_args__ = (

@@ -11,6 +11,7 @@ from app.models.user import User
 # Authorizationヘッダから "Bearer <token>" を取り出す仕組み
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+
 def get_current_user(
     token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
 ) -> User:
@@ -18,15 +19,18 @@ def get_current_user(
     JWTを検証し、DBからユーザーを取得する依存関数。
     無効なら 401 を返す。
     """
+
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
         user_id: str = payload.get("sub")
         if user_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="無効なトークンです",
             )
-        
+
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -40,6 +44,5 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="ユーザーが存在しません",
         )
-    
 
     return user

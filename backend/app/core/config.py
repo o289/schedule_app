@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     DEBUG: bool = True
     SECRET_KEY: str
-    ALGORITHM: str = "HS256"         # 追加
+    ALGORITHM: str = "HS256"  # 追加
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
     # API / Web
@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     WEB_PORT: int = 3000
 
     class Config:
-        env_file = ".env"   # プロジェクトルートの.envを読み込む
+        env_file = ".env"  # プロジェクトルートの.envを読み込む
 
     # 組み立て用プロパティ
     @property
@@ -39,5 +39,5 @@ class Settings(BaseSettings):
     def WEB_BASE_URL(self) -> str:
         return f"http://localhost:{self.WEB_PORT}"
 
-settings = Settings()
 
+settings = Settings()

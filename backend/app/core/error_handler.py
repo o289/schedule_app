@@ -1,8 +1,9 @@
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.exception_handlers import RequestValidationError
-from starlette.exceptions import HTTPException 
+from starlette.exceptions import HTTPException
 from fastapi import status
+
 
 # HTTPException ハンドラ
 async def http_exception_handler(request: Request, exc: HTTPException):
@@ -15,10 +16,11 @@ async def http_exception_handler(request: Request, exc: HTTPException):
                 "details": {
                     "field": None,
                     "action_plan": "入力内容を確認してください",
-                }
+                },
             }
         },
     )
+
 
 # バリデーションエラー (Pydantic) 用ハンドラ
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -34,7 +36,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
                 "details": {
                     "field": first_error.get("loc", ["unknown"])[-1],
                     "action_plan": first_error.get("msg"),
-                }
+                },
             }
         },
     )

@@ -4,6 +4,7 @@ from .base import BaseRepository
 from app.models.user import User
 from app.core.security import hash_password, verify_password
 
+
 class UserRepository(BaseRepository):
     def __init__(self, db: Session):
         super().__init__(db, User)
@@ -15,13 +16,8 @@ class UserRepository(BaseRepository):
         ...
 
         hashed_pw = hash_password(user_in.password)
-        user = User(
-            name=user_in.name,
-            email=user_in.email,
-            password=hashed_pw
-        )
+        user = User(name=user_in.name, email=user_in.email, password=hashed_pw)
         return self.base_add(user)
-        
 
     def get_by_email(self, email: str):
         # ヒント: query(User).filter(User.email == email).first()
@@ -39,12 +35,12 @@ class UserRepository(BaseRepository):
         if verify_password(password, user.password):
             return user
         return None
-    
+
     def update_refresh_token(self, user: User, token: str):
         user.refresh_token = token
         self.db.commit()
         self.db.refresh(user)
         return user
-    
+
     def get_by_refresh_token(self, token: str):
         return self.db.query(User).filter(User.refresh_token == token).first()

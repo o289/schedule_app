@@ -12,7 +12,12 @@ from app.crud.user import UserRepository
 from app.schemas.user import UserCreate, UserResponse, UserLogin, TokenResponse
 
 # セキュリティ（JWT）
-from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token
+from app.core.security import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    create_refresh_token,
+)
 from app.api.deps import get_current_user
 
 # モデル達（User認証用に参照）
@@ -21,21 +26,32 @@ from app.models.user import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+
 def _normalize_email(email: str) -> str:
     return email.strip().lower()
 
+
 # --- Signup ---
-@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED, summary="ユーザー登録",include_in_schema=False)
+@router.post(
+    "/signup",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="ユーザー登録",
+    include_in_schema=False,
+)
 def signup(user_in: UserCreate, db: Session = Depends(get_db)):
     repo = UserRepository(db)
 
     email = _normalize_email(user_in.email)
 
     existing_user = repo.get_by_email(email)
-    
+
     if existing_user:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="このメールはすでに登録済みです")
-    
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="このメールはすでに登録済みです",
+        )
+
     user_in.email = email
     user = repo.create_user(user_in)
 
@@ -58,8 +74,9 @@ def login(user_in: UserLogin, db: Session = Depends(get_db)):
     # DBにリフレッシュトークンを保存（上書き）
     repo.update_refresh_token(user, refresh_token)
 
-    return TokenResponse(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
-
+    return TokenResponse(
+        access_token=access_token, refresh_token=refresh_token, token_type="bearer"
+    )
 
 
 # --- refresh ---
@@ -74,8 +91,9 @@ def refresh(refresh_token: str = Body(..., embed=True), db: Session = Depends(ge
     # 新しいアクセストークン発行
     new_access_token = create_access_token(data={"sub": str(user.id)})
 
-    return TokenResponse(access_token=new_access_token, refresh_token=refresh_token, token_type="bearer")
-
+    return TokenResponse(
+        access_token=new_access_token, refresh_token=refresh_token, token_type="bearer"
+    )
 
 
 # --- Logout ---
@@ -92,7 +110,6 @@ def logout(refresh_token: str = Body(..., embed=True), db: Session = Depends(get
     db.commit()
 
     return {"msg": "ログアウトしました"}
-
 
 
 # --- Me ---

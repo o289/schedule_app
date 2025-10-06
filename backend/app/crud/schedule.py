@@ -4,6 +4,7 @@ from app.models.schedule import Schedule, ScheduleDate
 from app.schemas.schedule import ScheduleCreate, ScheduleUpdate
 from uuid import UUID
 
+
 class ScheduleRepository(BaseRepository):
     def __init__(self, db: Session):
         super().__init__(db, Schedule)
@@ -18,20 +19,17 @@ class ScheduleRepository(BaseRepository):
                 for d in schedule_in.dates
             ],
             category_id=schedule_in.category_id,  # Enum → str
-            user_id=user_id
+            user_id=user_id,
         )
         return self.base_add(schedule)
-
 
     # --- 取得（ID指定） ---
     def get(self, schedule_id: UUID) -> Schedule | None:
         return self.base_get(schedule_id)
 
-    
     # --- ユーザーの全スケジュール取得 ---
     def get_by_user(self, user_id: UUID) -> list[Schedule]:
         return self.base_list(user_id=user_id)
-
 
     # --- 削除 ---
     def delete(self, schedule_id: UUID, user_id: UUID) -> bool:
@@ -43,7 +41,6 @@ class ScheduleRepository(BaseRepository):
         if not obj:
             return False
         return self.base_delete(obj)  # ← オブジェクトを渡す
-
 
     # --- 更新 ---
     def update(self, schedule_id: UUID, schedule_in: ScheduleUpdate) -> Schedule | None:
@@ -85,6 +82,5 @@ class ScheduleRepository(BaseRepository):
             for existing in list(schedule.dates):
                 if existing.id not in incoming_ids:
                     schedule.dates.remove(existing)
-
 
         return self.base_update(schedule)  # ここで commit + refresh 済み

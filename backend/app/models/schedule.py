@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 
 from app.core.database import BaseTable
 
+
 class Schedule(BaseTable):
     __tablename__ = "schedules"
 
@@ -12,16 +13,18 @@ class Schedule(BaseTable):
 
     # 子テーブル: 複数日を保持
     dates = relationship(
-        "ScheduleDate",
-        back_populates="schedule",
-        cascade="all, delete-orphan"
+        "ScheduleDate", back_populates="schedule", cascade="all, delete-orphan"
     )
 
-    category_id = Column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=False)
+    category_id = Column(
+        UUID(as_uuid=True), ForeignKey("categories.id"), nullable=False
+    )
     category = relationship("Category", back_populates="schedules")
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    user = relationship("User", back_populates="schedules")  
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    user = relationship("User", back_populates="schedules")
 
     todos = relationship("Todo", back_populates="schedule", cascade="all, delete")
 

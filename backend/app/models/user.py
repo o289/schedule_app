@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 
 from app.core.database import BaseTable
 
+
 class User(BaseTable):
     __tablename__ = "users"
 
@@ -14,7 +15,3 @@ class User(BaseTable):
 
     categories = relationship("Category", back_populates="user", cascade="all, delete")
     schedules = relationship("Schedule", back_populates="user", cascade="all, delete")
-    
-
-    
-

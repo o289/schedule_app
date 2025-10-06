@@ -12,7 +12,6 @@ from app.models.user import User
 router = APIRouter(prefix="/categories", tags=["categories"])
 
 
-
 # --- 一覧 ---
 @router.get("/", response_model=list[CategoryResponse])
 def list_categories(
@@ -64,10 +63,13 @@ def delete_category(
     if not category or category.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="カテゴリが見つかりません")
 
-    try: 
+    try:
         repo.delete(category_id, current_user.id)
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=400, detail="このカテゴリにはスケジュールが存在するため削除できません")
-    
+        raise HTTPException(
+            status_code=400,
+            detail="このカテゴリにはスケジュールが存在するため削除できません",
+        )
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)

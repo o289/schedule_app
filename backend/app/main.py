@@ -12,22 +12,26 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
-
 app = FastAPI(debug=settings.DEBUG)
 
 
 # CORS設定
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000","http://127.0.0.1:3000",],  # フロントのURL
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],  # フロントのURL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
 @app.get("/ping")
 def pong():
     return {"message": "pong"}
+
 
 app.include_router(user_router)
 app.include_router(category_router)
