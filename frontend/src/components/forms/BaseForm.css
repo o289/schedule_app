@@ -1,5 +1,5 @@
 /* ScheduleForm 全体 */
-.schedule-form {
+.base-form {
   background-color: #fff; /* 白ベース */
   padding: 1.5rem; /* 内側余白を広めに */
   border-radius: 8px; /* 角丸で柔らかく */
@@ -9,23 +9,23 @@
 }
 
 /* 各フィールド */
-.schedule-form div {
+.base-form div {
   margin-bottom: 1rem; /* フィールド間の余白 */
   display: flex;
   flex-direction: column; /* ラベルを上に */
 }
 
 /* ラベル */
-.schedule-form label {
+.base-form label {
   margin-bottom: 0.4rem;
   font-weight: 600;
   color: #333; /* 濃いグレーで可読性UP */
 }
 
 /* 入力欄 */
-.schedule-form input,
-.schedule-form select,
-.schedule-form textarea {
+.base-form input,
+.base-form select,
+.base-form textarea {
   padding: 0.6rem;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -35,22 +35,22 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.schedule-form input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+.base-form input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   filter: invert(0.5); /* 0=黒, 1=白, 0.5=グレー寄り */
   cursor: pointer;
 }
 
 /* フォーカス時 */
-.schedule-form input:focus,
-.schedule-form select:focus,
-.schedule-form textarea:focus {
+.base-form input:focus,
+.base-form select:focus,
+.base-form textarea:focus {
   border-color: #4a90e2; /* 青系のアクセント */
   box-shadow: 0 0 4px rgba(74, 144, 226, 0.3);
   outline: none;
 }
 
 /* ボタン */
-.schedule-form button {
+.base-form button {
   padding: 0.6rem 1.2rem;
   margin-top: 0.5rem;
   border: none;
@@ -63,20 +63,20 @@
   transition: background-color 0.2s;
 }
 
-.schedule-form button:disabled {
+.base-form button:disabled {
   background-color: grey;
 }
 
-.schedule-form button:hover {
+.base-form button:hover {
   background-color: #357ab8;
 }
 
 /* キャンセルボタン */
-.schedule-form .btn-cancel {
+.base-form .btn-cancel {
   background-color: #ccc;
   color: #333;
 }
 
-.schedule-form .btn-cancel:hover {
+.base-form .btn-cancel:hover {
   background-color: #aaa;
 }

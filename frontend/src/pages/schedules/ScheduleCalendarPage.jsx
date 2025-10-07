@@ -12,7 +12,6 @@ import ScheduleForm from "./ScheduleForm";
 import ErrorModal from "../../components/ErrorModal";
 
 import "./ScheduleCalendarPage.css"; // ← CSSを読み込む
-import "./ScheduleForm.css";
 
 export default function ScheduleCalendarPage() {
   const { categories } = useCategory();

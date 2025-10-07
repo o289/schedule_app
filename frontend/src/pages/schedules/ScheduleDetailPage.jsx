@@ -76,14 +76,8 @@ export default function ScheduleDetailPage() {
                   setTodoForm({ title: "", priority: "", due_date: "" });
                   setShowTodoForm(false); // 送信後に戻る
                 }}
+                onCancel={() => setShowTodoForm(false)}
               />
-              <button
-                className="btn-cancel"
-                style={{ marginTop: "1rem" }}
-                onClick={() => setShowTodoForm(false)}
-              >
-                キャンセル
-              </button>
             </div>
           )}
         </div>

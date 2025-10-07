@@ -1,8 +1,9 @@
-import "./ScheduleForm.css";
 import { useState, useEffect } from "react";
 import { handleDateTime } from "./useDateTime";
-
 import ScheduleDatesModal from "./DatesModal";
+
+import BaseForm from "../../components/forms/BaseForm";
+import FormField from "../../components/forms/FormField";
 
 export default function ScheduleForm({
   formData,
@@ -41,9 +42,8 @@ export default function ScheduleForm({
   }, [formData.title, dates, formData.category_id]);
 
   return (
-    <form onSubmit={onSubmit} className="schedule-form">
-      <div className="form-group">
-        <label>タイトル</label>
+    <BaseForm onSubmit={onSubmit} onCancel={onCancel} submitLabel={submitLabel}>
+      <FormField label="タイトル">
         <input
           type="text"
           name="title"
@@ -51,11 +51,9 @@ export default function ScheduleForm({
           onChange={onChange}
           required
         />
-      </div>
-
-      <div className="form-group">
-        <label>日程を選択</label>
-        <div className="date-group" style={{ marginBottom: "8px" }}>
+      </FormField>
+      <FormField label="日程">
+        <>
           <input
             type="datetime-local"
             name="temp_start_date"
@@ -71,13 +69,14 @@ export default function ScheduleForm({
             style={{ marginRight: "8px" }}
           />
           <button type="button" onClick={addDate} disabled={datesDisable}>
-            ＋ 日程追加
+            ＋日程追加
           </button>
-        </div>
-        <button type="button" onClick={() => setShowDatesModal(true)}>
-          登録済み日程を見る
-        </button>
-      </div>
+        </>
+      </FormField>
+
+      <button type="button" onClick={() => setShowDatesModal(true)}>
+        登録済み日程を見る
+      </button>
 
       {showDatesModal && (
         <ScheduleDatesModal
@@ -87,13 +86,10 @@ export default function ScheduleForm({
         />
       )}
 
-      <div className="form-group">
-        <label>メモ</label>
+      <FormField label="メモ">
         <textarea name="note" value={formData.note || ""} onChange={onChange} />
-      </div>
-
-      <div className="form-group">
-        <label>カテゴリ</label>
+      </FormField>
+      <FormField label="カテゴリー">
         <select
           name="category_id"
           value={formData.category_id || ""}
@@ -107,18 +103,7 @@ export default function ScheduleForm({
             </option>
           ))}
         </select>
-      </div>
-
-      <div className="form-actions">
-        <button type="submit" className="btn-submit" disabled={disabled}>
-          {submitLabel}
-        </button>
-        {onCancel && (
-          <button type="button" onClick={onCancel} className="btn-cancel">
-            キャンセル
-          </button>
-        )}
-      </div>
-    </form>
+      </FormField>
+    </BaseForm>
   );
 }

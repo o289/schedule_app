@@ -1,11 +1,12 @@
-import { PRIORITIES } from "../../constants/priority";
-import "./TodoForm.css";
+import BaseForm from "../../components/forms/BaseForm";
+import FormField from "../../components/forms/FormField";
 
-export default function TodoForm({ formData, onChange, onSubmit }) {
+import { PRIORITIES } from "../../constants/priority";
+
+export default function TodoForm({ formData, onChange, onSubmit, onCancel }) {
   return (
-    <form onSubmit={onSubmit} className="todo-form">
-      <div>
-        <label>タイトル</label>
+    <BaseForm onSubmit={onSubmit} onCancel={onCancel} submitLabel="ToDo追加">
+      <FormField label="タイトル">
         <input
           type="text"
           name="title"
@@ -13,10 +14,8 @@ export default function TodoForm({ formData, onChange, onSubmit }) {
           onChange={onChange}
           required
         />
-      </div>
-
-      <div>
-        <label>優先度</label>
+      </FormField>
+      <FormField label="優先度">
         <select
           name="priority"
           value={formData.priority || ""}
@@ -30,19 +29,15 @@ export default function TodoForm({ formData, onChange, onSubmit }) {
             </option>
           ))}
         </select>
-      </div>
-
-      <div>
-        <label>期限</label>
+      </FormField>
+      <FormField label="期限">
         <input
           type="date"
           name="due_date"
           value={formData.due_date || ""}
           onChange={onChange}
         />
-      </div>
-
-      <button type="submit">追加</button>
-    </form>
+      </FormField>
+    </BaseForm>
   );
 }

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 
-import "../pages/schedules/ScheduleForm.css";
+import BaseForm from "../components/forms/BaseForm.jsx";
+import FormField from "../components/forms/FormField.jsx";
 
 export default function LoginPage() {
   const { handleLogin } = useAuth();
@@ -10,7 +11,13 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [disabled, setDisabled] = useState(true);
   const [error, setError] = useState(null);
+
+  // 入力チェック
+  // emailとpasswordの入力が入っていなければ、ボタンを押せないようにする
+  const checkValid = email && password;
+  if (disabled !== !checkValid) setDisabled(!checkValid);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -25,27 +32,30 @@ export default function LoginPage() {
 
   return (
     <div style={{ padding: "1rem" }}>
-      <form onSubmit={onSubmit} className="schedule-form">
-        <div>
-          <label>メール</label>
+      <BaseForm
+        onSubmit={onSubmit}
+        onCancel={() => navigate("/")}
+        submitLabel="ログイン"
+        disabled={!checkValid}
+      >
+        <FormField label="メール">
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-        </div>
-        <div>
-          <label>パスワード</label>
+        </FormField>
+        <FormField label="パスワード">
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-        </div>
-        <button type="submit">ログイン</button>
-      </form>
+        </FormField>
+      </BaseForm>
+
       {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
