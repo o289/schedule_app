@@ -145,7 +145,6 @@ export function useSchedule(id = null) {
     fetchSchedules,
     fetchSchedule,
     formData,
-    fetchSchedule,
     handleScheduleCreate,
     isCreating,
     setIsCreating,
