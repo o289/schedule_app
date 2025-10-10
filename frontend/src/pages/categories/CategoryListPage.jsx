@@ -16,15 +16,15 @@ export default function CategoryListPage() {
     newForm,
     isCreating,
     setIsCreating,
+    handleEditClick,
     handleUpdate,
     editForm,
+    editingId,
     setEditingId,
     isEditMode,
     setIsEditMode,
     handleChange,
     handleDelete,
-    handleEditClick,
-    editingId,
     error,
   } = useCategory(id);
 

@@ -12,6 +12,11 @@ class ScheduleDateBase(BaseModel):
 
     @validator("end_date")
     def check_dates(cls, v, values):
+        start_date = values.get("start_date")
+
+        if not start_date or not v:
+            raise ValueError("start_date and end_date are required")
+
         if "start_date" in values and v <= values["start_date"]:
             raise ValueError("end_date must be after start_date")
         return v
@@ -50,7 +55,7 @@ class ScheduleCreate(ScheduleBase):
 
 # --- 更新 ---
 class ScheduleUpdate(ScheduleBase):
-    dates: Optional[conlist(ScheduleDateBase, min_length=1)] = None
+    dates: Optional[conlist(ScheduleDateUpdate, min_length=1)] = None
 
 
 # --- レスポンス ---

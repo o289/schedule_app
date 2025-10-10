@@ -91,6 +91,7 @@ export function useSchedule(id = null) {
 
   // --- 更新 ---
   const handleScheduleUpdate = async (e) => {
+    e.preventDefault();
     await apiFetch(
       `${base_url}${id}`,
       {
@@ -99,8 +100,8 @@ export function useSchedule(id = null) {
       },
       { accessToken, refreshToken, handleRefresh }
     );
+    await fetchSchedule();
     setIsEditMode(false);
-    fetchSchedule();
   };
 
   // --- 削除 ---
@@ -141,6 +142,7 @@ export function useSchedule(id = null) {
   return {
     schedule,
     schedules,
+    fetchSchedules,
     fetchSchedule,
     formData,
     fetchSchedule,

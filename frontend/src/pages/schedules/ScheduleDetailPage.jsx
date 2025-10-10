@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react"; // ← これを追加
-import { useCategory } from "../categories/categoryHandlers";
 import { useParams, useLocation } from "react-router-dom";
-import { useTodo } from "../todos/useTodo";
+
+import { useCategory } from "../categories/categoryHandlers";
+
 import { useSchedule } from "../schedules/useSchedule";
 import { useDateTime } from "../schedules/useDateTime";
 
+import { useTodo } from "../todos/useTodo";
 import TodoForm from "../todos/TodoForm";
+
 import ScheduleCard from "../../components/ScheduleCard";
 import ScheduleForm from "./ScheduleForm";
 
@@ -15,6 +18,7 @@ export default function ScheduleDetailPage() {
   const dateId = location.state?.dateId;
 
   const { categories, setCategories } = useCategory();
+
   const {
     todos,
     fetchTodos,
@@ -27,7 +31,6 @@ export default function ScheduleDetailPage() {
     priority: "",
     due_date: "" || null,
   });
-
   const [showTodoForm, setShowTodoForm] = useState(false);
 
   const {
