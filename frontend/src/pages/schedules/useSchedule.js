@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { apiFetch } from "../../api/client";
 import { useCategory } from "../categories/categoryHandlers";
 import { useDateTime } from "../schedules/useDateTime";
+import { getNowDateTime, getNowPlusOneHour } from "../../utils/date";
 
 export function useSchedule(id = null) {
   const { accessToken, refreshToken, handleRefresh } = useAuth();
@@ -13,14 +14,8 @@ export function useSchedule(id = null) {
 
   const { fetchCategories } = useCategory();
 
-  const {
-    selectedDate,
-    selectedDates,
-    setSelectedDate,
-    setSelectedDates,
-    getNowDateTime,
-    getNowPlusOneHour,
-  } = useDateTime(schedules);
+  const { selectedDate, selectedDates, setSelectedDates } =
+    useDateTime(schedules);
 
   const [isCreating, setIsCreating] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -92,16 +87,27 @@ export function useSchedule(id = null) {
   // --- 更新 ---
   const handleScheduleUpdate = async (e) => {
     e.preventDefault();
+
+    const payload = {
+      ...formData,
+      dates: formData.dates.map((d) => ({
+        id: d.id || crypto.randomUUID(), // ← idを維持または生成
+        start_date: d.start_date,
+        end_date: d.end_date,
+      })),
+    };
+
     await apiFetch(
       `${base_url}${id}`,
       {
         method: "PUT",
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       },
       { accessToken, refreshToken, handleRefresh }
     );
     await fetchSchedule();
     setIsEditMode(false);
+    alert("スケジュールを更新しました");
   };
 
   // --- 削除 ---

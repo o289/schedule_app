@@ -1,25 +1,9 @@
 import { useState, useEffect } from "react";
+import { getNowDateTime, getNowPlusOneHour } from "../../utils/date";
 
 export function useDateTime(schedules) {
   const [selectedDate, setSelectedDate] = useState(null);
   const [events, setEvents] = useState([]);
-
-  // --- 日付補助関数 ---
-  function getNowDateTime() {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    return now.toISOString().slice(0, 16);
-  }
-
-  function getNowPlusOneHour() {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset() + 60);
-    return now.toISOString().slice(0, 16);
-  }
-
-  const handleDateClick = (info) => {
-    setSelectedDate(info.dateStr);
-  };
 
   useEffect(() => {
     if (!schedules) {
@@ -46,26 +30,19 @@ export function useDateTime(schedules) {
     selectedDate,
     setSelectedDate,
     events,
-    handleDateClick,
-    getNowDateTime,
-    getNowPlusOneHour,
   };
 }
 
-
-
 // scheduleのdatesに追加するための関数
-// 
+//
 export function handleDateTime(formData, onChange) {
-  const { getNowDateTime, getNowPlusOneHour } = useDateTime();
-
   const [dates, setDates] = useState(
     formData.dates && formData.dates.length > 0
       ? formData.dates
       : [{ start_date: "", end_date: "" }]
   );
-  const [tempStart, setTempStart] = useState(getNowDateTime);
-  const [tempEnd, setTempEnd] = useState(getNowPlusOneHour);
+  const [tempStart, setTempStart] = useState(getNowDateTime());
+  const [tempEnd, setTempEnd] = useState(getNowPlusOneHour());
 
   const [datesDisable, setDatesDisable] = useState(false);
 
@@ -99,17 +76,14 @@ export function handleDateTime(formData, onChange) {
   };
 
   useEffect(() => {
-    if (
+    const invalid =
       !tempStart ||
-      (!tempEnd &&
-        tempStart >= tempEnd &&
-        dates.some((date) => date.start_date === newDate.start_date))
-    ) {
-      setDatesDisable(true);
-    } else {
-      setDatesDisable(false);
-    }
-  }, []);
+      !tempEnd ||
+      tempStart >= tempEnd ||
+      dates.some((date) => date.start_date === tempStart);
+
+    setDatesDisable(invalid);
+  }, [tempStart, tempEnd, dates]);
 
   const removeDate = (index) => {
     const newDates = dates.filter((_, i) => i !== index);
