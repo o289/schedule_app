@@ -87,8 +87,11 @@ class ScheduleRepository(BaseRepository):
                     start_date=date_in.start_date,
                     end_date=date_in.end_date,
                 )
-                with self.db.begin():
-                    self.db.add(new_date)  # セッションに追加し
+                # begin() ブロックを削除しました。理由：
+                # ここでトランザクションを開始すると、既に外部でトランザクションが開始されている場合に
+                # 二重トランザクションエラーが発生するためです。
+                # 代わりに、単純に add() を呼び出すことで、既存のトランザクション内で処理されます。
+                self.db.add(new_date)  # セッションに追加し
 
                 schedule.dates.append(new_date)  # ORM的にも関連付ける
 
@@ -108,8 +111,11 @@ class ScheduleRepository(BaseRepository):
                 start_date=d.start_date,
                 end_date=d.end_date,
             )
-            with self.db.begin():
-                self.db.add(new_date)
+            # begin() ブロックを削除しました。理由：
+            # ここでトランザクションを開始すると、既に外部でトランザクションが開始されている場合に
+            # 二重トランザクションエラーが発生するためです。
+            # 代わりに、単純に add() を呼び出すことで、既存のトランザクション内で処理されます。
+            self.db.add(new_date)
 
             schedule.dates.append(new_date)  # ORM的にも関連付ける
 
