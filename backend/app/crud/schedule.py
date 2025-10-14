@@ -43,24 +43,21 @@ class ScheduleRepository(BaseRepository):
         return self.base_delete(obj)  # ← オブジェクトを渡す
 
     # --- 更新 ---
-    def update(self, schedule_id: UUID, schedule_in: ScheduleUpdate) -> Schedule | None:
-        """
-        スケジュールの更新処理。
-        - タイトル、メモ、カテゴリなどの基本情報を更新
-        - dates配列の内容に応じて、ScheduleDateを追加・更新・削除
-        """
+    """
+    使用しているロジックが多いので複数に分割する
+    """
 
-        schedule = self.get(schedule_id)
-        if not schedule:
-            return None
-
+    def _update_schedule_fields(self, schedule: Schedule, schedule_in: ScheduleUpdate):
         update_data = schedule_in.model_dump(exclude={"id", "user_id", "dates"})
 
         # --- ① 日付データ以外の更新処理 ---
         for field, value in update_data.items():
             setattr(schedule, field, value)
 
-            # --- ② 日付データの更新処理 ---
+    def _update_schedule_dates(
+        self, schedule: Schedule, schedule_in: ScheduleUpdate, schedule_id: UUID
+    ):
+        # --- ② 日付データの更新処理 ---
         existing_dates = {d.id: d for d in schedule.dates}  # DB上の既存日付
         incoming_dates = {
             d.id: d for d in schedule_in.dates if d.id
@@ -86,13 +83,13 @@ class ScheduleRepository(BaseRepository):
                 # 新規追加
                 # --- 💡 新しいScheduleDateインスタンスを作成し、ORMで追跡させる ---
                 new_date = ScheduleDate(
-                    id=date_id,
                     schedule_id=schedule_id,
                     start_date=date_in.start_date,
                     end_date=date_in.end_date,
                 )
-                self.db.add(new_date)  # セッションに追加し
-                self.db.flush()  # flushしてIDなどDB側で設定される値を反映させる
+                with self.db.begin():
+                    self.db.add(new_date)  # セッションに追加し
+
                 schedule.dates.append(new_date)  # ORM的にも関連付ける
 
                 # ✅ B. 削除された日付を削除
@@ -111,10 +108,28 @@ class ScheduleRepository(BaseRepository):
                 start_date=d.start_date,
                 end_date=d.end_date,
             )
-            self.db.add(new_date)
-            self.db.flush()  # flushしてIDなどDB側で設定される値を反映させる
+            with self.db.begin():
+                self.db.add(new_date)
+
             schedule.dates.append(new_date)  # ORM的にも関連付ける
 
-            # --- ③ コミット・リフレッシュ ---
+    #  --- 実際に使用するアップデート ---
+    def update(self, schedule_id: UUID, schedule_in: ScheduleUpdate) -> Schedule | None:
+        """
+        スケジュールの更新処理。
+        - タイトル、メモ、カテゴリなどの基本情報を更新
+        - dates配列の内容に応じて、ScheduleDateを追加・更新・削除
+        """
+
+        schedule = self.get(schedule_id)
+        if not schedule:
+            return None
+
+        self._update_schedule_fields(schedule=schedule, schedule_in=schedule_in)
+        self._update_schedule_dates(
+            schedule=schedule, schedule_in=schedule_in, schedule_id=schedule_id
+        )
+
+        # --- ③ コミット・リフレッシュ ---
         # base_update() 内で commit + refresh を実行しているため、ここでは不要。
         return self.base_update(schedule)
