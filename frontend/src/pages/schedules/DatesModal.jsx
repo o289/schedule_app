@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./DatesModal.css";
+import { formatDateTime } from "../../utils/date";
 
 export default function ScheduleDatesModal({ dates, removeDate, onClose }) {
   // 以下のコードとeffectはdates配列の中身が1になった時に削除を押せないようにする目的
@@ -21,9 +22,11 @@ export default function ScheduleDatesModal({ dates, removeDate, onClose }) {
         {dates.map((date, index) => (
           <div key={index} className="dates-modal-card">
             <div style={{ display: "block", marginBottom: "4px" }}>
-              開始: {date.start_date || "-"}
+              開始: {formatDateTime(date.start_date || "-", "datetime")}
             </div>
-            <div style={{ display: "block" }}>終了: {date.end_date || "-"}</div>
+            <div style={{ display: "block" }}>
+              終了: {formatDateTime(date.end_date || "-", "datetime")}
+            </div>
             <button
               type="button"
               onClick={() => removeDate(index)}
