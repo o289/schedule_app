@@ -43,9 +43,8 @@ class CategoryRepository(BaseRepository):
         if not category:
             return None
 
-        if category_in.name is not None:
-            category.name = category_in.name
-        if category_in.color is not None:
-            category.color = category_in.color.value
+        self.base_apply_schema(
+            obj=category, schema_in=category_in, exclude={"id", "user_id"}
+        )
 
         return self.base_update(category)  # ここで commit + refresh 済み

@@ -44,6 +44,7 @@ class TodoRepository(BaseRepository):
 
         update_data = schedule_in.model_dump(exclude_unset=True)
 
+        # 現場todoはis_done以外にフィールドの変更ができない状態のでここのbase_apply_schemaの適用を除外
         for field, value in update_data.items():
             if field == "is_done":
                 todo.is_done = value

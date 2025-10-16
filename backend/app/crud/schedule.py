@@ -48,11 +48,9 @@ class ScheduleRepository(BaseRepository):
     """
 
     def _update_schedule_fields(self, schedule: Schedule, schedule_in: ScheduleUpdate):
-        update_data = schedule_in.model_dump(exclude={"id", "user_id", "dates"})
-
-        # --- ① 日付データ以外の更新処理 ---
-        for field, value in update_data.items():
-            setattr(schedule, field, value)
+        self.base_apply_schema(
+            obj=schedule, schema_in=schedule_in, exclude={"id", "user_id", "dates"}
+        )
 
     def _update_schedule_dates(
         self, schedule: Schedule, schedule_in: ScheduleUpdate, schedule_id: UUID
@@ -67,18 +65,8 @@ class ScheduleRepository(BaseRepository):
         for date_id, date_in in incoming_dates.items():
             if date_id in existing_dates:
                 existing_date = existing_dates[date_id]
+                self.base_apply_schema(obj=existing_date, schema_in=date_in)
 
-                # --- 💡 Pydantic → dict 変換 ---
-                # model_dump() を使う理由:
-                #   PydanticモデルのままだとSQLAlchemyが直接理解できないため、
-                #   素のPython辞書に変換してからSQLAlchemyモデルに値を代入する。
-                # exclude_unset=True により「未送信フィールド」は上書きされない。
-                date_data = date_in.model_dump(exclude_unset=True)
-
-                # --- 💡 SQLAlchemyモデルに代入 ---
-                # setattr() によって SQLAlchemy が変更を検知し、UPDATE を発行する。
-                for key, value in date_data.items():
-                    setattr(existing_date, key, value)
             else:
                 # 新規追加
                 # --- 💡 新しいScheduleDateインスタンスを作成し、ORMで追跡させる ---

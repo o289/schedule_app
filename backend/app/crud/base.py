@@ -56,3 +56,20 @@ class BaseRepository:
             return obj
         except Exception:
             return None
+
+    def base_apply_schema(self, obj, schema_in, exclude: set[str] | None = None):
+        """
+        Pydanticモデル(schema_in)のデータをSQLAlchemyモデル(obj)へ安全に適用する。
+        exclude_unset=True で部分更新を行い、ifhasattr(obj,key)で存在しない属性は無視。
+        """
+        data = schema_in.model_dump(exclude_unset=True, exclude=exclude or set())
+
+        for key, value in data.items():
+            # None はリレーション破壊を防ぐためスキップ
+            if value is None:
+                continue
+
+            if hasattr(obj, key):
+                setattr(obj, key, value)
+
+        return obj
