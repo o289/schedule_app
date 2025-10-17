@@ -10,6 +10,7 @@ class ScheduleRepository(BaseRepository):
         super().__init__(db, Schedule)
 
     # --- 作成 ---
+    # スケジュールの予定はdatesモデルも絡んでいるため、base_create_instanceの導入は見送り
     def create(self, user_id: UUID, schedule_in: ScheduleCreate) -> Schedule:
         schedule = Schedule(
             title=schedule_in.title,
