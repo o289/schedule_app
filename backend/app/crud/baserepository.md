@@ -3,23 +3,17 @@
 本リポジトリは、SQLAlchemy を利用した CRUD 処理を共通化するための基底クラスです。  
 FastAPI などのアプリケーションで、モデルごとの Repository を実装する際の土台として利用します。
 
----
-
 ## ✅ 目的
 
 - CRUD の共通処理をまとめて重複を減らす
 - 例外発生時やデータ未存在時の返り値を統一する
 - ビジネスロジックは各モデル専用の Repository に記述し、BaseRepository は最低限の共通処理のみを担当する
 
----
-
 ## ✅ 使用方法
 
 1. Repository クラスを作成し、BaseRepository を継承する
 2. `db` (Session) と `model` (SQLAlchemy モデルクラス) を渡して初期化する
 3. CRUD メソッドを呼び出す
-
----
 
 ## ✅ 実装されているメソッド
 
@@ -52,7 +46,11 @@ FastAPI などのアプリケーションで、モデルごとの Repository を
 - 成功時 → 更新後の `obj`
 - obj が `None` または失敗時 → `None`
 
----
+### apply_schema(obj, schema_in, exclude: set[str] | None = None)
+
+- モデル -> dict 変換
+- schema_in には該当の pydict スキーマを挿入
+- exclude には除外したい項目を挿入
 
 ## ✅ 注意点
 
@@ -60,8 +58,6 @@ FastAPI などのアプリケーションで、モデルごとの Repository を
   - Web API で利用する際は、ルーター層で `404` や `400` に変換する
 - **ビジネスロジック**（例: パスワードハッシュ化, Todo 完了時の done_at 付与）は BaseRepository には書かない
   - 各モデル専用の Repository に実装する
-
----
 
 ## ✅ 想定される利用例
 

@@ -27,10 +27,9 @@ def list_categories(
 def create_category(
     category_in: CategoryCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
     repo = CategoryRepository(db)
-    return repo.create(user_id=current_user.id, category_in=category_in)
+    return repo.create(category_in=category_in)
 
 
 # --- 更新 ---

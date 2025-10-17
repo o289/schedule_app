@@ -10,12 +10,9 @@ class CategoryRepository(BaseRepository):
         super().__init__(db, Category)
 
     # --- 作成 ---
-    def create(self, user_id: UUID, category_in: CategoryCreate) -> Category:
-        category = Category(
-            user_id=user_id,
-            name=category_in.name,
-            color=category_in.color.value,  # Enum → str
-        )
+    def create(self, category_in: CategoryCreate) -> Category:
+        category = self.base_create_instance(model=Category, schema_in=category_in)
+
         return self.base_add(category)
 
     # --- 取得（ID指定） ---
@@ -43,9 +40,8 @@ class CategoryRepository(BaseRepository):
         if not category:
             return None
 
-        if category_in.name is not None:
-            category.name = category_in.name
-        if category_in.color is not None:
-            category.color = category_in.color.value
+        self.base_apply_schema(
+            obj=category, schema_in=category_in, exclude={"id", "user_id"}
+        )
 
         return self.base_update(category)  # ここで commit + refresh 済み

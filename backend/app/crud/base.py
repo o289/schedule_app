@@ -56,3 +56,40 @@ class BaseRepository:
             return obj
         except Exception:
             return None
+
+    def base_create_instance(self, model, schema_in):
+        """
+        任意のモデルに対応できる共通「新規作成」関数
+
+        【目的】
+        - Pydanticモデル(schema_in) から SQLAlchemyモデル(model_class) を安全に作成する。
+        - 各モデルのカラムが変わっても、この関数を修正する必要がない。
+
+        【実現方法】
+        - model_dump() で Pydanticモデルを dict に変換。
+        - model_validate() で SQLAlchemyモデルを検証付きで生成。
+        ※ Pydantic v2では model_validate() を使うことで、型変換や検証が自動で行われる。
+        - 最後にDBに追加してコミット。
+        """
+        data = schema_in.model_dump()
+
+        obj = model.model_validate(data)
+
+        return obj
+
+    def base_apply_schema(self, obj, schema_in, exclude: set[str] | None = None):
+        """
+        Pydanticモデル(schema_in)のデータをSQLAlchemyモデル(obj)へ安全に適用する。
+        exclude_unset=True で部分更新を行い、ifhasattr(obj,key)で存在しない属性は無視。
+        """
+        data = schema_in.model_dump(exclude_unset=True, exclude=exclude or set())
+
+        for key, value in data.items():
+            # None はリレーション破壊を防ぐためスキップ
+            if value is None:
+                continue
+
+            if hasattr(obj, key):
+                setattr(obj, key, value)
+
+        return obj

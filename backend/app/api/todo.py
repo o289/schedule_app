@@ -41,7 +41,7 @@ def create_todo(
         raise HTTPException(status_code=403, detail="権限がありません")
 
     repo = TodoRepository(db)
-    return repo.create(schedule_id, todo_in)
+    return repo.create(todo_in)
 
 
 # --- Todo 更新 ---
