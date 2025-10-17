@@ -5,6 +5,25 @@ on:
       - main
 
 jobs:
+  check-pr-source:
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚦 Validate PR source branch
+        run: |
+          echo "----------------------------------------"
+          echo "🔍 Pull Request validation check"
+          echo "Target branch : ${{ github.base_ref }}"
+          echo "Source branch : ${{ github.head_ref }}"
+          echo "----------------------------------------"
+
+          if [[ "${{ github.head_ref }}" =~ ^release/ ]]; then
+            echo "✅ OK: '${{ github.head_ref }}' is a valid release branch."
+          else
+            echo "❌ ERROR: Only branches starting with 'release/' can be merged into main."
+            echo "🧱 Please open your PR from a 'release/*' branch instead."
+            exit 1
+          fi
   build:
     runs-on: ubuntu-latest
     steps:
