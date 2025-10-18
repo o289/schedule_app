@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { getNowDateTime, getNowPlusOneHour } from "../../utils/date";
+import {
+  formatLocalDateTime,
+  getNowDateTime,
+  getNowPlusOneHour,
+} from "../../utils/date";
 
 export function useDateTime(schedules) {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -34,7 +38,6 @@ export function useDateTime(schedules) {
 }
 
 // scheduleのdatesに追加するための関数
-//
 export function handleDateTime(formData, onChange) {
   const [dates, setDates] = useState(
     formData.dates && formData.dates.length > 0
@@ -56,6 +59,16 @@ export function handleDateTime(formData, onChange) {
     setDates(newDates);
     onChange({ target: { name: "dates", value: newDates } });
   };
+
+  // スタートの日付・時刻がエンドより後である場合にエンドをスタートの1時間後に固定する
+  // スタートがエンドより後にも関わらず入力されてしまうのをを防止
+  useEffect(() => {
+    if (tempStart > tempEnd) {
+      const start = new Date(tempStart);
+      const end = new Date(start.getTime() + 60 * 60 * 1000);
+      setTempEnd(formatLocalDateTime(end));
+    }
+  }, [tempStart, tempEnd]);
 
   const addDate = () => {
     if (!tempStart || !tempEnd) return;
