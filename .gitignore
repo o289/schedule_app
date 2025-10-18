@@ -31,3 +31,6 @@ Thumbs.db
 
 # Makefile
 Makefile
+
+# 差分ファイル
+diff.txt
