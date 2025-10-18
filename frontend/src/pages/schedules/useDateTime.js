@@ -68,7 +68,7 @@ export function handleDateTime(formData, onChange) {
       const end = new Date(start.getTime() + 60 * 60 * 1000);
       setTempEnd(formatLocalDateTime(end));
     }
-  }, [tempStart]);
+  }, [tempStart, tempEnd]);
 
   const addDate = () => {
     if (!tempStart || !tempEnd) return;
