@@ -6,14 +6,16 @@ import "./ProfileCard.css";
 
 import ScheduleCardLite from "../components/ScheduleCardLite.jsx";
 
+import { Button } from "@mui/material";
+import UndoIcon from "@mui/icons-material/Undo";
 
 export default function MePage() {
   const { schedules } = useSchedule();
   const today = new Date().toISOString().split("T")[0];
-  const todaySchedules = schedules.filter((s) => 
+  const todaySchedules = schedules.filter((s) =>
     s.dates?.some((d) => d.start_date.startsWith(today))
-  )
-  
+  );
+
   const navigate = useNavigate();
 
   const { user, handleLogout } = useAuth();
@@ -33,7 +35,7 @@ export default function MePage() {
     // リダイレクト直前の瞬間に空画面を返す
     return null;
   }
-  
+
   return (
     <div>
       <div className="profile-card">
@@ -46,25 +48,26 @@ export default function MePage() {
             <span className="label">Email:</span>
             {user.email}
           </p>
-          <button onClick={onLogout} className="btn-link-me">
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<UndoIcon />}
+            onClick={onLogout}
+          >
             ログアウト
-          </button>
+          </Button>
         </div>
       </div>
-      
+
       {/* 今日のスケジュールを表示するため */}
       <div>
         <h2 className="profile-title">今日の予定</h2>
-        {todaySchedules.map((s) => ( 
+        {todaySchedules.map((s) => (
           <div key={s.id}>
-            <ScheduleCardLite
-              schedule={s}
-            />
+            <ScheduleCardLite schedule={s} />
           </div>
         ))}
       </div>
     </div>
-
-    
   );
 }
