@@ -6,6 +6,9 @@ import { darkenColor } from "../utils/color";
 import "./ScheduleCard.css";
 import ScheduleDatesCard from "../components/ScheduleDatesCard";
 
+import { Button } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 export default function ScheduleCard({
   schedule,
   todos,
@@ -50,16 +53,19 @@ export default function ScheduleCard({
             <button className="btn-edit" onClick={() => setIsEditMode(true)}>
               編集
             </button>
-            <button className="btn-delete" onClick={handleScheduleDelete}>
-              削除
+            <button className="btn-edit" onClick={showTodoForm}>
+              Todo
             </button>
-            <button
-              className="btn-edit"
+
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<DeleteIcon />}
               style={{ marginLeft: "1rem" }}
-              onClick={showTodoForm}
+              onClick={handleScheduleDelete}
             >
-              Todo追加
-            </button>
+              削除
+            </Button>
           </div>
         </div>
       </div>
