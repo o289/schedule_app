@@ -1,9 +1,4 @@
 import { useState, useEffect } from "react";
-import {
-  formatLocalDateTime,
-  getNowDateTime,
-  getNowPlusOneHour,
-} from "../../utils/date";
 
 export function useDateTime(schedules) {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -44,8 +39,8 @@ export function handleDateTime(formData, onChange) {
       ? formData.dates
       : [{ start_date: "", end_date: "" }]
   );
-  const [tempStart, setTempStart] = useState(getNowDateTime());
-  const [tempEnd, setTempEnd] = useState(getNowPlusOneHour());
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
 
   const [datesDisable, setDatesDisable] = useState(false);
 
@@ -60,21 +55,11 @@ export function handleDateTime(formData, onChange) {
     onChange({ target: { name: "dates", value: newDates } });
   };
 
-  // スタートの日付・時刻がエンドより後である場合にエンドをスタートの1時間後に固定する
-  // スタートがエンドより後にも関わらず入力されてしまうのをを防止
-  useEffect(() => {
-    if (tempStart > tempEnd) {
-      const start = new Date(tempStart);
-      const end = new Date(start.getTime() + 60 * 60 * 1000);
-      setTempEnd(formatLocalDateTime(end));
-    }
-  }, [tempStart, tempEnd]);
-
   const addDate = () => {
-    if (!tempStart || !tempEnd) return;
-    const newDate = { start_date: tempStart, end_date: tempEnd };
+    if (!start || !end) return;
+    const newDate = { start_date: start, end_date: end };
 
-    if (tempStart >= tempEnd) return;
+    if (start >= end) return;
     // 予定の時刻の重複を禁止しているので、同じ日にちに同じ時刻スタートの予定を追加できないようにするため
     if (dates.some((date) => date.start_date === newDate.start_date)) return;
 
@@ -84,19 +69,19 @@ export function handleDateTime(formData, onChange) {
 
     // 初期値に開始時刻を現在時刻、終了時刻に現在時刻＋1時間を設定
     // こうすることで、日付のフォームの入力後に時刻が空白になることを防ぐ。
-    setTempStart(tempStart);
-    setTempEnd(tempEnd);
+    setStart("");
+    setEnd("");
   };
 
   useEffect(() => {
     const invalid =
-      !tempStart ||
-      !tempEnd ||
-      tempStart >= tempEnd ||
-      dates.some((date) => date.start_date === tempStart);
+      !start ||
+      !end ||
+      start >= end ||
+      dates.some((date) => date.start_date === start);
 
     setDatesDisable(invalid);
-  }, [tempStart, tempEnd, dates]);
+  }, [start, end, dates]);
 
   const removeDate = (index) => {
     const newDates = dates.filter((_, i) => i !== index);
@@ -107,10 +92,10 @@ export function handleDateTime(formData, onChange) {
   return {
     dates,
     setDates,
-    tempStart,
-    setTempStart,
-    tempEnd,
-    setTempEnd,
+    start,
+    setStart,
+    end,
+    setEnd,
     handleDateChange,
     addDate,
     removeDate,
