@@ -19,7 +19,6 @@ export default function BaseForm({
           type="submit"
           variant="contained"
           startIcon={<SendIcon />}
-          className="btn-submit"
           disabled={disabled}
         >
           {submitLabel}

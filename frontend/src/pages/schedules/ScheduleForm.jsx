@@ -5,6 +5,9 @@ import ScheduleDatesModal from "./DatesModal";
 import BaseForm from "../../components/forms/BaseForm";
 import FormField from "../../components/forms/FormField";
 
+import { Button } from "@mui/material";
+import ScheduleDateTimeSelect from "../../components/DatetimeSelect";
+
 export default function ScheduleForm({
   formData,
   onChange,
@@ -18,10 +21,10 @@ export default function ScheduleForm({
   const {
     dates,
     setDates,
-    tempStart,
-    setTempStart,
-    tempEnd,
-    setTempEnd,
+    start,
+    setStart,
+    end,
+    setEnd,
     handleDateChange,
     addDate,
     removeDate,
@@ -42,7 +45,7 @@ export default function ScheduleForm({
   }, [formData.title, dates, formData.category_id]);
 
   return (
-    <BaseForm onSubmit={onSubmit} onCancel={onCancel} submitLabel={submitLabel}>
+    <BaseForm onSubmit={onSubmit} disabled={disabled} onCancel={onCancel} submitLabel={submitLabel}>
       <FormField label="タイトル">
         <input
           type="text"
@@ -53,30 +56,19 @@ export default function ScheduleForm({
         />
       </FormField>
       <FormField label="日程">
-        <>
-          <input
-            type="datetime-local"
-            name="temp_start_date"
-            value={tempStart}
-            onChange={(e) => setTempStart(e.target.value)}
-            style={{ marginRight: "8px" }}
-          />
-          <input
-            type="datetime-local"
-            name="temp_end_date"
-            value={tempEnd}
-            onChange={(e) => setTempEnd(e.target.value)}
-            style={{ marginRight: "8px" }}
-          />
-          <button type="button" onClick={addDate} disabled={datesDisable}>
-            ＋日程追加
-          </button>
-        </>
+        <ScheduleDateTimeSelect
+          setStart={setStart}
+          setEnd={setEnd}
+        />
+
+        <Button type="button" variant="contained" onClick={addDate} disabled={datesDisable}>
+          ＋日程追加
+        </Button>
       </FormField>
 
-      <button type="button" onClick={() => setShowDatesModal(true)}>
+      <Button type="button" variant="contained" onClick={() => setShowDatesModal(true)}>
         登録済み日程を見る
-      </button>
+      </Button>
 
       {showDatesModal && (
         <ScheduleDatesModal
