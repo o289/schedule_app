@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { handleDateTime } from "../pages/schedules/useDateTime";
 
 function DatePicker({ value, onChange, min, max }) {
@@ -15,18 +15,28 @@ function DatePicker({ value, onChange, min, max }) {
 }
 
 function TimePicker({ value, onChange, minTime, maxTime }) {
-  const timeOptions = Array.from({ length: 48 }, (_, i) => {
-    const hours = String(Math.floor(i / 2)).padStart(2, "0");
-    const minutes = i % 2 === 0 ? "00" : "30";
-    return `${hours}:${minutes}`;
-  });
+  const timeOptions = useMemo(
+    () =>
+      Array.from({ length: 48 }, (_, i) => {
+        const hours = String(Math.floor(i / 2)).padStart(2, "0");
+        const minutes = i % 2 === 0 ? "00" : "30";
+        return `${hours}:${minutes}`;
+      }),
+    []
+  );
 
-  // min/maxで絞り込み
-  const filteredOptions = timeOptions.filter((t) => {
-    if (minTime && t < minTime) return false;
-    if (maxTime && t > maxTime) return false;
-    return true;
-  });
+  const toMinutes = (t) => {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
+  };
+
+  const filteredOptions = useMemo(() => {
+    return timeOptions.filter((t) => {
+      if (minTime && toMinutes(t) < toMinutes(minTime)) return false;
+      if (maxTime && toMinutes(t) > toMinutes(maxTime)) return false;
+      return true;
+    });
+  }, [timeOptions, minTime, maxTime]);
 
   return (
     <>
@@ -63,18 +73,14 @@ export default function ScheduleDateTimeSelect({ setStart, setEnd }) {
       startTime.includes(":")
     ) {
       setStart(`${startDate}T${startTime}`);
-
     }
-  }, [startDate, startTime]);
-
-  useEffect(() => {
     if (endDate && endTime && endDate.includes("-") && endTime.includes(":")) {
       setEnd(`${endDate}T${endTime}`);
     }
-  }, [endDate, endTime]);  
+  }, [startDate, startTime, endDate, endTime]);
 
   return (
-    <>
+    <div className="datetime-select-wrapper">
       {/* 開始日時 */}
       <div style={{ border: "1px solid #ccc", borderRadius: "6px", display: "flex", alignItems: "left", gap: "0.5rem" }}>
         <div style={{ display: "flex", margin: "0", flexDirection: "row", alignItems: "left", gap: "1rem" }}>
@@ -106,6 +112,6 @@ export default function ScheduleDateTimeSelect({ setStart, setEnd }) {
             />
         </div>
       </div>
-    </>
+    </div>
   );
 }
