@@ -1,26 +1,43 @@
-# 予定 × ToDo管理アプリ (個人利用版)
+# 予定 × ToDo 管理アプリ (個人利用版)
 
-## 1. アプリの目的・使用技術・デプロイ先
-**アプリの目的**  
-- 個人利用を前提とした「予定とToDoを一元管理」できるアプリ  
-- 「予定の中に複数のToDoがある」構造を採用  
-- 完了済みタスクは30日保持 → 復元可能 / 自動削除でシンプル管理  
-- 学習目的として API駆動 (FastAPI + React) を採用  
+## 1. プロダクト概要（What / Why）
 
-**使用技術**  
-- Backend: FastAPI + SQLAlchemy  
-- Frontend: React + UIライブラリ (MUI / Vuetify)  
-- DB: PostgreSQL（開発環境から本番同等を想定）  
-- カレンダーUI: FullCalendar.js  
-- 認証: JWT（学習目的で導入）  
-- 定期削除: APScheduler  
+このアプリは、複数日にまたがる不規則な予定を、１つの画面でまとめて登録できるスケジュール管理サービスです。一般的なカレンダーアプリでは、繰り返し予定を使っても「登録 → 個別編集」の 2 段階が必要になり、実際の運用では手間がかかります。特に、曜日が一定していない予定や、飛び飛びの日程を扱う場合には、同じ操作を何度も繰り返す必要があり、私の負担になっていました。
 
+本アプリでは、この問題を解決するために、複数の予定を一度に選択し、そのまま予定として登録できる機能を提供しています。これにより、これまで複数回必要だった作業が 1 回で完了し、予定入力の手間を大きく削減できます。ユーザーは日常のスケジュール管理をより効率よく行うことができます。
 
-**デプロイ先**  
-- 無料VPS
+## 2. 機能
 
-## 2. データベース設計・モデル設計
-**ER図（Mermaid表記）**  
+- ログイン機能（JWT 認証）
+- アカウント登録・セキュアなパスワードハッシュ化
+- スケジュールの CRUD
+- カテゴリ管理（色分け）
+- スケジュールに紐づく ToDo
+
+## 3. 技術
+
+**使用技術**
+
+- 言語: Python, javascript
+- Backend(フレームワーク): FastAPI + SQLAlchemy
+- Frontend(フレームワーク): React + UI ライブラリ (MUI / Vuetify)
+- Auth: JWT, bcrypt
+- Infra: Docker / Nginx / XServer VPS /
+- DB: PostgreSQL（開発環境から本番同等を想定）
+- カレンダー UI: FullCalendar.js
+- その他: Alembic / SQLAlchemy / MUI /
+
+## 4. アーキテクチャ
+
+- フロント：React + MUI
+- API：FastAPI
+- DB：PostgreSQL
+- リバースプロキシ：Nginx
+- Docker Compose で各サービスを統合
+
+## 5. データベース設計・モデル設計
+
+**ER 図（Mermaid 表記）**
 
 ```mermaid
 erDiagram
@@ -28,6 +45,7 @@ erDiagram
     User ||--o{ Schedule : has
     Category ||--o{ Schedule : has
     Schedule ||--o{ Todo : has
+	Schedule ||--o{ ScheduleDates : has
 
     User {
       uuid id PK
@@ -48,9 +66,15 @@ erDiagram
       uuid user_id FK
       uuid category_id FK
       string title
+	  [schedule_dates] dates
+      text note
+    }
+
+	ScheduleDates {
+      uuid id PK
+      uuid schedule_id FK
       datetime start_date
       datetime end_date
-      text note
     }
 
     Todo {
@@ -64,122 +88,15 @@ erDiagram
     }
 ```
 
-**モデル詳細**
-	•	User
-	•	id, name, email, password
-	•	Category
-	•	id, user_id(FK), name, color(enum: red/blue/green/yellow/purple)
-	•	Schedule (予定)
-	•	id, user_id(FK), category_id(FK), title, start_date(datetime), end_date(datetime), note
-	•	Todo
-	•	id, schedule_id(FK), title, is_done(boolean), done_at(datetime), priority(enum 1〜5, 制限あり), due_date(optional)
+## 6. 意識したこと
 
-⸻
+- バイブコーディングを活用し、早急な実装
+- バックエンドは FastAPI、DB は PostgreSQL、Alembic でマイグレーション管理
+- フロントは React でコンポーネント分割／UX 改善
+- Docker Compose でフルスタックの開発環境を構築
+- XServerVPS でのデプロイ
 
-3. API設計・エンドポイント設計
+## 7. 学び
 
-認証
-	•	POST /auth/signup - ユーザー登録
-	•	POST /auth/login - ログイン（JWT発行）
-	•   POST /auth/refresh - リフレッシュ
-
-Category
-	•	GET /categories - カテゴリ一覧
-	•	POST /categories - カテゴリ作成
-	•	PUT /categories/{id} - カテゴリ更新
-	•	DELETE /categories/{id} - カテゴリ削除
-
-Schedule
-	•	GET /schedules - 予定一覧
-	•	POST /schedules - 予定作成
-	•	GET /schedules/{id} - 予定詳細
-	•	PUT /schedules/{id} - 予定更新
-	•	DELETE /schedules/{id} - 予定削除
-
-Todo
-	•	POST /schedules/{id}/todos - タスク追加
-	•	PUT /todos/{id} - タスク更新（完了/復元含む）
-	•	DELETE /todos/{id} - タスク削除
-
-完了済みタスク
-	•	GET /schedules/{id}/done_todos - 30日以内の完了済みタスク一覧
-	•	内部処理: APSchedulerで30日以上経過したタスクを自動削除
-
-⸻
-
-4. UI設計
-
-トップページ（カレンダー）
-	•	FullCalendarで予定を表示
-	•	日付クリックで予定一覧を表示
-	•	予定クリックで詳細ページへ遷移
-
-予定詳細ページ
-	•	予定情報（タイトル/日付/カテゴリ色）
-	•	未完了タスク一覧（チェックボックス形式）
-	•	タスク追加ボタン
-	•	「完了済みタスクを見る」リンク
-
-完了済みタスクページ
-	•	対象予定に紐づく完了済みタスク一覧（30日以内）
-	•	各タスクに「復元」ボタン
-	•	注意文「30日を過ぎたタスクは自動削除されます」
-
-カテゴリ管理ページ
-	•	カテゴリ一覧表示
-	•	新規カテゴリ作成（名前＋色パレットから選択）
-
-⸻
-
-今後の拡張
-	•	完了タスク履歴のレポート化（達成率やグラフ化）
-	•	AIによる自動スケジューリング（別アプリで予定）
-	•	モバイルUI最適化（モーダル表示対応）
-	•	将来的に別アプリと連携（共有・マネタイズ向け）
-
-
-5. フォルダ構成
-schedule_app
-	backend/
-	└── app/
-		├── main.py             # エントリーポイント
-		├── core/               # 設定, DB接続, 共通処理
-		│   ├── config.py
-		│   └── database.py
-		├── models/             # SQLAlchemyモデル
-		│   ├── user.py
-		│   └── category.py
-		|	├── schedule.py
-		│   └── todo.py
-		├── schemas/            # Pydanticスキーマ
-		│   ├── user.py
-		│   └── category.py
-		|	├── schedule.py
-		│   └── todo.py
-		├── api/                # ルーター (エンドポイント)
-		│   ├── user.py
-		│   └── category.py
-		|	├── schedule.py
-		│   └── todo.py
-		├── crud/               # DB操作（Create/Read/Update/Delete）
-		│   ├── user.py
-		│   └── category.py
-		|	├── schedule.py
-		│   └── todo.py
-		└── __init__.py
-	frontend/
-	└── src/
-		├── features/
-		│   ├── schedule/
-		│   │   ├── components/   # カレンダーUIなど
-		│   │   ├── api/          # fetch("/schedule/...")
-		│   │   └── hooks/
-		│   └── todo/
-		│       ├── components/
-		│       ├── api/
-		│       └── hooks/
-		├── shared/               # 共通部品（Button, Modalなど）
-		├── App.tsx
-		└── main.tsx
-
-		
+- バイブコーディングは早く実装でき、効率がいいこと
+- それの活用にはより基礎を磨かなければならない
