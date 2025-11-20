@@ -66,7 +66,7 @@ erDiagram
       uuid user_id FK
       uuid category_id FK
       string title
-	  [schedule_dates] dates
+	    schedule_dates dates
       text note
     }
 
