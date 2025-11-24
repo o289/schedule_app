@@ -38,7 +38,7 @@ def _normalize_email(email: str) -> str:
     summary="ユーザー登録",
     include_in_schema=False,
 )
-def signup(user_in: UserCreate, db: Session = SessionDep):
+def signup(user_in: UserCreate, db: SessionDep):
     repo = UserRepository(db)
 
     email = _normalize_email(user_in.email)
@@ -59,7 +59,7 @@ def signup(user_in: UserCreate, db: Session = SessionDep):
 
 # --- Login ---
 @router.post("/login", response_model=TokenResponse)
-def login(user_in: UserLogin, db: Session = SessionDep):
+def login(user_in: UserLogin, db: SessionDep):
     repo = UserRepository(db)
     user = repo.verify_user(user_in.email, user_in.password)
 
@@ -80,7 +80,10 @@ def login(user_in: UserLogin, db: Session = SessionDep):
 
 # --- refresh ---
 @router.post("/refresh", response_model=TokenResponse)
-def refresh(refresh_token: str = Body(..., embed=True), db: Session = SessionDep):
+def refresh(
+    db: SessionDep,
+    refresh_token: str = Body(..., embed=True),
+):
     repo = UserRepository(db)
     user = repo.get_by_refresh_token(refresh_token)
 
@@ -97,7 +100,7 @@ def refresh(refresh_token: str = Body(..., embed=True), db: Session = SessionDep
 
 # --- Logout ---
 @router.post("/logout")
-def logout(refresh_token: str = Body(..., embed=True), db: Session = SessionDep):
+def logout(db: SessionDep, refresh_token: str = Body(..., embed=True)):
     repo = UserRepository(db)
     user = repo.get_by_refresh_token(refresh_token)
 
@@ -114,5 +117,5 @@ def logout(refresh_token: str = Body(..., embed=True), db: Session = SessionDep)
 # --- Me ---
 # 現在のユーザー
 @router.get("/me", response_model=UserResponse)
-def read_me(current_user: User = CurrentUser):
+def read_me(current_user: CurrentUser):
     return current_user

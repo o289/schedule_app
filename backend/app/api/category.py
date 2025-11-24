@@ -14,8 +14,8 @@ router = APIRouter(prefix="/categories", tags=["categories"])
 # --- 一覧 ---
 @router.get("/", response_model=list[CategoryResponse])
 def list_categories(
-    db: Session = SessionDep,
-    current_user: User = CurrentUser,
+    db: SessionDep,
+    current_user: CurrentUser,
 ):
     repo = CategoryRepository(db)
     return repo.get_by_user(user_id=current_user.id)
@@ -24,11 +24,10 @@ def list_categories(
 # --- 作成 ---
 @router.post("/", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
 def create_category(
-    category_in: CategoryCreate,
-    db: Session = SessionDep,
+    category_in: CategoryCreate, db: SessionDep, current_user: CurrentUser
 ):
     repo = CategoryRepository(db)
-    return repo.create(category_in=category_in)
+    return repo.create(category_in=category_in, user_id=current_user.id)
 
 
 # --- 更新 ---
@@ -36,8 +35,8 @@ def create_category(
 def update_category(
     category_id: UUID,
     category_in: CategoryUpdate,
-    db: Session = SessionDep,
-    current_user: User = CurrentUser,
+    db: SessionDep,
+    current_user: CurrentUser,
 ):
     repo = CategoryRepository(db)
     category = repo.get(category_id)
@@ -52,8 +51,8 @@ def update_category(
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_category(
     category_id: UUID,
-    db: Session = SessionDep,
-    current_user: User = CurrentUser,
+    db: SessionDep,
+    current_user: CurrentUser,
 ):
     repo = CategoryRepository(db)
     category = repo.get(category_id)

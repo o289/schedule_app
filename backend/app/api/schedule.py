@@ -16,8 +16,8 @@ router = APIRouter(prefix="/schedules", tags=["schedules"])
 @router.post("/", response_model=ScheduleResponse, status_code=status.HTTP_201_CREATED)
 def create_schedule(
     schedule_in: ScheduleCreate,
-    db: Session = SessionDep,
-    current_user: User = CurrentUser,
+    db: SessionDep,
+    current_user: CurrentUser,
 ):
     repo = ScheduleRepository(db)
     # user_id を渡すことで他人のカテゴリに紐づけられないよう制御できる
@@ -29,8 +29,8 @@ def create_schedule(
 # --- 一覧取得（ログインユーザーのスケジュールのみ） ---
 @router.get("/", response_model=list[ScheduleResponse])
 def list_schedules(
-    db: Session = SessionDep,
-    current_user: User = CurrentUser,
+    db: SessionDep,
+    current_user: CurrentUser,
 ):
     repo = ScheduleRepository(db)
     return repo.get_by_user(current_user.id)
@@ -40,8 +40,8 @@ def list_schedules(
 @router.get("/{schedule_id}", response_model=ScheduleResponse)
 def get_schedule(
     schedule_id: UUID,
-    db: Session = SessionDep,
-    current_user: User = CurrentUser,
+    db: SessionDep,
+    current_user: CurrentUser,
 ):
     repo = ScheduleRepository(db)
     schedule = repo.get(schedule_id)
@@ -57,8 +57,8 @@ def get_schedule(
 def update_schedule(
     schedule_id: UUID,
     schedule_in: ScheduleUpdate,
-    db: Session = SessionDep,
-    current_user: User = CurrentUser,
+    db: SessionDep,
+    current_user: CurrentUser,
 ):
     repo = ScheduleRepository(db)
     schedule = repo.get(schedule_id)
@@ -73,8 +73,8 @@ def update_schedule(
 @router.delete("/{schedule_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_schedule(
     schedule_id: UUID,
-    db: Session = SessionDep,
-    current_user: User = CurrentUser,
+    db: SessionDep,
+    current_user: CurrentUser,
 ):
     repo = ScheduleRepository(db)
     success = repo.delete(schedule_id, current_user.id)
