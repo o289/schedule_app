@@ -34,7 +34,7 @@ export default function TodoForm({ formData, onChange, onSubmit, onCancel }) {
         <input
           type="date"
           name="due_date"
-          value={formData.due_date || ""}
+          value={formData.due_date || null}
           onChange={onChange}
         />
       </FormField>
