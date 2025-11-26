@@ -1,5 +1,9 @@
 import "./BaseForm.css";
 
+import { Button } from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
+import CloseIcon from "@mui/icons-material/Close";
+
 export default function BaseForm({
   onSubmit,
   children,
@@ -11,13 +15,24 @@ export default function BaseForm({
     <form onSubmit={onSubmit} className="base-form">
       {children}
       <div className="form-actions">
-        <button type="submit" className="btn-submit" disabled={disabled}>
+        <Button
+          type="submit"
+          variant="contained"
+          startIcon={<SendIcon />}
+          disabled={disabled}
+        >
           {submitLabel}
-        </button>
+        </Button>
         {onCancel && (
-          <button type="button" className="btn-cancel" onClick={onCancel}>
+          <Button
+            type="button"
+            variant="contained"
+            startIcon={<CloseIcon />}
+            className="btn-cancel"
+            onClick={onCancel}
+          >
             キャンセル
-          </button>
+          </Button>
         )}
       </div>
     </form>

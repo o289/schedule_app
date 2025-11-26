@@ -5,6 +5,9 @@ import ScheduleDatesModal from "./DatesModal";
 import BaseForm from "../../components/forms/BaseForm";
 import FormField from "../../components/forms/FormField";
 
+import { Button } from "@mui/material";
+import DaySelectDisplay from "../../components/MultiDateCalendar";
+
 export default function ScheduleForm({
   formData,
   onChange,
@@ -18,11 +21,12 @@ export default function ScheduleForm({
   const {
     dates,
     setDates,
-    tempStart,
-    setTempStart,
-    tempEnd,
-    setTempEnd,
-    handleDateChange,
+    selectedDates,
+    setSelectedDates,
+    start,
+    setStart,
+    end,
+    setEnd,
     addDate,
     removeDate,
     datesDisable,
@@ -42,7 +46,12 @@ export default function ScheduleForm({
   }, [formData.title, dates, formData.category_id]);
 
   return (
-    <BaseForm onSubmit={onSubmit} onCancel={onCancel} submitLabel={submitLabel}>
+    <BaseForm
+      onSubmit={onSubmit}
+      disabled={disabled}
+      onCancel={onCancel}
+      submitLabel={submitLabel}
+    >
       <FormField label="タイトル">
         <input
           type="text"
@@ -52,43 +61,7 @@ export default function ScheduleForm({
           required
         />
       </FormField>
-      <FormField label="日程">
-        <>
-          <input
-            type="datetime-local"
-            name="temp_start_date"
-            value={tempStart}
-            onChange={(e) => setTempStart(e.target.value)}
-            style={{ marginRight: "8px" }}
-          />
-          <input
-            type="datetime-local"
-            name="temp_end_date"
-            value={tempEnd}
-            onChange={(e) => setTempEnd(e.target.value)}
-            style={{ marginRight: "8px" }}
-          />
-          <button type="button" onClick={addDate} disabled={datesDisable}>
-            ＋日程追加
-          </button>
-        </>
-      </FormField>
 
-      <button type="button" onClick={() => setShowDatesModal(true)}>
-        登録済み日程を見る
-      </button>
-
-      {showDatesModal && (
-        <ScheduleDatesModal
-          dates={dates}
-          removeDate={removeDate}
-          onClose={() => setShowDatesModal(false)}
-        />
-      )}
-
-      <FormField label="メモ">
-        <textarea name="note" value={formData.note || ""} onChange={onChange} />
-      </FormField>
       <FormField label="カテゴリー">
         <select
           name="category_id"
@@ -104,6 +77,39 @@ export default function ScheduleForm({
           ))}
         </select>
       </FormField>
+
+      <FormField label="メモ">
+        <textarea name="note" value={formData.note || ""} onChange={onChange} />
+      </FormField>
+
+      <FormField label="日程">
+        <DaySelectDisplay
+          addDate={() => addDate(selectedDates)}
+          datesDisable={datesDisable}
+          selectedDates={selectedDates}
+          setSelectedDates={setSelectedDates}
+          start={start}
+          setStart={setStart}
+          end={end}
+          setEnd={setEnd}
+        />
+      </FormField>
+
+      <Button
+        type="button"
+        variant="contained"
+        onClick={() => setShowDatesModal(true)}
+      >
+        登録済み日程を見る
+      </Button>
+
+      {showDatesModal && (
+        <ScheduleDatesModal
+          dates={dates}
+          removeDate={removeDate}
+          onClose={() => setShowDatesModal(false)}
+        />
+      )}
     </BaseForm>
   );
 }

@@ -11,8 +11,7 @@ class Settings(BaseSettings):
 
     # App
     SECRET_KEY: str
-    DEBUG: bool = True
-    SECRET_KEY: str
+    DEBUG: bool = False
     ALGORITHM: str = "HS256"  # 追加
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 

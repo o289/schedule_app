@@ -11,8 +11,10 @@ class TodoRepository(BaseRepository):
         super().__init__(db, Todo)
 
     # --- 作成 ---
-    def create(self, todo_in: TodoCreate) -> Todo:
-        todo = self.base_create_instance(model=Todo, schema_in=todo_in)
+    def create(self, todo_in: TodoCreate, schedule_id: UUID) -> Todo:
+        todo = self.base_create_instance(
+            model=Todo, schema_in=todo_in, extra={"schedule_id": schedule_id}
+        )
         return self.base_add(todo)
 
     # --- 取得（ID指定） ---

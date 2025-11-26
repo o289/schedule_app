@@ -22,9 +22,11 @@ services:
     ports:
       - "${API_PORT}:8000"
     volumes:
-      - ./backend:/app
+      - ./backend/app:/app/app
+      - ./backend/alembic:/app/alembic
+      - ./backend/alembic.ini:/app/alembic.ini:ro
     environment:
-      DATABASE_URL: ${DATABASE_URL}   # AlembicやSQLAlchemyが利用
+      DATABASE_URL: ${DATABASE_URL} # AlembicやSQLAlchemyが利用
       API_PORT: ${API_PORT}
     depends_on:
       - db
@@ -39,7 +41,6 @@ services:
       - "${WEB_PORT}:3000"
     volumes:
       - ./frontend:/app
-      - ./frontend/public:/app/public
       - /app/node_modules
     stdin_open: true
     tty: true

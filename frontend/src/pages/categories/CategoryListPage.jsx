@@ -7,6 +7,13 @@ import { useCategory } from "./categoryHandlers";
 
 import "./CategoryListPage.css";
 
+import { Button } from "@mui/material";
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
+
 export default function CategoryListPage() {
   const { id } = useParams();
   const {
@@ -32,20 +39,24 @@ export default function CategoryListPage() {
     <div style={{ padding: "2rem" }}>
       {!isCreating ? (
         <>
-          <button
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
             onClick={() => setIsCreating(true)}
-            className="btn-category btn-save"
           >
             新規作成
-          </button>
+          </Button>
 
           {/* 編集モード切替ボタン */}
-          <button
+          <Button
+            variant="contained"
+            color="warning"
+            startIcon={<EditIcon />}
             onClick={() => setIsEditMode((prev) => !prev)}
-            className="btn-category btn-cancel"
           >
             {isEditMode ? "編集モードOFF" : "編集モードON"}
-          </button>
+          </Button>
         </>
       ) : (
         <CategoryForm

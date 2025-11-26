@@ -1,9 +1,9 @@
 # FastAPI 基本
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, HTTPException, status, Body
 
 # DB
 from sqlalchemy.orm import Session
-from app.core.database import get_db
+from app.api.deps import CurrentUser, SessionDep
 
 # Repository
 from app.crud.user import UserRepository
@@ -18,7 +18,6 @@ from app.core.security import (
     create_access_token,
     create_refresh_token,
 )
-from app.api.deps import get_current_user
 
 # モデル達（User認証用に参照）
 from app.models.user import User
@@ -39,7 +38,7 @@ def _normalize_email(email: str) -> str:
     summary="ユーザー登録",
     include_in_schema=False,
 )
-def signup(user_in: UserCreate, db: Session = Depends(get_db)):
+def signup(user_in: UserCreate, db: SessionDep):
     repo = UserRepository(db)
 
     email = _normalize_email(user_in.email)
@@ -60,7 +59,7 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)):
 
 # --- Login ---
 @router.post("/login", response_model=TokenResponse)
-def login(user_in: UserLogin, db: Session = Depends(get_db)):
+def login(user_in: UserLogin, db: SessionDep):
     repo = UserRepository(db)
     user = repo.verify_user(user_in.email, user_in.password)
 
@@ -81,7 +80,10 @@ def login(user_in: UserLogin, db: Session = Depends(get_db)):
 
 # --- refresh ---
 @router.post("/refresh", response_model=TokenResponse)
-def refresh(refresh_token: str = Body(..., embed=True), db: Session = Depends(get_db)):
+def refresh(
+    db: SessionDep,
+    refresh_token: str = Body(..., embed=True),
+):
     repo = UserRepository(db)
     user = repo.get_by_refresh_token(refresh_token)
 
@@ -98,7 +100,7 @@ def refresh(refresh_token: str = Body(..., embed=True), db: Session = Depends(ge
 
 # --- Logout ---
 @router.post("/logout")
-def logout(refresh_token: str = Body(..., embed=True), db: Session = Depends(get_db)):
+def logout(db: SessionDep, refresh_token: str = Body(..., embed=True)):
     repo = UserRepository(db)
     user = repo.get_by_refresh_token(refresh_token)
 
@@ -115,5 +117,5 @@ def logout(refresh_token: str = Body(..., embed=True), db: Session = Depends(get
 # --- Me ---
 # 現在のユーザー
 @router.get("/me", response_model=UserResponse)
-def read_me(current_user: User = Depends(get_current_user)):
+def read_me(current_user: CurrentUser):
     return current_user

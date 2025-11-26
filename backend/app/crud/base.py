@@ -17,7 +17,9 @@ class BaseRepository:
             self.db.commit()
             self.db.refresh(obj)
             return obj
-        except Exception:
+        except Exception as e:
+            print(f"{e}というエラーが起きています")
+            self.db.rollback()
             return None
 
     def base_get(self, id: UUID):
@@ -41,7 +43,7 @@ class BaseRepository:
             print("コミット成功")
             return True
         except Exception as e:
-            print("コミット成功:", e)
+            print("コミット失敗:", e)
             self.db.rollback()
             return False
 
@@ -57,7 +59,7 @@ class BaseRepository:
         except Exception:
             return None
 
-    def base_create_instance(self, model, schema_in):
+    def base_create_instance(self, model, schema_in, extra: dict | None = None):
         """
         任意のモデルに対応できる共通「新規作成」関数
 
@@ -68,12 +70,18 @@ class BaseRepository:
         【実現方法】
         - model_dump() で Pydanticモデルを dict に変換。
         - model_validate() で SQLAlchemyモデルを検証付きで生成。
-        ※ Pydantic v2では model_validate() を使うことで、型変換や検証が自動で行われる。
+        ※ Pydantic v2では model(**data) を使うことで、型変換や検証が自動で行われる。
         - 最後にDBに追加してコミット。
         """
         data = schema_in.model_dump()
 
-        obj = model.model_validate(data)
+        # extra を安全にマージ
+        if extra:
+            for key, value in extra.items():
+                if hasattr(model, key):
+                    data[key] = value
+
+        obj = model(**data)
 
         return obj
 

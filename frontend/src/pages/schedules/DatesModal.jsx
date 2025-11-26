@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import "./DatesModal.css";
 import { formatDateTime } from "../../utils/date";
 
+import { Button } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import CloseIcon from "@mui/icons-material/Close";
+
 export default function ScheduleDatesModal({ dates, removeDate, onClose }) {
   // 以下のコードとeffectはdates配列の中身が1になった時に削除を押せないようにする目的
   // 現在、scheduleのdates配列がから配列でも登録されてしまう問題が起きているのでそれを防ぐ目的で定義
@@ -27,21 +31,28 @@ export default function ScheduleDatesModal({ dates, removeDate, onClose }) {
             <div style={{ display: "block" }}>
               終了: {formatDateTime(date.end_date || "-", "datetime")}
             </div>
-            <button
+
+            <Button
               type="button"
+              variant="contained"
+              startIcon={<DeleteIcon />}
               onClick={() => removeDate(index)}
               disabled={minimumDates}
-              className="dates-modal-delete"
             >
               削除
-            </button>
+            </Button>
           </div>
         ))}
 
         {/* 位置の固定   */}
-        <button type="button" onClick={onClose}>
+        <Button
+          type="button"
+          variant="contained"
+          startIcon={<CloseIcon />}
+          onClick={onClose}
+        >
           閉じる
-        </button>
+        </Button>
       </div>
     </div>
   );

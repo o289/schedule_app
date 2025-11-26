@@ -1,9 +1,4 @@
 import { useState, useEffect } from "react";
-import {
-  formatLocalDateTime,
-  getNowDateTime,
-  getNowPlusOneHour,
-} from "../../utils/date";
 
 export function useDateTime(schedules) {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -44,59 +39,57 @@ export function handleDateTime(formData, onChange) {
       ? formData.dates
       : [{ start_date: "", end_date: "" }]
   );
-  const [tempStart, setTempStart] = useState(getNowDateTime());
-  const [tempEnd, setTempEnd] = useState(getNowPlusOneHour());
+  const [selectedDates, setSelectedDates] = useState([]);
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
 
   const [datesDisable, setDatesDisable] = useState(false);
 
-  const handleDateChange = (index, field, value) => {
-    const newDates = dates.map((date, i) => {
-      if (i === index) {
-        return { ...date, [field]: value };
-      }
-      return date;
+  const addDate = (selectedDates) => {
+    if (
+      !Array.isArray(selectedDates) ||
+      !selectedDates ||
+      selectedDates.length === 0 ||
+      !start ||
+      !end
+    )
+      return;
+
+    const newDateObjects = selectedDates.map((dateObj) => {
+      const dateStr =
+        typeof dateObj === "object" && dateObj.start_date
+          ? dateObj.start_date.split("T")[0]
+          : dateObj;
+
+      const startDateTime = `${dateStr}T${start}`;
+      const endDateTime = `${dateStr}T${end}`;
+      return { start_date: startDateTime, end_date: endDateTime };
     });
+
+    // 既存datesと重複を除外して結合
+    const normalize = (str) => str.slice(0, 16); // "YYYY-MM-DDTHH:mm" まで
+    const uniqueDates = newDateObjects.filter(
+      (d) =>
+        !dates.some(
+          (existing) =>
+            normalize(existing.start_date) === normalize(d.start_date) &&
+            normalize(existing.end_date) === normalize(d.end_date)
+        )
+    );
+
+    if (uniqueDates.length === 0) return;
+
+    const newDates = [...dates, ...uniqueDates];
     setDates(newDates);
-    onChange({ target: { name: "dates", value: newDates } });
-  };
 
-  // スタートの日付・時刻がエンドより後である場合にエンドをスタートの1時間後に固定する
-  // スタートがエンドより後にも関わらず入力されてしまうのをを防止
-  useEffect(() => {
-    if (tempStart > tempEnd) {
-      const start = new Date(tempStart);
-      const end = new Date(start.getTime() + 60 * 60 * 1000);
-      setTempEnd(formatLocalDateTime(end));
-    }
-  }, [tempStart, tempEnd]);
-
-  const addDate = () => {
-    if (!tempStart || !tempEnd) return;
-    const newDate = { start_date: tempStart, end_date: tempEnd };
-
-    if (tempStart >= tempEnd) return;
-    // 予定の時刻の重複を禁止しているので、同じ日にちに同じ時刻スタートの予定を追加できないようにするため
-    if (dates.some((date) => date.start_date === newDate.start_date)) return;
-
-    const newDates = [...dates, newDate];
-    setDates(newDates);
+    // onChange で親フォームに反映
     onChange({ target: { name: "dates", value: newDates } });
 
-    // 初期値に開始時刻を現在時刻、終了時刻に現在時刻＋1時間を設定
-    // こうすることで、日付のフォームの入力後に時刻が空白になることを防ぐ。
-    setTempStart(tempStart);
-    setTempEnd(tempEnd);
+    // 入力をリセット
+    setSelectedDates([]);
+    setStart("");
+    setEnd("");
   };
-
-  useEffect(() => {
-    const invalid =
-      !tempStart ||
-      !tempEnd ||
-      tempStart >= tempEnd ||
-      dates.some((date) => date.start_date === tempStart);
-
-    setDatesDisable(invalid);
-  }, [tempStart, tempEnd, dates]);
 
   const removeDate = (index) => {
     const newDates = dates.filter((_, i) => i !== index);
@@ -107,11 +100,12 @@ export function handleDateTime(formData, onChange) {
   return {
     dates,
     setDates,
-    tempStart,
-    setTempStart,
-    tempEnd,
-    setTempEnd,
-    handleDateChange,
+    selectedDates,
+    setSelectedDates,
+    start,
+    setStart,
+    end,
+    setEnd,
     addDate,
     removeDate,
     datesDisable,

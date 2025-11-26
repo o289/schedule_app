@@ -1,13 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from app.core.database import get_db
 from app.models.user import User
 from app.models.schedule import Schedule
 from app.schemas.todo import TodoCreate, TodoUpdate, TodoResponse
 from app.crud.todo import TodoRepository
-from app.api.deps import get_current_user
+from app.api.deps import CurrentUser, SessionDep
 
 router = APIRouter(prefix="/schedules/{schedule_id}/todos", tags=["todos"])
 
@@ -16,8 +15,8 @@ router = APIRouter(prefix="/schedules/{schedule_id}/todos", tags=["todos"])
 @router.get("/", response_model=list[TodoResponse])
 def list_todos(
     schedule_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: SessionDep,
+    current_user: CurrentUser,
 ):
 
     schedule = db.query(Schedule).filter(Schedule.id == schedule_id).first()
@@ -33,15 +32,15 @@ def list_todos(
 def create_todo(
     schedule_id: UUID,
     todo_in: TodoCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: SessionDep,
+    current_user: CurrentUser,
 ):
     schedule = db.query(Schedule).filter(Schedule.id == schedule_id).first()
     if not schedule or schedule.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="権限がありません")
 
     repo = TodoRepository(db)
-    return repo.create(todo_in)
+    return repo.create(todo_in, schedule_id)
 
 
 # --- Todo 更新 ---
@@ -49,8 +48,8 @@ def create_todo(
 def update_todo(
     todo_id: UUID,
     todo_in: TodoUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: SessionDep,
+    current_user: CurrentUser,
 ):
     repo = TodoRepository(db)
     todo_item = repo.get(todo_id)
@@ -72,8 +71,8 @@ def update_todo(
 @router.delete("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_todo(
     todo_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: SessionDep,
+    current_user: CurrentUser,
 ):
     repo = TodoRepository(db)
 

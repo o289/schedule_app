@@ -1,3 +1,5 @@
+from typing import Annotated
+
 # app/api/deps.py
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -11,10 +13,11 @@ from app.models.user import User
 # Authorizationヘッダから "Bearer <token>" を取り出す仕組み
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+SessionDep = Annotated[Session, Depends(get_db)]
+TokenDep = Annotated[str, Depends(oauth2_scheme)]
 
-def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
-) -> User:
+
+def get_current_user(token: TokenDep, db: SessionDep) -> User:
     """
     JWTを検証し、DBからユーザーを取得する依存関数。
     無効なら 401 を返す。
@@ -46,3 +49,6 @@ def get_current_user(
         )
 
     return user
+
+
+CurrentUser = Annotated[User, Depends(get_current_user)]

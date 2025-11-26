@@ -10,8 +10,10 @@ class CategoryRepository(BaseRepository):
         super().__init__(db, Category)
 
     # --- 作成 ---
-    def create(self, category_in: CategoryCreate) -> Category:
-        category = self.base_create_instance(model=Category, schema_in=category_in)
+    def create(self, category_in: CategoryCreate, user_id: UUID) -> Category:
+        category = self.base_create_instance(
+            model=Category, schema_in=category_in, extra={"user_id": user_id}
+        )
 
         return self.base_add(category)
 
