@@ -12,8 +12,6 @@ export function useSchedule(id = null) {
   const [schedule, setSchedule] = useState(null);
   const [schedules, setSchedules] = useState([]);
 
-  const { fetchCategories } = useCategory();
-
   const { selectedDate, selectedDates, setSelectedDates } =
     useDateTime(schedules);
 
@@ -67,16 +65,16 @@ export function useSchedule(id = null) {
   };
 
   // 作成
-  const handleScheduleCreate = async (e) => {
+  const handleScheduleCreate = async () => {
     await apiFetch(
       base_url,
       { method: "POST", body: JSON.stringify(formData) },
       { accessToken, refreshToken, handleRefresh }
     );
 
-    await fetchSchedules();
     resetForm();
     setIsCreating(false);
+    navigate("/schedules");
   };
 
   // --- 入力変更 ---
@@ -105,9 +103,10 @@ export function useSchedule(id = null) {
       },
       { accessToken, refreshToken, handleRefresh }
     );
-    await fetchSchedule();
+
     setIsEditMode(false);
     alert("スケジュールを更新しました");
+    navigate(`/schedules`);
   };
 
   // --- 削除 ---
@@ -123,7 +122,7 @@ export function useSchedule(id = null) {
 
   // フォームを初期値に戻す
   const resetForm = () => {
-    setSelectedDates([getNowDateTime().slice(0, 10)]);
+    // setSelectedDates([getNowDateTime().slice(0, 10)]);
     setFormData({
       title: "",
       note: "",
@@ -136,14 +135,6 @@ export function useSchedule(id = null) {
       category_id: "",
     });
   };
-
-  useEffect(() => {
-    if (id) {
-      fetchSchedule();
-    } else {
-      fetchSchedules();
-    }
-  }, [id]);
 
   return {
     schedule,
