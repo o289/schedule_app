@@ -20,6 +20,7 @@ export default function ScheduleCalendarPage() {
   const {
     schedules,
     handleScheduleCreate,
+    fetchSchedules,
     handleChange,
     isCreating,
     setIsCreating,
@@ -28,6 +29,10 @@ export default function ScheduleCalendarPage() {
   } = useSchedule();
 
   const { handleDateClick, events } = useDateTime(schedules);
+
+  useEffect(() => {
+    fetchSchedules(); // ← マウント時に必ず実行
+  }, []);
 
   return (
     <div style={{ padding: "1rem" }}>
