@@ -26,8 +26,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - certs:/etc/letsencrypt
-      - /var/www/certbot:/var/www/certbot 
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - backend
 
@@ -38,14 +37,5 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - certs:/etc/letsencrypt
-      - webroot:/var/www/certbot 
-    entrypoint: sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done"
-
 volumes:
   postgres_data:
-  certs:
-  webroot:  
