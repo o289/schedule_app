@@ -26,6 +26,7 @@ export default function ScheduleDetailPage() {
     handleTodoUpdate,
     handleTodoDelete,
   } = useTodo(id);
+
   const [todoForm, setTodoForm] = useState({
     title: "",
     priority: "",
@@ -38,6 +39,7 @@ export default function ScheduleDetailPage() {
     isEditMode,
     setIsEditMode,
     formData,
+    fetchSchedule,
     handleChange,
     handleScheduleUpdate,
     handleScheduleDelete,
@@ -46,6 +48,7 @@ export default function ScheduleDetailPage() {
 
   useEffect(() => {
     if (id) {
+      fetchSchedule();
       fetchTodos();
     }
   }, [id]);
