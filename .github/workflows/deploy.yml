@@ -286,3 +286,19 @@ jobs:
             docker save -o image_backups/backend_$(date +%F).tar schedule_app-backend:latest
             docker save -o image_backups/nginx_$(date +%F).tar schedule_app-nginx:latest
             ls -lh image_backups/
+
+      # 9. デプロイ成功時のみ Docker キャッシュを削除
+      - name: Cleanup Docker cache after successful deploy
+        if: success()
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          # 重要: デプロイが完全に成功した後のみ実行する
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/schedule_app
+            echo "🧹 Cleaning Docker build cache and unused images..."
+            docker builder prune -af
+            docker image prune -af
+            echo "✅ Docker cache cleanup completed."
