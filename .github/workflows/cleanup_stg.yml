@@ -1,0 +1,26 @@
+name: Cleanup STG Environment (Scheduled)
+
+on:
+    schedule:
+        # 毎日 深夜 3:30 JST（= 18:30 UTC）
+        - cron: "30 18 * * *"
+    workflow_dispatch:
+
+jobs:
+    cleanup-stg:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Cleanup STG containers and volumes
+              uses: appleboy/ssh-action@v1.0.0
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      echo "🧹 Cleaning up STG environment..."
+                      cd /home/${{ secrets.VPS_USER }}/schedule_app
+
+                      docker compose -p schedule_app_stg -f docker-compose.stg.yml down -v || true
+
+                      echo "✅ STG environment fully removed"
