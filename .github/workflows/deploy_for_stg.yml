@@ -1,0 +1,103 @@
+name: Deploy STG (manual, destructive)
+on:
+    workflow_dispatch:
+
+jobs:
+    deploy-stg:
+        runs-on: ubuntu-latest
+
+        steps:
+            # 1. リポジトリ取得
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            # 2. VPS 上のコードを release ブランチに同期
+            - name: Sync release branch to VPS (STG)
+              uses: appleboy/ssh-action@v1.0.0
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      cd /home/${{ secrets.VPS_USER }}
+                      if [ ! -d "schedule_app" ]; then
+                        echo "📥 Cloning repository..."
+                        git clone https://github.com/o289/schedule_app.git
+                      fi
+
+                      cd schedule_app
+                      echo "🔄 Syncing release branch..."
+                      git fetch origin
+                      git checkout ${{ github.ref_name }}
+                      git reset --hard origin/${{ github.ref_name }}
+
+            # 3. STG 環境を完全初期化（データ破棄前提）
+            - name: Reset STG containers and volumes
+              uses: appleboy/ssh-action@v1.0.0
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      cd /home/${{ secrets.VPS_USER }}/schedule_app
+                      echo "🧨 Removing STG containers and volumes..."
+                      docker compose -f docker-compose.stg.yml down -v || true
+
+            # 4. STG 用ビルド（キャッシュ利用可）
+            - name: Build STG images
+              uses: appleboy/ssh-action@v1.0.0
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      cd /home/${{ secrets.VPS_USER }}/schedule_app
+                      echo "🔨 Building STG images..."
+                      docker compose -f docker-compose.stg.yml build
+
+            # 5. STG 起動
+            - name: Start STG environment
+              uses: appleboy/ssh-action@v1.0.0
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      cd /home/${{ secrets.VPS_USER }}/schedule_app
+                      echo "🚀 Starting STG environment..."
+                      docker compose -f docker-compose.stg.yml up -d
+
+            # 6. マイグレーション（失敗したら止める）
+            - name: Run Alembic migrations (STG)
+              uses: appleboy/ssh-action@v1.0.0
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      cd /home/${{ secrets.VPS_USER }}/schedule_app
+                      echo "🗄️ Running Alembic migrations on STG..."
+                      docker compose -f docker-compose.stg.yml run --rm backend alembic upgrade head
+
+            # 7. 簡易ヘルスチェック
+            - name: Health check (STG)
+              uses: appleboy/ssh-action@v1.0.0
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      echo "🔍 Checking STG endpoint..."
+                      curl -f https://stg.yudais-prod.com || exit 1
+
+            # 8. 失敗時ログ（最低限）
+            - name: Collect logs on failure
+              if: failure()
+              uses: appleboy/ssh-action@v1.0.0
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      cd /home/${{ secrets.VPS_USER }}/schedule_app
+                      docker compose -f docker-compose.stg.yml logs --tail=200
