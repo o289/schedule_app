@@ -1,73 +1,31 @@
 import { useState } from "react";
 import { Button } from "@mui/material";
 
-const generateTimeOptions = () => {
-  const times = [];
-  for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 30) {
-      const hour = String(h).padStart(2, "0");
-      const minute = String(m).padStart(2, "0");
-      times.push(`${hour}:${minute}`);
-    }
-  }
-  return times;
-};
-
-const timeOptions = generateTimeOptions();
-
-const selectStyle = {
-  padding: "6px 8px",
-  margin: "0 8px",
-  border: "none",
-  borderRadius: "4px",
-  cursor: "pointer",
-  fontSize: "14px",
-  backgroundColor: "transparent",
-  outline: "none",
-};
+//
+import TimePicker from "./commonPicker/TimePicker";
+//
 
 function TimeRangePicker({ startTime, setStartTime, endTime, setEndTime }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "8px",
-      }}
-    >
+    <>
       {/* 開始時間 */}
-      <select
-        style={selectStyle}
+      <TimePicker
+        label="開始"
+        mode="start"
         value={startTime}
-        onChange={(e) => setStartTime(e.target.value)}
-      >
-        {timeOptions.map((time) =>
-          !endTime || time <= endTime ? (
-            <option key={time} value={time}>
-              {time}
-            </option>
-          ) : null
-        )}
-      </select>
-
-      <span>〜</span>
+        constraintValue={endTime}
+        onChange={setStartTime}
+      />
 
       {/* 終了時間 */}
-      <select
-        style={selectStyle}
+      <TimePicker
+        label="終了"
+        mode="end"
         value={endTime}
-        onChange={(e) => setEndTime(e.target.value)}
-      >
-        {timeOptions.map((time) =>
-          !startTime || time >= startTime ? (
-            <option key={time} value={time}>
-              {time}
-            </option>
-          ) : null
-        )}
-      </select>
-    </div>
+        constraintValue={startTime}
+        onChange={setEndTime}
+      />
+    </>
   );
 }
 
