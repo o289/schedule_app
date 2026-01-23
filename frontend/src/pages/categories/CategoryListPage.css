@@ -93,3 +93,25 @@
 .btn-delete:hover {
   background-color: #c0392b;
 }
+
+/* カテゴリーの配置 */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  justify-items: center;
+}
+
+/* PC */
+@media (min-width: 768px) {
+  .category-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* スマホ */
+@media (max-width: 767px) {
+  .category-grid {
+    display: block;
+  }
+}

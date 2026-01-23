@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { apiFetch } from "../../api/client";
+import CategoryCard from "../../components/card/category/CategoryCard";
 import CategoryForm from "./CategoryForm";
+
 import { useCategory } from "./categoryHandlers";
 
 import "./CategoryListPage.css";
@@ -38,7 +40,7 @@ export default function CategoryListPage() {
   return (
     <div style={{ padding: "2rem" }}>
       {!isCreating ? (
-        <>
+        <div style={{ margin: "10px" }}>
           <Button
             variant="contained"
             color="primary"
@@ -57,7 +59,7 @@ export default function CategoryListPage() {
           >
             {isEditMode ? "編集モードOFF" : "編集モードON"}
           </Button>
-        </>
+        </div>
       ) : (
         <CategoryForm
           formData={newForm}
@@ -70,13 +72,15 @@ export default function CategoryListPage() {
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <ul className="category-list">
-        {categories.map((c) => (
-          <li
-            key={c.id}
-            className={`category-item ${editingId === c.id ? "editing" : ""}`}
-          >
-            {isEditMode && editingId === c.id ? (
+      <div className="category-grid">
+        {categories.map((category) => (
+          <div>
+            <CategoryCard
+              key={category.id}
+              color={category.color}
+              categoryName={category.name}
+            />
+            {isEditMode && editingId === category.id ? (
               <>
                 <CategoryForm
                   formData={editForm}
@@ -86,7 +90,7 @@ export default function CategoryListPage() {
                   onCancel={() => setEditingId(null)}
                 />
                 <button
-                  onClick={() => handleDelete(String(c.id))}
+                  onClick={() => handleDelete(String(category.id))}
                   style={{ marginLeft: "1rem" }}
                   className="btn-category btn-delete"
                 >
@@ -95,10 +99,9 @@ export default function CategoryListPage() {
               </>
             ) : (
               <>
-                <span style={{ color: c.color }}>{c.name}</span>
                 {isEditMode && (
                   <button
-                    onClick={() => handleEditClick(c)}
+                    onClick={() => handleEditClick(category)}
                     className="btn-category btn-edit"
                   >
                     編集
@@ -106,9 +109,9 @@ export default function CategoryListPage() {
                 )}
               </>
             )}
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
