@@ -38,27 +38,32 @@ export default function CategoryListPage() {
   } = useCategory(id);
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div>
       {!isCreating ? (
-        <div style={{ margin: "10px" }}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={() => setIsCreating(true)}
-          >
-            新規作成
-          </Button>
-
+        <div
+          style={{ display: "flex", justifyContent: "right", margin: "12px" }}
+        >
+          <div className="category-btn">
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={() => setIsCreating(true)}
+            >
+              新規作成
+            </Button>
+          </div>
           {/* 編集モード切替ボタン */}
-          <Button
-            variant="contained"
-            color="warning"
-            startIcon={<EditIcon />}
-            onClick={() => setIsEditMode((prev) => !prev)}
-          >
-            {isEditMode ? "編集モードOFF" : "編集モードON"}
-          </Button>
+          <div className="category-btn">
+            <Button
+              variant="contained"
+              color="warning"
+              startIcon={<EditIcon />}
+              onClick={() => setIsEditMode((prev) => !prev)}
+            >
+              {isEditMode ? "編集モードOFF" : "編集モードON"}
+            </Button>
+          </div>
         </div>
       ) : (
         <CategoryForm
