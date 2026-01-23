@@ -27,8 +27,30 @@ export default function ScheduleCard({
           ←
         </Link>
         <div>
-          <button onClick={() => setIsEditMode(true)}>編集</button>
-          <button onClick={showTodoForm}>Todo</button>
+          <Link
+            className="btn-edit"
+            style={{
+              "--category-color": schedule.category?.color || "#4a90e2",
+              // "--category-color-dark": darkenColor(
+              //   schedule.category?.color || "#4a90e2"
+              // ),
+            }}
+            onClick={() => setIsEditMode(true)}
+          >
+            編集
+          </Link>
+          <Link
+            className="btn-edit"
+            style={{
+              "--category-color": schedule.category?.color || "#4a90e2",
+              // "--category-color-dark": darkenColor(
+              //   schedule.category?.color || "#4a90e2"
+              // ),
+            }}
+            onClick={showTodoForm}
+          >
+            Todo
+          </Link>
 
           <Button
             variant="contained"
@@ -42,8 +64,9 @@ export default function ScheduleCard({
         </div>
       </div>
 
-      <CardContainer>
+      <CardContainer size="lg">
         <div
+          className="schedule-card"
           style={{
             "--category-color": schedule.category?.color || "#4a90e2",
             "--category-color-dark": darkenColor(

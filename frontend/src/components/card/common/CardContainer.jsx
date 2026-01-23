@@ -2,6 +2,6 @@
 
 import "./CardContainer.css";
 
-export default function CardContainer({ children }) {
-  return <div className="card-ui">{children}</div>;
+export default function CardContainer({ size = "md", children }) {
+  return <div className={`card-ui card-ui--${size}`}>{children}</div>;
 }
