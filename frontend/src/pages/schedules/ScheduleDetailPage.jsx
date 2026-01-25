@@ -11,6 +11,7 @@ import TodoForm from "../todos/TodoForm";
 
 import ScheduleCard from "../../components/card/schedule/ScheduleCard";
 import ScheduleForm from "./ScheduleForm";
+import Loading from "../../components/Loading";
 
 export default function ScheduleDetailPage() {
   const { id } = useParams();
@@ -36,6 +37,7 @@ export default function ScheduleDetailPage() {
 
   const {
     schedule,
+    isFetching,
     isEditMode,
     setIsEditMode,
     formData,
@@ -53,7 +55,9 @@ export default function ScheduleDetailPage() {
     }
   }, [id]);
 
-  if (!schedule) return <p>読み込み中...</p>;
+  if (isFetching || !schedule) {
+    return <Loading />;
+  }
 
   return (
     <div style={{ padding: "1rem" }}>

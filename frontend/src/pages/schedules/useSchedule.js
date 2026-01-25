@@ -5,6 +5,7 @@ import { apiFetch } from "../../api/client";
 import { useCategory } from "../categories/categoryHandlers";
 import { useDateTime } from "../schedules/useDateTime";
 import { getNowDateTime, getNowPlusOneHour } from "../../utils/date";
+import useLoading from "../../hooks/useLoading";
 
 export function useSchedule(id = null) {
   const { accessToken, refreshToken, handleRefresh } = useAuth();
@@ -19,6 +20,7 @@ export function useSchedule(id = null) {
   const [isEditMode, setIsEditMode] = useState(false);
 
   const [error, setError] = useState("");
+  const { isFetching, startFetching, stopFetching } = useLoading();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -40,28 +42,38 @@ export function useSchedule(id = null) {
 
   // 一覧
   const fetchSchedules = async () => {
-    const res = await apiFetch(
-      base_url,
-      { method: "GET" },
-      { accessToken, refreshToken, handleRefresh }
-    );
-    setSchedules(res);
+    startFetching();
+    try {
+      const res = await apiFetch(
+        base_url,
+        { method: "GET" },
+        { accessToken, refreshToken, handleRefresh }
+      );
+      setSchedules(res);
+    } finally {
+      stopFetching();
+    }
   };
 
   // 詳細
   const fetchSchedule = async () => {
-    const res = await apiFetch(
-      `${base_url}${id}`,
-      { method: "GET" },
-      { accessToken, refreshToken, handleRefresh }
-    );
-    setSchedule(res);
-    setFormData({
-      title: res.title,
-      note: res.note || "",
-      dates: res.dates || [],
-      category_id: res.category_id,
-    });
+    startFetching();
+    try {
+      const res = await apiFetch(
+        `${base_url}${id}`,
+        { method: "GET" },
+        { accessToken, refreshToken, handleRefresh }
+      );
+      setSchedule(res);
+      setFormData({
+        title: res.title,
+        note: res.note || "",
+        dates: res.dates || [],
+        category_id: res.category_id,
+      });
+    } finally {
+      stopFetching();
+    }
   };
 
   // 作成
@@ -85,7 +97,6 @@ export function useSchedule(id = null) {
   // --- 更新 ---
   const handleScheduleUpdate = async (e) => {
     e.preventDefault();
-
     const payload = {
       ...formData,
       dates: formData.dates.map((d) => ({
@@ -139,6 +150,7 @@ export function useSchedule(id = null) {
   return {
     schedule,
     schedules,
+    isFetching,
     fetchSchedules,
     fetchSchedule,
     formData,

@@ -16,10 +16,13 @@ import {
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 
+import Loading from "../../components/Loading";
+
 export default function CategoryListPage() {
   const { id } = useParams();
   const {
     categories,
+    isFetching,
     handleCreate,
     handleNewChange,
     newForm,
@@ -36,6 +39,10 @@ export default function CategoryListPage() {
     handleDelete,
     error,
   } = useCategory(id);
+
+  if (isFetching) {
+    return <Loading />;
+  }
 
   return (
     <div>
