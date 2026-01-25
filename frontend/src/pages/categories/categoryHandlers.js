@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
+import useLoading from "../../hooks/useLoading";
 
 export function useCategory(categoryId) {
   const { accessToken, refreshToken, handleRefresh } = useAuth();
@@ -14,17 +15,23 @@ export function useCategory(categoryId) {
   // ハンドル
   const [isCreating, setIsCreating] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false); // 編集モード追加
+  const { isFetching, startFetching, stopFetching } = useLoading();
 
   const base_url = "/categories/";
 
   // 一覧表示
   const fetchCategories = async () => {
-    const res = await apiFetch(
-      base_url,
-      { method: "GET" },
-      { accessToken, refreshToken, handleRefresh }
-    );
-    setCategories(res);
+    startFetching();
+    try {
+      const res = await apiFetch(
+        base_url,
+        { method: "GET" },
+        { accessToken, refreshToken, handleRefresh }
+      );
+      setCategories(res);
+    } finally {
+      stopFetching();
+    }
   };
 
   // 作成
@@ -94,6 +101,7 @@ export function useCategory(categoryId) {
   return {
     categories,
     fetchCategories,
+    isFetching,
     handleCreate,
     handleNewChange,
     newForm,
