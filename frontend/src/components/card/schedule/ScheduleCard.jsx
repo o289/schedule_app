@@ -10,6 +10,8 @@ import { Button } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import CardContainer from "../common/CardContainer";
+import { DateTimeCard } from "../dates/DateTimeCard";
+import { buildTimeGroupsFromDates } from "../dates/scheduleViewAdapter";
 
 export default function ScheduleCard({
   schedule,
@@ -88,7 +90,12 @@ export default function ScheduleCard({
 
       <h3>予定の日にち一覧</h3>
       {Array.isArray(schedule?.dates) && schedule.dates.length > 0 ? (
-        schedule.dates.map((d) => <ScheduleDatesCard key={d.id} date={d} />)
+        buildTimeGroupsFromDates(schedule.dates, "gray").map((timeGroup) => (
+          <DateTimeCard
+            key={`${timeGroup.start}-${timeGroup.end}`}
+            timeGroup={timeGroup}
+          />
+        ))
       ) : (
         <p>日程はまだ登録されていません。</p>
       )}
