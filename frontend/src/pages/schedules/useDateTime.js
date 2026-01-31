@@ -32,13 +32,20 @@ export function useDateTime(schedules) {
   };
 }
 
-// scheduleのdatesに追加するための関数
+// scheduleのdatesを「追加・削除」するためのUI専用ロジック
+// Single Source of Truth は formData.dates
 export function handleDateTime(formData, onChange) {
   const [dates, setDates] = useState(
-    formData.dates && formData.dates.length > 0
-      ? formData.dates
-      : [{ start_date: "", end_date: "" }]
+    Array.isArray(formData.dates) ? formData.dates : []
   );
+  // formData.dates を唯一の真実として同期する
+  useEffect(() => {
+    if (Array.isArray(formData.dates)) {
+      setDates(formData.dates);
+    } else {
+      setDates([]);
+    }
+  }, [formData.dates]);
   const [selectedDates, setSelectedDates] = useState([]);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");

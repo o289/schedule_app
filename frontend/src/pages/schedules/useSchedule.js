@@ -25,12 +25,7 @@ export function useSchedule(id = null) {
   const [formData, setFormData] = useState({
     title: "",
     note: "",
-    dates: [
-      {
-        start_date: getNowDateTime(),
-        end_date: getNowPlusOneHour(),
-      },
-    ],
+    dates: [],
     category_id: "",
   });
 
@@ -133,16 +128,10 @@ export function useSchedule(id = null) {
 
   // フォームを初期値に戻す
   const resetForm = () => {
-    // setSelectedDates([getNowDateTime().slice(0, 10)]);
     setFormData({
       title: "",
       note: "",
-      dates: [
-        {
-          start_date: getNowDateTime(),
-          end_date: getNowPlusOneHour(),
-        },
-      ],
+      dates: [],
       category_id: "",
     });
   };
