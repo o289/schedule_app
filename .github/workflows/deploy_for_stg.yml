@@ -28,8 +28,7 @@ jobs:
                       cd schedule_app
                       echo "🔄 Syncing release branch..."
                       git fetch origin
-                      git checkout ${{ github.ref_name }}
-                      git reset --hard origin/${{ github.ref_name }}
+                      git checkout -B ${{ github.ref_name }} origin/${{ github.ref_name }}
 
             # 3. STG 環境を完全初期化（データ破棄前提）
             - name: Reset STG containers and volumes
@@ -53,7 +52,7 @@ jobs:
                   script: |
                       cd /home/${{ secrets.VPS_USER }}/schedule_app
                       echo "🔨 Building STG images..."
-                      docker compose -f docker-compose.stg.yml build
+                      docker compose -f docker-compose.stg.yml build --no-cache
 
             # 5. STG 起動
             - name: Start STG environment
