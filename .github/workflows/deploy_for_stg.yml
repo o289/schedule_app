@@ -1,81 +1,81 @@
 name: Deploy STG (manual, destructive)
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
-    deploy-stg:
-        runs-on: ubuntu-latest
+  deploy-stg:
+    runs-on: ubuntu-latest
 
-        steps:
-            # 1. リポジトリ取得
-            - name: Checkout repository
-              uses: actions/checkout@v4
+    steps:
+      # 1. リポジトリ取得
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-            # 2-5. Deploy STG in single SSH session
-            - name: Deploy STG in single SSH session
-              uses: appleboy/ssh-action@v1.0.0
-              with:
-                  host: ${{ secrets.VPS_HOST }}
-                  username: ${{ secrets.VPS_USER }}
-                  key: ${{ secrets.VPS_SSH_KEY }}
-                  script: |
-                      echo "🔒 Checking release branch guard..."
-                      if [[ "${GITHUB_REF_NAME}" != release/* ]]; then
-                        echo "❌ This workflow can only be run for release branches."
-                        exit 1
-                      fi
-                      cd /home/${{ secrets.VPS_USER }}
-                      if [ ! -d "schedule_app" ]; then
-                        echo "📥 Cloning repository..."
-                        git clone https://github.com/o289/schedule_app.git
-                      fi
+      # 2-5. Deploy STG in single SSH session
+      - name: Deploy STG in single SSH session
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "🔒 Checking release branch guard..."
+            if [[ "${{ github.ref_name }}" != release/* ]]; then
+              echo "❌ This workflow can only be run for release branches."
+              exit 1
+            fi
+            cd /home/${{ secrets.VPS_USER }}
+            if [ ! -d "schedule_app" ]; then
+              echo "📥 Cloning repository..."
+              git clone https://github.com/o289/schedule_app.git
+            fi
 
-                      cd schedule_app
-                      echo "🔄 Syncing release branch..."
-                      git fetch origin
-                      TARGET_RELEASE_BRANCH="${GITHUB_REF_NAME}"
-                      git checkout -B "$TARGET_RELEASE_BRANCH" "origin/$TARGET_RELEASE_BRANCH"
+            cd schedule_app
+            echo "🔄 Syncing release branch..."
+            git fetch origin
+            TARGET_RELEASE_BRANCH="${{ github.ref_name }}"
+            git checkout -B "$TARGET_RELEASE_BRANCH" "origin/$TARGET_RELEASE_BRANCH"
 
-                      echo "🧨 Removing STG containers and volumes..."
-                      docker compose -f docker-compose.stg.yml down -v || true
+            echo "🧨 Removing STG containers and volumes..."
+            docker compose -f docker-compose.stg.yml down -v || true
 
-                      echo "🔨 Building STG images..."
-                      docker compose -f docker-compose.stg.yml build --no-cache
+            echo "🔨 Building STG images..."
+            docker compose -f docker-compose.stg.yml build --no-cache
 
-                      echo "🚀 Starting STG environment..."
-                      docker compose -f docker-compose.stg.yml up -d
+            echo "🚀 Starting STG environment..."
+            docker compose -f docker-compose.stg.yml up -d
 
-            # 6. マイグレーション（失敗したら止める）
-            - name: Run Alembic migrations (STG)
-              uses: appleboy/ssh-action@v1.0.0
-              with:
-                  host: ${{ secrets.VPS_HOST }}
-                  username: ${{ secrets.VPS_USER }}
-                  key: ${{ secrets.VPS_SSH_KEY }}
-                  script: |
-                      cd /home/${{ secrets.VPS_USER }}/schedule_app
-                      echo "🗄️ Running Alembic migrations on STG..."
-                      docker compose -f docker-compose.stg.yml run --rm backend alembic upgrade head
+      # 6. マイグレーション（失敗したら止める）
+      - name: Run Alembic migrations (STG)
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/schedule_app
+            echo "🗄️ Running Alembic migrations on STG..."
+            docker compose -f docker-compose.stg.yml run --rm backend alembic upgrade head
 
-            # 7. 簡易ヘルスチェック
-            - name: Health check (STG)
-              uses: appleboy/ssh-action@v1.0.0
-              with:
-                  host: ${{ secrets.VPS_HOST }}
-                  username: ${{ secrets.VPS_USER }}
-                  key: ${{ secrets.VPS_SSH_KEY }}
-                  script: |
-                      echo "🔍 Checking STG endpoint..."
-                      curl -f https://stg-sukejuru.yudais-prod.com || exit 1
+      # 7. 簡易ヘルスチェック
+      - name: Health check (STG)
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "🔍 Checking STG endpoint..."
+            curl -f https://stg-sukejuru.yudais-prod.com || exit 1
 
-            # 8. 失敗時ログ（最低限）
-            - name: Collect logs on failure
-              if: failure()
-              uses: appleboy/ssh-action@v1.0.0
-              with:
-                  host: ${{ secrets.VPS_HOST }}
-                  username: ${{ secrets.VPS_USER }}
-                  key: ${{ secrets.VPS_SSH_KEY }}
-                  script: |
-                      cd /home/${{ secrets.VPS_USER }}/schedule_app
-                      docker compose -f docker-compose.stg.yml logs --tail=200
+      # 8. 失敗時ログ（最低限）
+      - name: Collect logs on failure
+        if: failure()
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/schedule_app
+            docker compose -f docker-compose.stg.yml logs --tail=200
