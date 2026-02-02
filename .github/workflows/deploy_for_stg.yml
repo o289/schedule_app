@@ -69,6 +69,11 @@ jobs:
             echo "🔍 Checking STG endpoint..."
             curl -f https://stg-sukejuru.yudais-prod.com || exit 1
 
+      - name: Ingress health check (STG)
+        uses: ./.github/workflows/ingress_health_check.yml
+        with:
+          environment: stg
+
       # 8. 失敗時ログ（最低限）
       - name: Collect logs on failure
         if: failure()

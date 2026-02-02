@@ -203,6 +203,11 @@ jobs:
               echo "✅ Deployment successful. All containers running with new images."
             fi
 
+      - name: Ingress health check (PROD)
+        uses: ./.github/workflows/ingress_health_check.yml
+        with:
+          environment: prod
+
       # 6. 失敗時のログ収集
       - name: Collect docker logs on failure
         if: failure()

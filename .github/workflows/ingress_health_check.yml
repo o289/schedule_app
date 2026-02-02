@@ -1,0 +1,50 @@
+# .github/workflows/ingress_health_check.yml
+name: Ingress Health Check
+
+on:
+    workflow_call: # 他の workflow から呼ばれる前提
+        inputs:
+            environment:
+                required: true
+                type: string # "stg" or "prod"
+
+jobs:
+    ingress-health-check:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Run ingress health check on VPS
+              uses: appleboy/ssh-action@v1.0.0
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      set -e
+
+                      echo "🔍 Ingress health check for ${{ inputs.environment }}"
+
+                      if [ "${{ inputs.environment }}" = "stg" ]; then
+                        HOST="stg-sukejuru.yudais-prod.com"
+                      elif [ "${{ inputs.environment }}" = "prod" ]; then
+                        HOST="app-sukejuru.yudais-prod.com"
+                      else
+                        echo "❌ Unknown environment"
+                        exit 1
+                      fi
+
+                      echo "✅ Target host: $HOST"
+
+                      echo "🔎 Checking ingress container..."
+                      docker ps | grep ingress-nginx
+
+                      echo "🔎 Checking nginx config syntax..."
+                      docker exec ingress-nginx nginx -t
+
+                      echo "🌐 Checking UI routing..."
+                      curl -k -f -H "Host: $HOST" https://127.0.0.1/ > /dev/null
+
+                      echo "🔌 Checking API routing..."
+                      curl -k -f -H "Host: $HOST" https://127.0.0.1/api/health > /dev/null
+
+                      echo "🎉 Ingress health check PASSED"

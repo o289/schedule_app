@@ -7,6 +7,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
+    networks:
+      - schedule_app_network
     image: schedule_app-backend-stg:latest
     container_name: schedule_app-backend-stg
     restart: always
@@ -14,12 +16,14 @@ services:
     depends_on:
       - db
 
-  nginx:
+  nginx-stg:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
       args:
         VITE_API_URL: /api
+    networks:
+      - schedule_app_network
     image: schedule_app-nginx-stg:latest
     container_name: schedule_app-nginx-stg
     env_file:
@@ -27,13 +31,12 @@ services:
     restart: always
     ports:
       - "8080:80"
-      - "8443:443"
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - backend
 
   db:
+    networks:
+      - schedule_app_network
     image: postgres:15
     container_name: schedule_app-db-stg
     restart: always
@@ -43,3 +46,7 @@ services:
 
 volumes:
   postgres_data_stg:
+
+networks:
+  schedule_app_network:
+    external: true
