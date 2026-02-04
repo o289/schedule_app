@@ -1,0 +1,33 @@
+/* src/components/card/CardContainer.css */
+.card-ui {
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  margin: 2rem auto;
+
+  /* 最小責務：コンテンツがはみ出ないことのみ保証 */
+  overflow: hidden;
+}
+
+/* サイズプリセット（UI責務） */
+.card-ui--sm {
+  width: 160px;
+  height: 96px;
+}
+
+.card-ui--md {
+  width: 280px;
+  min-height: 120px;
+}
+
+.card-ui--lg {
+  width: 360px;
+  min-height: 160px;
+}
+
+/* 操作感を持たせない */
+.card-ui * {
+  cursor: default;
+}

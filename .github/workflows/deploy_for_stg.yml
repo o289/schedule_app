@@ -41,7 +41,7 @@ jobs:
                   script: |
                       cd /home/${{ secrets.VPS_USER }}/schedule_app
                       echo "🧨 Removing STG containers and volumes..."
-                      docker compose -f docker-compose.stg.yml down -v || true
+                      docker compose -f infra/docker/docker-compose.stg.yml down -v || true
 
             # 4. STG 用ビルド（キャッシュ利用可）
             - name: Build STG images
@@ -53,7 +53,7 @@ jobs:
                   script: |
                       cd /home/${{ secrets.VPS_USER }}/schedule_app
                       echo "🔨 Building STG images..."
-                      docker compose -f docker-compose.stg.yml build
+                      docker compose -f infra/docker/docker-compose.stg.yml build --no-cache
 
             # 5. STG 起動
             - name: Start STG environment
@@ -65,7 +65,7 @@ jobs:
                   script: |
                       cd /home/${{ secrets.VPS_USER }}/schedule_app
                       echo "🚀 Starting STG environment..."
-                      docker compose -f docker-compose.stg.yml up -d
+                      docker compose -f infra/docker/docker-compose.stg.yml up -d
 
             # 6. マイグレーション（失敗したら止める）
             - name: Run Alembic migrations (STG)
@@ -77,7 +77,7 @@ jobs:
                   script: |
                       cd /home/${{ secrets.VPS_USER }}/schedule_app
                       echo "🗄️ Running Alembic migrations on STG..."
-                      docker compose -f docker-compose.stg.yml run --rm backend alembic upgrade head
+                      docker compose -f infra/docker/docker-compose.stg.yml run --rm backend alembic upgrade head
 
             # 7. 簡易ヘルスチェック
             - name: Health check (STG)
@@ -87,8 +87,8 @@ jobs:
                   username: ${{ secrets.VPS_USER }}
                   key: ${{ secrets.VPS_SSH_KEY }}
                   script: |
-                      echo "🔍 Checking STG endpoint..."
-                      curl -f https://stg.yudais-prod.com || exit 1
+                      echo "🔍 Checking STG endpoints..."
+                      curl -f https://stg-sukejuru.yudais-prod.com:8443/ || exit 1
 
             # 8. 失敗時ログ（最低限）
             - name: Collect logs on failure
@@ -100,4 +100,4 @@ jobs:
                   key: ${{ secrets.VPS_SSH_KEY }}
                   script: |
                       cd /home/${{ secrets.VPS_USER }}/schedule_app
-                      docker compose -f docker-compose.stg.yml logs --tail=200
+                      docker compose -f infra/docker/docker-compose.stg.yml logs --tail=200
