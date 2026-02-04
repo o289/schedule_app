@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile.prod
     image: schedule_app-backend:latest
     restart: always
-    env_file: .env.prod
+    env_file: ../../.env.prod
     depends_on:
       - db
     networks:
@@ -22,7 +22,7 @@ services:
         VITE_API_URL: /api
     image: schedule_app-frontend:latest
     env_file:
-      - .env.prod
+      - ../../.env.prod
     restart: always
     ports:
       - "80:80"
@@ -49,7 +49,7 @@ services:
   db:
     image: postgres:15
     restart: always
-    env_file: .env.prod
+    env_file: ../../.env.prod
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:

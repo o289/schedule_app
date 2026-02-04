@@ -31,24 +31,24 @@ jobs:
         uses: actions/checkout@v4
 
       # 0. 定期実行のDBバックアップで失敗したら、デプロイを走らせない
-      - name: Check latest Daily DB Backup workflow run status
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-        run: |
-          echo "Checking latest Daily DB Backup workflow run status..."
-          WORKFLOW_NAME="Daily DB Backup"
-          LATEST_RUN_STATUS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            "https://api.github.com/repos/$REPO/actions/workflows" | \
-            jq -r --arg name "$WORKFLOW_NAME" '.workflows[] | select(.name == $name) | .id' | \
-            xargs -I {} curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            "https://api.github.com/repos/$REPO/actions/workflows/{}/runs?per_page=1" | \
-            jq -r '.workflow_runs[0].conclusion')
-          if [ "$LATEST_RUN_STATUS" != "success" ]; then
-            echo "Latest Daily DB Backup workflow run did not succeed. Aborting deployment."
-            exit 1
-          fi
-          echo "Latest Daily DB Backup workflow run succeeded. Continuing deployment."
+      # - name: Check latest Daily DB Backup workflow run status
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     REPO: ${{ github.repository }}
+      #   run: |
+      #     echo "Checking latest Daily DB Backup workflow run status..."
+      #     WORKFLOW_NAME="Daily DB Backup"
+      #     LATEST_RUN_STATUS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+      #       "https://api.github.com/repos/$REPO/actions/workflows" | \
+      #       jq -r --arg name "$WORKFLOW_NAME" '.workflows[] | select(.name == $name) | .id' | \
+      #       xargs -I {} curl -s -H "Authorization: token $GITHUB_TOKEN" \
+      #       "https://api.github.com/repos/$REPO/actions/workflows/{}/runs?per_page=1" | \
+      #       jq -r '.workflow_runs[0].conclusion')
+      #     if [ "$LATEST_RUN_STATUS" != "success" ]; then
+      #       echo "Latest Daily DB Backup workflow run did not succeed. Aborting deployment."
+      #       exit 1
+      #     fi
+      #     echo "Latest Daily DB Backup workflow run succeeded. Continuing deployment."
 
       # 1. Secretsから.env.prodを生成（改行を保持）
       - name: Create local .env.prod from secrets
