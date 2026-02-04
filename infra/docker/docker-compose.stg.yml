@@ -10,7 +10,7 @@ services:
     image: schedule_app-backend-stg:latest
     container_name: schedule_app-backend-stg
     restart: always
-    env_file: .env
+    env_file: ../../.env
     depends_on:
       - db
     networks:
@@ -25,7 +25,7 @@ services:
     image: schedule_app-frontend-stg:latest
     container_name: schedule_app-frontend-stg
     env_file:
-      - .env
+      - ../../.env
     restart: always
     ports:
       - "8080:80"
@@ -53,7 +53,7 @@ services:
     image: postgres:15
     container_name: schedule_app-db-stg
     restart: always
-    env_file: .env
+    env_file: ../../.env
     volumes:
       - postgres_data_stg:/var/lib/postgresql/data
     networks:
