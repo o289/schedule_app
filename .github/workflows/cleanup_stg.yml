@@ -21,6 +21,6 @@ jobs:
                       echo "🧹 Cleaning up STG environment..."
                       cd /home/${{ secrets.VPS_USER }}/schedule_app
 
-                      docker compose -p schedule_app_stg -f docker-compose.stg.yml down -v || true
+                      docker compose -f infra/docker/docker-compose.stg.yml down -v || true
 
                       echo "✅ STG environment fully removed"

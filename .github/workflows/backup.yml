@@ -12,28 +12,28 @@ jobs:
       - name: Backup DB on VPS
         uses: appleboy/ssh-action@v1.0.0
         with:
-            host: ${{ secrets.VPS_HOST }}
-            username: ${{ secrets.VPS_USER }}
-            key: ${{ secrets.VPS_SSH_KEY }}
-            script: |
-                cd /home/${{ secrets.VPS_USER }}/schedule_app
-                mkdir -p backups
-                docker compose -f docker-compose.prod.yml exec -T db \
-                sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' \
-                > backups/backup_$(date +%F_%H-%M).sql
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/schedule_app
+            mkdir -p backups
+            docker compose -f infra/docker/docker-compose.prod.yml exec -T db \
+            sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' \
+            > backups/backup_$(date +%F_%H-%M).sql
 
-                # バックアップファイルが空でないか確認
-                BACKUP_FILE=$(ls -t backups/backup_*.sql | head -n1)
-                if [ ! -s "$BACKUP_FILE" ]; then
-                echo "❌ Backup file is empty!"
-                exit 1
-                fi
-                echo "✅ Backup completed: $BACKUP_FILE"
+            # バックアップファイルが空でないか確認
+            BACKUP_FILE=$(ls -t backups/backup_*.sql | head -n1)
+            if [ ! -s "$BACKUP_FILE" ]; then
+            echo "❌ Backup file is empty!"
+            exit 1
+            fi
+            echo "✅ Backup completed: $BACKUP_FILE"
 
-                # 不正データ削除（スケジュール整合性維持）
-                echo "🧹 Cleaning invalid and orphaned schedules..."
-                docker compose -f docker-compose.prod.yml exec -T db \
-                psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
-                "DELETE FROM schedule_dates WHERE end_date <= start_date; \
-                 DELETE FROM schedules WHERE NOT EXISTS (SELECT 1 FROM schedule_dates WHERE schedule_dates.schedule_id = schedules.id);"
-                echo "✅ Clean-up completed."
+            # 不正データ削除（スケジュール整合性維持）
+            echo "🧹 Cleaning invalid and orphaned schedules..."
+            docker compose -f infra/docker/docker-compose.prod.yml exec -T db \
+            psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
+            "DELETE FROM schedule_dates WHERE end_date <= start_date; \
+             DELETE FROM schedules WHERE NOT EXISTS (SELECT 1 FROM schedule_dates WHERE schedule_dates.schedule_id = schedules.id);"
+            echo "✅ Clean-up completed."
