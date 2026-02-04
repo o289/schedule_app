@@ -1,0 +1,67 @@
+version: "3.9"
+name: schedule_app_stg
+
+services:
+  backend:
+    working_dir: /app
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile.prod
+    image: schedule_app-backend-stg:latest
+    container_name: schedule_app-backend-stg
+    restart: always
+    env_file: ../../.env
+    depends_on:
+      - db
+    networks:
+      - schedule_app_stg_net
+
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: /api
+    image: schedule_app-frontend-stg:latest
+    container_name: schedule_app-frontend-stg
+    env_file:
+      - ../../.env
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - schedule_app_stg_net
+
+  ingress-nginx:
+    image: nginx:alpine
+    container_name: ingress-nginx-stg
+    ports:
+      - "8443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ../../infra/nginx/ingress.common.conf:/etc/nginx/ingress.common.conf:ro
+      - ../../infra/nginx/ingress.stg.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - schedule_app_stg_net
+
+  db:
+    image: postgres:15
+    container_name: schedule_app-db-stg
+    restart: always
+    env_file: ../../.env
+    volumes:
+      - postgres_data_stg:/var/lib/postgresql/data
+    networks:
+      - schedule_app_stg_net
+
+volumes:
+  postgres_data_stg:
+
+networks:
+  schedule_app_stg_net:
+    driver: bridge

@@ -96,7 +96,7 @@ jobs:
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             echo "🧹 Cleaning invalid and orphaned schedules..."
-            docker compose -f docker-compose.prod.yml exec -T db \
+            docker compose -f infra/docker/docker-compose.prod.yml exec -T db \
             psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
             "DELETE FROM schedule_dates WHERE end_date <= start_date; \
              DELETE FROM schedules WHERE NOT EXISTS (SELECT 1 FROM schedule_dates WHERE schedule_dates.schedule_id = schedules.id);"
@@ -115,20 +115,20 @@ jobs:
             mkdir -p backups
 
             echo "🔄 Restarting DB container to ensure env is loaded..."
-            docker compose -f docker-compose.prod.yml up -d db
+            docker compose -f infra/docker/docker-compose.prod.yml up -d db
 
             echo "⏳ Waiting for PostgreSQL to be ready..."
-            until docker compose -f docker-compose.prod.yml exec -T db \
+            until docker compose -f infra/docker/docker-compose.prod.yml exec -T db \
               pg_isready -U "$POSTGRES_USER"; do
               sleep 2
             done
 
             echo "💾 Taking database backup..."
-            docker compose -f docker-compose.prod.yml exec -T db \
+            docker compose -f infra/docker/docker-compose.prod.yml exec -T db \
               sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' \
               > backups/backup_$(date +%F_%H-%M).sql
 
-      - name: Build backend and nginx images (no-cache)
+      - name: Build backend and frontend images (no-cache)
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -136,8 +136,8 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
-            echo "🔨 Build backend and nginx images (no-cache)..."
-            docker compose -f docker-compose.prod.yml build --no-cache backend nginx
+            echo "🔨 Build backend and frontend images (no-cache)..."
+            docker compose -f infra/docker/docker-compose.prod.yml build --no-cache backend frontend
 
   migrate:
     needs: build
@@ -154,7 +154,7 @@ jobs:
             # Check for new migration files
             if [ "$(ls -A backend/alembic/versions/*.py 2>/dev/null)" ]; then
               echo "🗄️ Running Alembic migrations..."
-              docker compose -f docker-compose.prod.yml run --rm backend alembic upgrade head
+              docker compose -f infra/docker/docker-compose.prod.yml run --rm backend alembic upgrade head
             else
               echo "ℹ️ No Alembic migration files detected, skipping."
             fi
@@ -174,25 +174,25 @@ jobs:
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
 
-            echo "🚀 Start nginx with new image..."
-            docker compose -f docker-compose.prod.yml up -d
+            echo "🚀 Start frontend with new image..."
+            docker compose -f infra/docker/docker-compose.prod.yml up -d
 
-            echo "🔍 Check dist contents in nginx..."
-            if ! docker exec schedule_app-nginx-1 ls -la /usr/share/nginx/html >/dev/null 2>&1; then
+            echo "🔍 Check dist contents in frontend..."
+            if ! docker compose -f infra/docker/docker-compose.prod.yml exec -T frontend ls -la /usr/share/nginx/html >/dev/null 2>&1; then
               echo "⚠️ Dist folder not found. Rolling back ALL app containers (DB is preserved)..."
 
               BACKUP_DIR=image_backups
               BACKEND_IMAGE=$(ls -t ${BACKUP_DIR}/backend_*.tar 2>/dev/null | head -n1)
-              NGINX_IMAGE=$(ls -t ${BACKUP_DIR}/nginx_*.tar 2>/dev/null | head -n1)
+              FRONTEND_IMAGE=$(ls -t ${BACKUP_DIR}/frontend_*.tar 2>/dev/null | head -n1)
 
-              if [ -f "$BACKEND_IMAGE" ] && [ -f "$NGINX_IMAGE" ]; then
+              if [ -f "$BACKEND_IMAGE" ] && [ -f "$FRONTEND_IMAGE" ]; then
                 docker load -i "$BACKEND_IMAGE"
-                docker load -i "$NGINX_IMAGE"
+                docker load -i "$FRONTEND_IMAGE"
 
                 # DBコンテナは止めずに、アプリケーションだけ再起動
-                docker compose -f docker-compose.prod.yml stop backend nginx frontend || true
-                docker compose -f docker-compose.prod.yml rm -f backend nginx frontend || true
-                docker compose -f docker-compose.prod.yml up -d --no-build
+                docker compose -f infra/docker/docker-compose.prod.yml stop backend frontend || true
+                docker compose -f infra/docker/docker-compose.prod.yml rm -f backend frontend || true
+                docker compose -f infra/docker/docker-compose.prod.yml up -d --no-build
 
                 echo "✅ Rolled back to stable version (DB preserved)."
               else
@@ -214,7 +214,7 @@ jobs:
           # 補助的: ログ収集失敗は致命的ではないため継続可能
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
-            docker compose -f docker-compose.prod.yml logs --tail=200 > deploy-error.log
+            docker compose -f infra/docker/docker-compose.prod.yml logs --tail=200 > deploy-error.log
 
       - name: Download error logs from VPS
         if: failure()
@@ -247,10 +247,9 @@ jobs:
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             echo "🚨 Deployment failed. Rolling back..."
-
             BACKUP_DIR=image_backups
             BACKEND_IMAGE=$(ls -t ${BACKUP_DIR}/backend_*.tar 2>/dev/null | head -n1)
-            NGINX_IMAGE=$(ls -t ${BACKUP_DIR}/nginx_*.tar 2>/dev/null | head -n1)
+            FRONTEND_IMAGE=$(ls -t ${BACKUP_DIR}/frontend_*.tar 2>/dev/null | head -n1)
 
             if [ -f "$BACKEND_IMAGE" ]; then
               echo "🔄 Loading backend image from backup: $BACKEND_IMAGE"
@@ -259,23 +258,23 @@ jobs:
               echo "⚠️ No backend backup image found."
             fi
 
-            if [ -f "$NGINX_IMAGE" ]; then
-              echo "🔄 Loading nginx image from backup: $NGINX_IMAGE"
-              docker load -i "$NGINX_IMAGE"
+            if [ -f "$FRONTEND_IMAGE" ]; then
+              echo "🔄 Loading frontend image from backup: $FRONTEND_IMAGE"
+              docker load -i "$FRONTEND_IMAGE"
             else
-              echo "⚠️ No nginx backup image found."
+              echo "⚠️ No frontend backup image found."
             fi
 
-            echo "🛑 Stopping backend and nginx containers..."
-            docker compose -f docker-compose.prod.yml stop backend nginx || true
+            echo "🛑 Stopping backend and frontend containers..."
+            docker compose -f infra/docker/docker-compose.prod.yml stop backend frontend || true
 
-            echo "🗑️ Removing backend and nginx containers..."
-            docker compose -f docker-compose.prod.yml rm -f backend nginx || true
+            echo "🗑️ Removing backend and frontend containers..."
+            docker compose -f infra/docker/docker-compose.prod.yml rm -f backend frontend || true
 
-            echo "🚀 Starting backend and nginx containers with restored images..."
-            docker compose -f docker-compose.prod.yml up -d --no-build backend nginx
+            echo "🚀 Starting backend and frontend containers with restored images..."
+            docker compose -f infra/docker/docker-compose.prod.yml up -d --no-build backend frontend
 
-            echo "✅ Rollback completed. Backend and nginx containers restored. DB container is preserved."
+            echo "✅ Rollback completed. Backend and frontend containers restored. DB container is preserved."
 
       # 8. 成功時にイメージを保存（latestイメージをtarアーカイブ化）
       - name: Save Docker images on success
@@ -290,7 +289,7 @@ jobs:
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             mkdir -p image_backups
             docker save -o image_backups/backend_$(date +%F).tar schedule_app-backend:latest
-            docker save -o image_backups/nginx_$(date +%F).tar schedule_app-nginx:latest
+            docker save -o image_backups/frontend_$(date +%F).tar schedule_app-frontend:latest
             ls -lh image_backups/
 
       # 9. デプロイ成功時のみ Docker キャッシュを削除
