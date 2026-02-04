@@ -4,7 +4,7 @@ services:
   backend:
     working_dir: /app
     build:
-      context: ./backend
+      context: ../../backend
       dockerfile: Dockerfile.prod
     image: schedule_app-backend:latest
     restart: always
@@ -16,7 +16,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ../../frontend
       dockerfile: Dockerfile.prod
       args:
         VITE_API_URL: /api
