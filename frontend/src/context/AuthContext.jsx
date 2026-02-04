@@ -18,13 +18,13 @@ export function AuthProvider({ children }) {
   // サインアップ
   const handleSignup = async (email, password, name) => {
     try {
-      await signup({ email, password, name });
-      // サインアップ後に自動ログイン
-      handleLogin(email, password);
+        await signup({ email, password, name });
+        // サインアップ後に自動ログイン
+        handleLogin(email, password)
 
-      navigate("/me");
+        navigate("/me")
     } catch (err) {
-      console.error("サインアップ失敗", err);
+        console.error("サインアップ失敗", err)
     }
   };
 
@@ -43,9 +43,9 @@ export function AuthProvider({ children }) {
       // Meエンドポイントでユーザー情報を取得
       const me = await current_user(res.access_token);
       setUser(me);
-      localStorage.setItem("user", JSON.stringify(me));
-      navigate("/schedules");
-      return true;
+      localStorage.setItem("user", JSON.stringify(me)); 
+      navigate("/schedules")
+      return true
     } else {
       throw new Error(res.detail || "ログインに失敗しました");
     }
@@ -63,18 +63,18 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
 
-    navigate("/login");
+    navigate("/login")
   };
 
   // リフレッシュ
   const handleRefresh = async () => {
-    if (!refreshToken) return false;
+    if (!refreshToken) return false;  
     try {
       const res = await refresh(refreshToken);
       if (res.access_token) {
         setAccessToken(res.access_token);
         localStorage.setItem("accessToken", res.access_token); // ← 永続化も更新
-        console.log("リフレッシュは成功している");
+        console.log("リフレッシュは成功している")
         return res.access_token; // 成功
       }
     } catch (err) {
@@ -86,55 +86,44 @@ export function AuthProvider({ children }) {
     }
   };
 
+
   // 初期化: localStorageから復元
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     const savedAccess = localStorage.getItem("accessToken");
     const savedRefresh = localStorage.getItem("refreshToken");
-
+  
     const initAuth = async () => {
       if (savedUser && savedAccess && savedRefresh) {
         setUser(JSON.parse(savedUser));
         setAccessToken(savedAccess);
         setRefreshToken(savedRefresh);
-
+  
         // ここで必ずリフレッシュ
         const newToken = await handleRefresh();
         if (newToken) {
           try {
-            const me = await current_user(newToken);
+            const me = await current_user(newToken)
             setUser(me);
           } catch (err) {
             console.error("me取得失敗:", err);
             setUser(null);
           }
-        }
+        } 
       }
       setInitializing(false); // ← リフレッシュが終わってから
     };
-
+  
     initAuth();
   }, []);
 
+
   if (initializing) {
-    return;
+    return <div>読み込み中...</div>;
   }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        accessToken,
-        refreshToken,
-        handleSignup,
-        handleLogin,
-        handleLogout,
-        handleRefresh,
-        setAccessToken,
-        setUser,
-        setError,
-      }}
-    >
+    <AuthContext.Provider value={{ user, accessToken, refreshToken, handleSignup, handleLogin, handleLogout, handleRefresh, setAccessToken, setUser, setError }}>
       {children}
       <ErrorModal
         error={error}

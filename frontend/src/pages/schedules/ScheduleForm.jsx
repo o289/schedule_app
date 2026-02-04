@@ -105,17 +105,9 @@ export default function ScheduleForm({
 
       {showDatesModal && (
         <ScheduleDatesModal
-          dates={formData.dates}
+          dates={dates}
           removeDate={removeDate}
           onClose={() => setShowDatesModal(false)}
-          onChange={(newDates) => {
-            onChange({
-              target: {
-                name: "dates",
-                value: newDates,
-              },
-            });
-          }}
         />
       )}
     </BaseForm>

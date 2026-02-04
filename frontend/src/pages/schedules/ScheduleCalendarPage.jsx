@@ -13,14 +13,12 @@ import ErrorModal from "../../components/ErrorModal";
 
 import "./ScheduleCalendarPage.css"; // ← CSSを読み込む
 import { useEffect } from "react";
-import Loading from "../../components/Loading";
 
 export default function ScheduleCalendarPage() {
   const { categories } = useCategory();
 
   const {
     schedules,
-    isFetching,
     handleScheduleCreate,
     fetchSchedules,
     handleChange,
@@ -35,10 +33,6 @@ export default function ScheduleCalendarPage() {
   useEffect(() => {
     fetchSchedules(); // ← マウント時に必ず実行
   }, []);
-
-  if (isFetching || !schedules) {
-    return <Loading />;
-  }
 
   return (
     <div style={{ padding: "1rem" }}>

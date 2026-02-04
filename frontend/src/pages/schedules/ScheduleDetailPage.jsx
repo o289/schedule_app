@@ -9,9 +9,8 @@ import { useDateTime } from "../schedules/useDateTime";
 import { useTodo } from "../todos/useTodo";
 import TodoForm from "../todos/TodoForm";
 
-import ScheduleCard from "../../components/card/schedule/ScheduleCard";
+import ScheduleCard from "../../components/ScheduleCard";
 import ScheduleForm from "./ScheduleForm";
-import Loading from "../../components/Loading";
 
 export default function ScheduleDetailPage() {
   const { id } = useParams();
@@ -31,13 +30,12 @@ export default function ScheduleDetailPage() {
   const [todoForm, setTodoForm] = useState({
     title: "",
     priority: "",
-    due_date: null,
+    due_date: "" || null,
   });
   const [showTodoForm, setShowTodoForm] = useState(false);
 
   const {
     schedule,
-    isFetching,
     isEditMode,
     setIsEditMode,
     formData,
@@ -55,9 +53,7 @@ export default function ScheduleDetailPage() {
     }
   }, [id]);
 
-  if (isFetching || !schedule) {
-    return <Loading />;
-  }
+  if (!schedule) return <p>読み込み中...</p>;
 
   return (
     <div style={{ padding: "1rem" }}>
@@ -77,17 +73,13 @@ export default function ScheduleDetailPage() {
             <div>
               <TodoForm
                 formData={todoForm}
-                onChange={(e) => {
-                  const { name, value } = e.target;
-                  setTodoForm({
-                    ...todoForm,
-                    [name]: name === "due_date" && value === "" ? null : value,
-                  });
-                }}
+                onChange={(e) =>
+                  setTodoForm({ ...todoForm, [e.target.name]: e.target.value })
+                }
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleTodoCreate(todoForm);
-                  setTodoForm({ title: "", priority: "", due_date: null });
+                  setTodoForm({ title: "", priority: "", due_date: "" });
                   setShowTodoForm(false); // 送信後に戻る
                 }}
                 onCancel={() => setShowTodoForm(false)}

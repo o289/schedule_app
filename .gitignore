@@ -36,6 +36,3 @@ Makefile
 
 # 差分ファイル
 diff.txt
-
-# UIのチェック用
-ui_check.html

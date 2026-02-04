@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useSchedule } from "./schedules/useSchedule.js";
 import "./ProfileCard.css";
 
-import ScheduleCardLite from "../components/card/schedule/ScheduleCardLite.jsx";
+import ScheduleCardLite from "../components/ScheduleCardLite.jsx";
 
 import { Button } from "@mui/material";
 import UndoIcon from "@mui/icons-material/Undo";

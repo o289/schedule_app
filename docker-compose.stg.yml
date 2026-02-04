@@ -1,0 +1,45 @@
+version: "3.9"
+name: schedule_app_stg
+
+services:
+  backend:
+    working_dir: /app
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    image: schedule_app-backend-stg:latest
+    container_name: schedule_app-backend-stg
+    restart: always
+    env_file: .env
+    depends_on:
+      - db
+
+  nginx:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: /api
+    image: schedule_app-nginx-stg:latest
+    container_name: schedule_app-nginx-stg
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:15
+    container_name: schedule_app-db-stg
+    restart: always
+    env_file: .env
+    volumes:
+      - postgres_data_stg:/var/lib/postgresql/data
+
+volumes:
+  postgres_data_stg:

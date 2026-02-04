@@ -1,6 +1,7 @@
-import { darkenColor } from "../../../utils/color";
-import { formatDateTime } from "../../../utils/date";
+import { darkenColor } from "../utils/color";
+import { formatDateTime } from "../utils/date";
 import "./ScheduleCard.css";
+
 
 export default function ScheduleCardLite({ schedule }) {
   return (
@@ -23,9 +24,9 @@ export default function ScheduleCardLite({ schedule }) {
         </p>
 
         {schedule.note && <p className="schedule-note">{schedule.note}</p>}
-
+        
         <ul>
-          {schedule.dates.map((d) => (
+          {schedule.dates.map((d) =>(
             <li key={d.id}>
               {formatDateTime(d.start_date)} 〜 {formatDateTime(d.end_date)}
             </li>

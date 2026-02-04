@@ -8,8 +8,8 @@ export default function BaseForm({
   onSubmit,
   children,
   disabled,
-  onCancel,
   submitLabel = "送信",
+  onCancel,
 }) {
   return (
     <form onSubmit={onSubmit} className="base-form">

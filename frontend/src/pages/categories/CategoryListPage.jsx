@@ -2,9 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { apiFetch } from "../../api/client";
-import CategoryCard from "../../components/card/category/CategoryCard";
 import CategoryForm from "./CategoryForm";
-
 import { useCategory } from "./categoryHandlers";
 
 import "./CategoryListPage.css";
@@ -16,13 +14,10 @@ import {
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 
-import Loading from "../../components/Loading";
-
 export default function CategoryListPage() {
   const { id } = useParams();
   const {
     categories,
-    isFetching,
     handleCreate,
     handleNewChange,
     newForm,
@@ -40,38 +35,29 @@ export default function CategoryListPage() {
     error,
   } = useCategory(id);
 
-  if (isFetching) {
-    return <Loading />;
-  }
-
   return (
-    <div>
+    <div style={{ padding: "2rem" }}>
       {!isCreating ? (
-        <div
-          style={{ display: "flex", justifyContent: "right", margin: "12px" }}
-        >
-          <div className="category-btn">
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              onClick={() => setIsCreating(true)}
-            >
-              新規作成
-            </Button>
-          </div>
+        <>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => setIsCreating(true)}
+          >
+            新規作成
+          </Button>
+
           {/* 編集モード切替ボタン */}
-          <div className="category-btn">
-            <Button
-              variant="contained"
-              color="warning"
-              startIcon={<EditIcon />}
-              onClick={() => setIsEditMode((prev) => !prev)}
-            >
-              {isEditMode ? "編集モードOFF" : "編集モードON"}
-            </Button>
-          </div>
-        </div>
+          <Button
+            variant="contained"
+            color="warning"
+            startIcon={<EditIcon />}
+            onClick={() => setIsEditMode((prev) => !prev)}
+          >
+            {isEditMode ? "編集モードOFF" : "編集モードON"}
+          </Button>
+        </>
       ) : (
         <CategoryForm
           formData={newForm}
@@ -84,15 +70,13 @@ export default function CategoryListPage() {
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <div className="category-grid">
-        {categories.map((category) => (
-          <div>
-            <CategoryCard
-              key={category.id}
-              color={category.color}
-              categoryName={category.name}
-            />
-            {isEditMode && editingId === category.id ? (
+      <ul className="category-list">
+        {categories.map((c) => (
+          <li
+            key={c.id}
+            className={`category-item ${editingId === c.id ? "editing" : ""}`}
+          >
+            {isEditMode && editingId === c.id ? (
               <>
                 <CategoryForm
                   formData={editForm}
@@ -102,7 +86,7 @@ export default function CategoryListPage() {
                   onCancel={() => setEditingId(null)}
                 />
                 <button
-                  onClick={() => handleDelete(String(category.id))}
+                  onClick={() => handleDelete(String(c.id))}
                   style={{ marginLeft: "1rem" }}
                   className="btn-category btn-delete"
                 >
@@ -111,9 +95,10 @@ export default function CategoryListPage() {
               </>
             ) : (
               <>
+                <span style={{ color: c.color }}>{c.name}</span>
                 {isEditMode && (
                   <button
-                    onClick={() => handleEditClick(category)}
+                    onClick={() => handleEditClick(c)}
                     className="btn-category btn-edit"
                   >
                     編集
@@ -121,9 +106,9 @@ export default function CategoryListPage() {
                 )}
               </>
             )}
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
