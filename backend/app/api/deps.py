@@ -31,13 +31,13 @@ def get_current_user(token: TokenDep, db: SessionDep) -> User:
         if user_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="無効なトークンです",
+                detail={"code": "INVALID_TOKEN"},
             )
 
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="トークンの検証に失敗しました",
+            detail={"code": "TOKEN_VERIFICATION_FAILED"},
         )
 
     user = db.query(User).filter(User.id == user_id).first()
@@ -45,7 +45,7 @@ def get_current_user(token: TokenDep, db: SessionDep) -> User:
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="ユーザーが存在しません",
+            detail={"code": "USER_NOT_FOUND"},
         )
 
     return user

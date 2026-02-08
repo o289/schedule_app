@@ -1,13 +1,13 @@
-from fastapi import APIRouter, status, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, status
 from uuid import UUID
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models.user import User
-
-# from app.models.category import Category
-from app.schemas.schedule import ScheduleCreate, ScheduleUpdate, ScheduleResponse
-from app.crud.schedule import ScheduleRepository
+from app.schemas.schedule import (
+    ScheduleCreate,
+    ScheduleUpdate,
+    ScheduleResponse,
+)
+from app.services.schedule_service import ScheduleService
 
 router = APIRouter(prefix="/schedules", tags=["schedules"])
 
@@ -19,21 +19,18 @@ def create_schedule(
     db: SessionDep,
     current_user: CurrentUser,
 ):
-    repo = ScheduleRepository(db)
-    # user_id を渡すことで他人のカテゴリに紐づけられないよう制御できる
-    schedule = repo.create(current_user.id, schedule_in)
-
-    return schedule
+    service = ScheduleService(db)
+    return service.create_schedule(current_user, schedule_in)
 
 
-# --- 一覧取得（ログインユーザーのスケジュールのみ） ---
+# --- 一覧取得 ---
 @router.get("/", response_model=list[ScheduleResponse])
 def list_schedules(
     db: SessionDep,
     current_user: CurrentUser,
 ):
-    repo = ScheduleRepository(db)
-    return repo.get_by_user(current_user.id)
+    service = ScheduleService(db)
+    return service.list_schedules(current_user)
 
 
 # --- 詳細取得 ---
@@ -43,16 +40,11 @@ def get_schedule(
     db: SessionDep,
     current_user: CurrentUser,
 ):
-    repo = ScheduleRepository(db)
-    schedule = repo.get(schedule_id)
-
-    if not schedule or schedule.user_id != current_user.id:
-        raise HTTPException(status_code=404, detail="スケジュールが見つかりません")
-
-    return schedule
+    service = ScheduleService(db)
+    return service.get_schedule(current_user, schedule_id)
 
 
-# --- 更新（PUT 全更新） ---
+# --- 更新 ---
 @router.put("/{schedule_id}", response_model=ScheduleResponse)
 def update_schedule(
     schedule_id: UUID,
@@ -60,13 +52,12 @@ def update_schedule(
     db: SessionDep,
     current_user: CurrentUser,
 ):
-    repo = ScheduleRepository(db)
-    schedule = repo.get(schedule_id)
-
-    if not schedule or schedule.user_id != current_user.id:
-        raise HTTPException(status_code=404, detail="スケジュールが見つかりません")
-
-    return repo.update(schedule_id, schedule_in)
+    service = ScheduleService(db)
+    return service.update_schedule(
+        current_user,
+        schedule_id,
+        schedule_in,
+    )
 
 
 # --- 削除 ---
@@ -76,10 +67,6 @@ def delete_schedule(
     db: SessionDep,
     current_user: CurrentUser,
 ):
-    repo = ScheduleRepository(db)
-    success = repo.delete(schedule_id, current_user.id)
-
-    if not success:
-        raise HTTPException(status_code=404, detail="スケジュールが見つかりません")
-
+    service = ScheduleService(db)
+    service.delete_schedule(current_user, schedule_id)
     return None

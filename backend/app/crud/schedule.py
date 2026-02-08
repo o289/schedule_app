@@ -121,9 +121,11 @@ class ScheduleRepository(BaseRepository):
             return None
 
         self._update_schedule_fields(schedule=schedule, schedule_in=schedule_in)
-        self._update_schedule_dates(
-            schedule=schedule, schedule_in=schedule_in, schedule_id=schedule_id
-        )
+
+        if getattr(schedule_in, "dates", None) is not None:
+            self._update_schedule_dates(
+                schedule=schedule, schedule_in=schedule_in, schedule_id=schedule_id
+            )
 
         # --- ③ コミット・リフレッシュ ---
         # base_update() 内で commit + refresh を実行しているため、ここでは不要。

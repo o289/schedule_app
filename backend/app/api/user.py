@@ -1,33 +1,15 @@
-# FastAPI 基本
-from fastapi import APIRouter, HTTPException, status, Body
+from fastapi import APIRouter, status, Body
 
-# DB
-from sqlalchemy.orm import Session
 from app.api.deps import CurrentUser, SessionDep
-
-# Repository
-from app.crud.user import UserRepository
-
-# スキーマ
-from app.schemas.user import UserCreate, UserResponse, UserLogin, TokenResponse
-
-# セキュリティ（JWT）
-from app.core.security import (
-    hash_password,
-    verify_password,
-    create_access_token,
-    create_refresh_token,
+from app.schemas.user import (
+    UserCreate,
+    UserResponse,
+    UserLogin,
+    TokenResponse,
 )
-
-# モデル達（User認証用に参照）
-from app.models.user import User
-
+from app.services.user_service import UserService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-
-def _normalize_email(email: str) -> str:
-    return email.strip().lower()
 
 
 # --- Signup ---
@@ -35,87 +17,50 @@ def _normalize_email(email: str) -> str:
     "/signup",
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="ユーザー登録",
     include_in_schema=False,
 )
-def signup(user_in: UserCreate, db: SessionDep):
-    repo = UserRepository(db)
-
-    email = _normalize_email(user_in.email)
-
-    existing_user = repo.get_by_email(email)
-
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="このメールはすでに登録済みです",
-        )
-
-    user_in.email = email
-    user = repo.create_user(user_in)
-
-    return user
+def signup(
+    user_in: UserCreate,
+    db: SessionDep,
+):
+    service = UserService(db)
+    return service.signup(user_in)
 
 
 # --- Login ---
 @router.post("/login", response_model=TokenResponse)
-def login(user_in: UserLogin, db: SessionDep):
-    repo = UserRepository(db)
-    user = repo.verify_user(user_in.email, user_in.password)
-
-    if not user:
-        raise HTTPException(status_code=401, detail="メールまたはパスワードが不正です")
-
-    # アクセストークン & リフレッシュトークン発行
-    access_token = create_access_token(data={"sub": str(user.id)})
-    refresh_token = create_refresh_token(data={"sub": str(user.id)})
-
-    # DBにリフレッシュトークンを保存（上書き）
-    repo.update_refresh_token(user, refresh_token)
-
-    return TokenResponse(
-        access_token=access_token, refresh_token=refresh_token, token_type="bearer"
-    )
+def login(
+    user_in: UserLogin,
+    db: SessionDep,
+):
+    service = UserService(db)
+    return service.login(user_in)
 
 
-# --- refresh ---
+# --- Refresh ---
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(
     db: SessionDep,
     refresh_token: str = Body(..., embed=True),
 ):
-    repo = UserRepository(db)
-    user = repo.get_by_refresh_token(refresh_token)
-
-    if not user:
-        raise HTTPException(status_code=401, detail="リフレッシュトークンが無効です")
-
-    # 新しいアクセストークン発行
-    new_access_token = create_access_token(data={"sub": str(user.id)})
-
-    return TokenResponse(
-        access_token=new_access_token, refresh_token=refresh_token, token_type="bearer"
-    )
+    service = UserService(db)
+    return service.refresh(refresh_token)
 
 
 # --- Logout ---
-@router.post("/logout")
-def logout(db: SessionDep, refresh_token: str = Body(..., embed=True)):
-    repo = UserRepository(db)
-    user = repo.get_by_refresh_token(refresh_token)
-
-    if not user:
-        raise HTTPException(status_code=401, detail="既にログアウト済みです")
-
-    # トークン削除
-    user.refresh_token = None
-    db.commit()
-
-    return {"msg": "ログアウトしました"}
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(
+    db: SessionDep,
+    refresh_token: str = Body(..., embed=True),
+):
+    service = UserService(db)
+    service.logout(refresh_token)
+    return None
 
 
 # --- Me ---
-# 現在のユーザー
 @router.get("/me", response_model=UserResponse)
-def read_me(current_user: CurrentUser):
+def read_me(
+    current_user: CurrentUser,
+):
     return current_user

@@ -15,8 +15,7 @@ class UserRepository(BaseRepository):
         # return self.add(user)
         ...
 
-        hashed_pw = hash_password(user_in.password)
-        user = User(name=user_in.name, email=user_in.email, password=hashed_pw)
+        user = User(name=user_in.name, email=user_in.email, password=user_in.password)
         return self.base_add(user)
 
     def get_by_email(self, email: str):
