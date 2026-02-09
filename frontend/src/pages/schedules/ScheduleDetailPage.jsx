@@ -45,7 +45,6 @@ export default function ScheduleDetailPage() {
     handleChange,
     handleScheduleUpdate,
     handleScheduleDelete,
-    error,
   } = useSchedule(id);
 
   useEffect(() => {

@@ -13,8 +13,6 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [disabled, setDisabled] = useState(true);
-  const [error, setError] = useState(null);
-
   // 入力チェック
   // emailとpasswordの入力が入っていなければ、ボタンを押せないようにする
   const checkValid = name && email && password;
@@ -22,13 +20,8 @@ export default function SignupPage() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await handleSignup(email, password, name);
-      // サインアップ成功 → 自動ログイン済み
-      navigate("/me"); // プロフィールページへリダイレクト
-    } catch (err) {
-      setError("サインアップに失敗しました");
-    }
+    await handleSignup(email, password, name);
+    navigate("/me"); // プロフィールページへリダイレクト
   };
 
   return (
@@ -64,8 +57,6 @@ export default function SignupPage() {
           />
         </FormField>
       </BaseForm>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 }

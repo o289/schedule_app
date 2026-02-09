@@ -12,7 +12,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [disabled, setDisabled] = useState(true);
-  const [error, setError] = useState(null);
 
   // 入力チェック
   // emailとpasswordの入力が入っていなければ、ボタンを押せないようにする
@@ -21,13 +20,8 @@ export default function LoginPage() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    setError(null); // 送信前にエラーをクリア
-
-    try {
-      await handleLogin(email, password);
-    } catch (err) {
-      setError(err.message || "ログインに失敗しました");
-    }
+    await handleLogin(email, password);
+    navigate("/schedules");
   };
 
   return (
@@ -55,8 +49,6 @@ export default function LoginPage() {
           />
         </FormField>
       </BaseForm>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 }

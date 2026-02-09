@@ -6,9 +6,11 @@ import { useCategory } from "../categories/categoryHandlers";
 import { useDateTime } from "../schedules/useDateTime";
 import { getNowDateTime, getNowPlusOneHour } from "../../utils/date";
 import useLoading from "../../hooks/useLoading";
+import { useAlert } from "../../context/AlertContext";
 
 export function useSchedule(id = null) {
-  const { accessToken, refreshToken, handleRefresh } = useAuth();
+  const { accessToken, refreshToken, handleRefresh, clearSession } = useAuth();
+  const { showAlert } = useAlert();
 
   const [schedule, setSchedule] = useState(null);
   const [schedules, setSchedules] = useState([]);
@@ -19,7 +21,6 @@ export function useSchedule(id = null) {
   const [isCreating, setIsCreating] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  const [error, setError] = useState("");
   const { isFetching, startFetching, stopFetching } = useLoading();
 
   const [formData, setFormData] = useState({
@@ -42,7 +43,7 @@ export function useSchedule(id = null) {
       const res = await apiFetch(
         base_url,
         { method: "GET" },
-        { accessToken, refreshToken, handleRefresh }
+        { accessToken, refreshToken, handleRefresh, clearSession }
       );
       setSchedules(res);
     } finally {
@@ -57,7 +58,7 @@ export function useSchedule(id = null) {
       const res = await apiFetch(
         `${base_url}${id}`,
         { method: "GET" },
-        { accessToken, refreshToken, handleRefresh }
+        { accessToken, refreshToken, handleRefresh, clearSession }
       );
       setSchedule(res);
       setFormData({
@@ -72,16 +73,20 @@ export function useSchedule(id = null) {
   };
 
   // 作成
-  const handleScheduleCreate = async () => {
+  const handleScheduleCreate = async (e) => {
+    e.preventDefault();
+
     await apiFetch(
       base_url,
       { method: "POST", body: JSON.stringify(formData) },
-      { accessToken, refreshToken, handleRefresh }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
     );
 
     resetForm();
     setIsCreating(false);
+    fetchSchedules();
     navigate("/schedules");
+    showAlert("CREATE_SUCCESS");
   };
 
   // --- 入力変更 ---
@@ -92,6 +97,7 @@ export function useSchedule(id = null) {
   // --- 更新 ---
   const handleScheduleUpdate = async (e) => {
     e.preventDefault();
+
     const payload = {
       ...formData,
       dates: formData.dates.map((d) => ({
@@ -107,12 +113,12 @@ export function useSchedule(id = null) {
         method: "PUT",
         body: JSON.stringify(payload),
       },
-      { accessToken, refreshToken, handleRefresh }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
     );
 
     setIsEditMode(false);
-    alert("スケジュールを更新しました");
     navigate(`/schedules`);
+    showAlert("UPDATE_SUCCESS");
   };
 
   // --- 削除 ---
@@ -121,9 +127,10 @@ export function useSchedule(id = null) {
     await apiFetch(
       `${base_url}${id}`,
       { method: "DELETE" },
-      { accessToken, refreshToken, handleRefresh }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
     );
     navigate("/schedules");
+    showAlert("DELETE_SUCCESS");
   };
 
   // フォームを初期値に戻す
@@ -151,6 +158,5 @@ export function useSchedule(id = null) {
     isEditMode,
     setIsEditMode,
     handleScheduleDelete,
-    error,
   };
 }

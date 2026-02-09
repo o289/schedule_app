@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { apiFetch } from "../../api/client";
 import CategoryCard from "../../components/card/category/CategoryCard";
 import CategoryForm from "./CategoryForm";
 
@@ -37,7 +36,6 @@ export default function CategoryListPage() {
     setIsEditMode,
     handleChange,
     handleDelete,
-    error,
   } = useCategory(id);
 
   if (isFetching) {
@@ -81,8 +79,6 @@ export default function CategoryListPage() {
           onCancel={() => setIsCreating(false)}
         />
       )}
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
 
       <div className="category-grid">
         {categories.map((category) => (

@@ -9,7 +9,6 @@ import interactionPlugin from "@fullcalendar/interaction";
 
 import CalendarBase from "../../components/CalendarBase";
 import ScheduleForm from "./ScheduleForm";
-import ErrorModal from "../../components/ErrorModal";
 
 import "./ScheduleCalendarPage.css"; // ← CSSを読み込む
 import { useEffect } from "react";
@@ -27,7 +26,6 @@ export default function ScheduleCalendarPage() {
     isCreating,
     setIsCreating,
     formData,
-    error,
   } = useSchedule();
 
   const { handleDateClick, events } = useDateTime(schedules);
@@ -58,8 +56,6 @@ export default function ScheduleCalendarPage() {
           buttonEvent={() => setIsCreating(true)}
         />
       )}
-
-      {error && <ErrorModal error={error} />}
     </div>
   );
 }
