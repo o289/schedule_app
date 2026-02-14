@@ -1,40 +1,12 @@
 from fastapi import APIRouter, status, Body
 
 from app.api.deps import CurrentUser, SessionDep
-from app.schemas.user import (
-    UserCreate,
-    UserResponse,
-    UserLogin,
-    TokenResponse,
-)
-from app.services.user_service import UserService
+
+from app.schemas.user import UserResponse
+from app.schemas.auth import TokenResponse
+from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-
-# --- Signup ---
-@router.post(
-    "/signup",
-    response_model=UserResponse,
-    status_code=status.HTTP_201_CREATED,
-    include_in_schema=False,
-)
-def signup(
-    user_in: UserCreate,
-    db: SessionDep,
-):
-    service = UserService(db)
-    return service.signup(user_in)
-
-
-# --- Login ---
-@router.post("/login", response_model=TokenResponse)
-def login(
-    user_in: UserLogin,
-    db: SessionDep,
-):
-    service = UserService(db)
-    return service.login(user_in)
 
 
 # --- Refresh ---
@@ -43,7 +15,7 @@ def refresh(
     db: SessionDep,
     refresh_token: str = Body(..., embed=True),
 ):
-    service = UserService(db)
+    service = AuthService(db)
     return service.refresh(refresh_token)
 
 
@@ -53,7 +25,7 @@ def logout(
     db: SessionDep,
     refresh_token: str = Body(..., embed=True),
 ):
-    service = UserService(db)
+    service = AuthService(db)
     service.logout(refresh_token)
     return None
 

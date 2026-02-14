@@ -1,11 +1,12 @@
 from uuid import UUID
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
 
 from app.models.user import User
 from app.models.schedule import Schedule
 from app.schemas.todo import TodoCreate, TodoUpdate
 from app.crud.todo import TodoRepository
+
+from app.core.api_error import BadRequestError, ForbiddenError, NotFoundError
 
 
 class TodoService:
@@ -18,10 +19,7 @@ class TodoService:
         schedule = self.db.query(Schedule).filter(Schedule.id == schedule_id).first()
 
         if not schedule or schedule.user_id != user.id:
-            raise HTTPException(
-                status_code=403,
-                detail={"code": "FORBIDDEN_SCHEDULE"},
-            )
+            raise ForbiddenError("FORBIDDEN_SCHEDULE")
 
         return self.repo.get_by_schedule(schedule_id)
 
@@ -35,10 +33,7 @@ class TodoService:
         schedule = self.db.query(Schedule).filter(Schedule.id == schedule_id).first()
 
         if not schedule or schedule.user_id != user.id:
-            raise HTTPException(
-                status_code=403,
-                detail={"code": "FORBIDDEN_SCHEDULE"},
-            )
+            raise ForbiddenError("FORBIDDEN_SCHEDULE")
 
         return self.repo.create(todo_in, schedule_id)
 
@@ -52,24 +47,15 @@ class TodoService:
         todo = self.repo.get(todo_id)
 
         if not todo:
-            raise HTTPException(
-                status_code=404,
-                detail={"code": "NOT_FOUND_TODO"},
-            )
+            raise NotFoundError("NOT_FOUND_TODO")
 
         if todo.schedule.user_id != user.id:
-            raise HTTPException(
-                status_code=403,
-                detail={"code": "FORBIDDEN_TODO"},
-            )
+            raise ForbiddenError("FORBIDDEN_SCHEDULE")
 
         updated = self.repo.update(todo_id, todo_in)
 
         if not updated:
-            raise HTTPException(
-                status_code=500,
-                detail={"code": "TODO_UPDATE_FAILED"},
-            )
+            raise BadRequestError("TODO_UPDATE_FAILED")
 
         return updated
 
@@ -82,16 +68,10 @@ class TodoService:
         todo = self.repo.get(todo_id)
 
         if not todo:
-            raise HTTPException(
-                status_code=404,
-                detail={"code": "NOT_FOUND_TODO"},
-            )
+            raise NotFoundError("NOT_FOUND_TODO")
 
         if todo.schedule.user_id != user.id:
-            raise HTTPException(
-                status_code=403,
-                detail={"code": "FORBIDDEN_TODO"},
-            )
+            raise ForbiddenError("FORBIDDEN_SCHEDULE")
 
         self.repo.delete(todo_id)
         return None

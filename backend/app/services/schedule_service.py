@@ -1,11 +1,12 @@
 from uuid import UUID
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
 
 from app.models.user import User
 from app.schemas.schedule import ScheduleCreate, ScheduleUpdate
 from app.crud.schedule import ScheduleRepository
 from app.crud.category import CategoryRepository
+
+from app.core.api_error import BadRequestError, NotFoundError
 
 
 class ScheduleService:
@@ -16,17 +17,14 @@ class ScheduleService:
     def _validate_dates(self, dates):
         for d in dates:
             if d.end_date <= d.start_date:
-                raise HTTPException(
-                    status_code=400,
-                    detail={"code": "INVALID_TIME"},
-                )
+                raise BadRequestError("INVALID_TIME")
 
     # --- 作成 ---
     def create_schedule(self, user: User, schedule_in: ScheduleCreate):
         self._validate_dates(schedule_in.dates)
         category = self.category_repo.get(schedule_in.category_id)
         if not category or category.user_id != user.id:
-            raise HTTPException(status_code=404, detail={"code": "NOT_FOUND_CATEGORY"})
+            raise NotFoundError("NOT_FOUND_CATEGORY")
         return self.repo.create(user.id, schedule_in)
 
     # --- 一覧取得 ---
@@ -38,8 +36,7 @@ class ScheduleService:
         schedule = self.repo.get(schedule_id)
 
         if not schedule or schedule.user_id != user.id:
-            raise HTTPException(status_code=404, detail={"code": "NOT_FOUND_SCHEDULE"})
-
+            raise NotFoundError("NOT_FOUND_SCHEDULE")
         return schedule
 
     # --- 更新 ---
@@ -52,7 +49,7 @@ class ScheduleService:
         schedule = self.repo.get(schedule_id)
 
         if not schedule or schedule.user_id != user.id:
-            raise HTTPException(status_code=404, detail={"code": "NOT_FOUND_SCHEDULE"})
+            raise NotFoundError("NOT_FOUND_SCHEDULE")
 
         if schedule_in.dates is not None:
             self._validate_dates(schedule_in.dates)
@@ -62,9 +59,7 @@ class ScheduleService:
         if schedule_in.category_id is not None:
             category = self.category_repo.get(schedule_in.category_id)
             if not category or category.user_id != user.id:
-                raise HTTPException(
-                    status_code=404, detail={"code": "NOT_FOUND_CATEGORY"}
-                )
+                raise NotFoundError("NOT_FOUND_CATEGORY")
         else:
             schedule_in = schedule_in.copy(exclude={"category_id"})
 
@@ -75,6 +70,6 @@ class ScheduleService:
         success = self.repo.delete(schedule_id, user.id)
 
         if not success:
-            raise HTTPException(status_code=404, detail={"code": "NOT_FOUND_SCHEDULE"})
+            raise NotFoundError("NOT_FOUND_SCHEDULE")
 
         return None
