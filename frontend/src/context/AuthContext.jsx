@@ -12,6 +12,16 @@ export function AuthProvider({ children }) {
 
   const { showAlert } = useAlert();
 
+  const authFetch = (url, options = {}, fetchOptions = {}) => {
+    return apiFetch(url, options, {
+      accessToken,
+      refreshToken,
+      showAlert,
+      clearSession,
+      ...fetchOptions,
+    });
+  };
+
   // セッションをクリアにする
   const clearSession = () => {
     setUser(null);
@@ -102,6 +112,7 @@ export function AuthProvider({ children }) {
         setRefreshToken,
         setUser,
         clearSession,
+        authFetch,
       }}
     >
       {children}

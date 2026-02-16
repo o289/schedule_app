@@ -1,7 +1,5 @@
 import { BrowserRouter as Router } from "react-router-dom";
 
-import RequireAuth from "./components/RequireAuth.jsx";
-
 import { AuthProvider } from "./context/AuthContext.jsx"; // ←追加
 import { AlertProvider } from "./context/AlertContext.jsx";
 import AppRoutes from "./routes/AppRoutes.js";
@@ -13,9 +11,7 @@ function App() {
       <AlertProvider>
         <AuthProvider>
           <Navbar />
-          <RequireAuth>
-            <AppRoutes />
-          </RequireAuth>
+          <AppRoutes />
         </AuthProvider>
       </AlertProvider>
     </Router>
