@@ -11,6 +11,9 @@ services:
     container_name: schedule_app-backend-stg
     restart: always
     env_file: ../../.env
+    environment:
+      - RP_ID=stg-sukejuru.yudais-prod.com
+      - ORIGIN=https://stg-sukejuru.yudais-prod.com:8443
     depends_on:
       - db
     networks:
