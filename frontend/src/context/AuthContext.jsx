@@ -1,8 +1,6 @@
 import { createContext, useState, useContext, useEffect } from "react";
-import { signup, login, logout, refresh } from "../api/auth";
-import { current_user } from "../api/user";
-import ErrorModal from "../components/ErrorModal";
-import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../api/client";
+import { useAlert } from "./AlertContext";
 
 const AuthContext = createContext(null);
 
@@ -10,115 +8,86 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [refreshToken, setRefreshToken] = useState(null);
-  const [error, setError] = useState(null); // 共通エラー用 state
-  const [initializing, setInitializing] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const navigate = useNavigate();
+  const { showAlert } = useAlert();
 
-  // サインアップ
-  const handleSignup = async (email, password, name) => {
-    try {
-      await signup({ email, password, name });
-      // サインアップ後に自動ログイン
-      handleLogin(email, password);
-
-      navigate("/me");
-    } catch (err) {
-      console.error("サインアップ失敗", err);
-    }
-  };
-
-  // ログイン
-  const handleLogin = async (email, password) => {
-    const res = await login({ email, password });
-    if (res.access_token) {
-      setAccessToken(res.access_token);
-      setRefreshToken(res.refresh_token);
-
-      // 永続化
-      localStorage.setItem("accessToken", res.access_token);
-      localStorage.setItem("refreshToken", res.refresh_token);
-      console.log("保存した refreshToken:", res.refresh_token);
-
-      // Meエンドポイントでユーザー情報を取得
-      const me = await current_user(res.access_token);
-      setUser(me);
-      localStorage.setItem("user", JSON.stringify(me));
-      navigate("/schedules");
-      return true;
-    } else {
-      throw new Error(res.detail || "ログインに失敗しました");
-    }
-  };
-
-  // ログアウト
-  const handleLogout = async () => {
-    if (refreshToken) await logout(refreshToken);
+  // セッションをクリアにする
+  const clearSession = () => {
     setUser(null);
     setAccessToken(null);
     setRefreshToken(null);
 
-    // localStorage も削除
-    localStorage.removeItem("user");
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+  };
 
-    navigate("/login");
+  // ログアウト
+  const handleLogout = async () => {
+    if (refreshToken) {
+      await apiFetch(
+        "/auth/logout",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        },
+        { showAlert }
+      );
+    }
+    clearSession();
   };
 
   // リフレッシュ
-  const handleRefresh = async () => {
-    if (!refreshToken) return false;
-    try {
-      const res = await refresh(refreshToken);
-      if (res.access_token) {
-        setAccessToken(res.access_token);
-        localStorage.setItem("accessToken", res.access_token); // ← 永続化も更新
-        console.log("リフレッシュは成功している");
-        return res.access_token; // 成功
-      }
-    } catch (err) {
-      console.error("リフレッシュ失敗:", err);
-      setUser(null);
-      setAccessToken(null);
-      setRefreshToken(null);
-      return false; // 失敗
+  const handleRefresh = async (tokenOverride = null) => {
+    const token = tokenOverride || refreshToken;
+    if (!token) return false;
+
+    const res = await apiFetch(
+      "/auth/refresh",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: token }),
+      },
+      { showAlert }
+    );
+
+    if (res?.data?.access_token) {
+      setAccessToken(res.data.access_token);
+      localStorage.setItem("accessToken", res.data.access_token);
+      return res.data.access_token;
     }
+
+    return false;
   };
 
   // 初期化: localStorageから復元
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
     const savedAccess = localStorage.getItem("accessToken");
     const savedRefresh = localStorage.getItem("refreshToken");
 
     const initAuth = async () => {
-      if (savedUser && savedAccess && savedRefresh) {
-        setUser(JSON.parse(savedUser));
+      if (savedAccess && savedRefresh) {
         setAccessToken(savedAccess);
         setRefreshToken(savedRefresh);
 
         // ここで必ずリフレッシュ
-        const newToken = await handleRefresh();
+        const newToken = await handleRefresh(savedRefresh);
         if (newToken) {
-          try {
-            const me = await current_user(newToken);
-            setUser(me);
-          } catch (err) {
-            console.error("me取得失敗:", err);
-            setUser(null);
-          }
+          const me = await apiFetch(
+            "/auth/me",
+            { method: "GET" },
+            { accessToken: newToken, showAlert }
+          );
+          setUser(me);
         }
       }
-      setInitializing(false); // ← リフレッシュが終わってから
+      setIsLoading(false); // ← リフレッシュが終わってから
     };
 
     initAuth();
   }, []);
-
-  if (initializing) {
-    return;
-  }
 
   return (
     <AuthContext.Provider
@@ -126,21 +95,16 @@ export function AuthProvider({ children }) {
         user,
         accessToken,
         refreshToken,
-        handleSignup,
-        handleLogin,
+        isLoading,
         handleLogout,
         handleRefresh,
         setAccessToken,
+        setRefreshToken,
         setUser,
-        setError,
+        clearSession,
       }}
     >
       {children}
-      <ErrorModal
-        error={error}
-        onClose={() => setError(null)}
-        onLogout={handleLogout}
-      />
     </AuthContext.Provider>
   );
 }

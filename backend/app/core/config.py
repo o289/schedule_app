@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"  # 追加
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
+    RP_ID: str
+    RP_NAME: str = "Schedule App"
+    ORIGIN: str
+
     # API / Web
     API_PORT: int = 8000
     WEB_PORT: int = 3000

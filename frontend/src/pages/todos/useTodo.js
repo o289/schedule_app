@@ -2,11 +2,13 @@
 import { useState } from "react";
 import { apiFetch } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
+import { useAlert } from "../../context/AlertContext";
 
 export function useTodo(scheduleId) {
-  const { accessToken, refreshToken, handleRefresh } = useAuth();
+  const { accessToken, refreshToken, handleRefresh, clearSession } = useAuth();
+  const { showAlert } = useAlert();
+
   const [todos, setTodos] = useState([]);
-  const [error, setError] = useState("");
 
   const base_todo_url = `/schedules/${scheduleId}/todos/`;
 
@@ -15,7 +17,7 @@ export function useTodo(scheduleId) {
     const res = await apiFetch(
       `${base_todo_url}`,
       { method: "GET" },
-      { accessToken, refreshToken, handleRefresh }
+      { accessToken, refreshToken, handleRefresh, clearSession }
     );
     setTodos(res);
   };
@@ -28,9 +30,10 @@ export function useTodo(scheduleId) {
         method: "POST",
         body: JSON.stringify({ ...newTodo, schedule_id: scheduleId }),
       },
-      { accessToken, refreshToken, handleRefresh }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
     );
     fetchTodos();
+    showAlert("CREATE_SUCCESS");
   };
 
   // 更新（例: 完了トグル）
@@ -41,9 +44,10 @@ export function useTodo(scheduleId) {
         method: "PUT",
         body: JSON.stringify(payload),
       },
-      { accessToken, refreshToken, handleRefresh }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
     );
     fetchTodos();
+    showAlert("UPDATE_SUCCESS");
   };
 
   // 削除
@@ -51,14 +55,14 @@ export function useTodo(scheduleId) {
     await apiFetch(
       `${base_todo_url}${todoId}`,
       { method: "DELETE" },
-      { accessToken, refreshToken, handleRefresh }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
     );
     fetchTodos();
+    showAlert("DELETE_SUCCESS");
   };
 
   return {
     todos,
-    error,
     fetchTodos,
     handleTodoCreate,
     handleTodoUpdate,

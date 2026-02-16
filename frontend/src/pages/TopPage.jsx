@@ -27,12 +27,7 @@ export default function TopPage() {
         ) : (
           <div className="hero-actions">
             <h2>ユーザー登録・ログインをお願いします。</h2>
-            <Link to="/signup" className="btn-top btn-primary">
-              サインアップ
-            </Link>
-            <Link to="/login" className="btn-top btn-secondary">
-              ログイン
-            </Link>
+            認証待ち
           </div>
         )}
       </div>

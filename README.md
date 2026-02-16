@@ -21,7 +21,7 @@
 - 言語: Python, javascript
 - Backend(フレームワーク): FastAPI + SQLAlchemy
 - Frontend(フレームワーク): React + UI ライブラリ (MUI / Vuetify)
-- Auth: JWT, bcrypt
+- Auth: JWT
 - Infra: Docker / Nginx / XServer VPS /
 - DB: PostgreSQL（開発環境から本番同等を想定）
 - カレンダー UI: FullCalendar.js

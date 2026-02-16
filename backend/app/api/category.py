@@ -1,12 +1,13 @@
-from fastapi import APIRouter, HTTPException, status, Response
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
+from fastapi import APIRouter, status, Response
 from uuid import UUID
 
 from app.api.deps import CurrentUser, SessionDep
-from app.crud.category import CategoryRepository
-from app.schemas.category import CategoryCreate, CategoryUpdate, CategoryResponse
-from app.models.user import User
+from app.schemas.category import (
+    CategoryCreate,
+    CategoryUpdate,
+    CategoryResponse,
+)
+from app.services.category_service import CategoryService
 
 router = APIRouter(prefix="/categories", tags=["categories"])
 
@@ -17,17 +18,19 @@ def list_categories(
     db: SessionDep,
     current_user: CurrentUser,
 ):
-    repo = CategoryRepository(db)
-    return repo.get_by_user(user_id=current_user.id)
+    service = CategoryService(db)
+    return service.list_categories(current_user)
 
 
 # --- 作成 ---
 @router.post("/", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
 def create_category(
-    category_in: CategoryCreate, db: SessionDep, current_user: CurrentUser
+    category_in: CategoryCreate,
+    db: SessionDep,
+    current_user: CurrentUser,
 ):
-    repo = CategoryRepository(db)
-    return repo.create(category_in=category_in, user_id=current_user.id)
+    service = CategoryService(db)
+    return service.create_category(current_user, category_in)
 
 
 # --- 更新 ---
@@ -38,13 +41,12 @@ def update_category(
     db: SessionDep,
     current_user: CurrentUser,
 ):
-    repo = CategoryRepository(db)
-    category = repo.get(category_id)
-
-    if not category or category.user_id != current_user.id:
-        raise HTTPException(status_code=404, detail="カテゴリが見つかりません")
-
-    return repo.update(category_id, category_in)
+    service = CategoryService(db)
+    return service.update_category(
+        current_user,
+        category_id,
+        category_in,
+    )
 
 
 # --- 削除 ---
@@ -54,19 +56,6 @@ def delete_category(
     db: SessionDep,
     current_user: CurrentUser,
 ):
-    repo = CategoryRepository(db)
-    category = repo.get(category_id)
-
-    if not category or category.user_id != current_user.id:
-        raise HTTPException(status_code=404, detail="カテゴリが見つかりません")
-
-    try:
-        repo.delete(category_id, current_user.id)
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(
-            status_code=400,
-            detail="このカテゴリにはスケジュールが存在するため削除できません",
-        )
-
+    service = CategoryService(db)
+    service.delete_category(current_user, category_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

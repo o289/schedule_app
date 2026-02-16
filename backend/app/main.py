@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
 
 from app.core.config import settings
+from app.api.auth import router as auth_router
 from app.api.user import router as user_router
 from app.api.category import router as category_router
 from app.api.schedule import router as schedule_router
@@ -32,6 +34,7 @@ def pong():
     return {"message": "pong"}
 
 
+app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(category_router)
 app.include_router(schedule_router)
@@ -39,3 +42,4 @@ app.include_router(todo_router)
 
 # 共通ハンドラを登録
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, http_exception_handler)

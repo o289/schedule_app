@@ -2,15 +2,17 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
+import { useAlert } from "../../context/AlertContext";
 import useLoading from "../../hooks/useLoading";
 
 export function useCategory(categoryId) {
-  const { accessToken, refreshToken, handleRefresh } = useAuth();
+  const { showAlert } = useAlert();
+  const { accessToken, refreshToken, handleRefresh, clearSession } = useAuth();
+
   const [categories, setCategories] = useState([]);
   const [newForm, setNewForm] = useState({ name: "", color: "gray" });
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", color: "" });
-  const [error, setError] = useState("");
 
   // ハンドル
   const [isCreating, setIsCreating] = useState(false);
@@ -26,7 +28,7 @@ export function useCategory(categoryId) {
       const res = await apiFetch(
         base_url,
         { method: "GET" },
-        { accessToken, refreshToken, handleRefresh }
+        { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
       );
       setCategories(res);
     } finally {
@@ -42,11 +44,12 @@ export function useCategory(categoryId) {
         method: "POST",
         body: JSON.stringify(newForm),
       },
-      { accessToken, refreshToken, handleRefresh }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
     );
     setNewForm({ name: "", color: "gray" });
     setIsCreating(false);
     fetchCategories();
+    showAlert("CREATE_SUCCESS");
   };
 
   const handleNewChange = (e) => {
@@ -61,11 +64,12 @@ export function useCategory(categoryId) {
         method: "PUT",
         body: JSON.stringify(editForm),
       },
-      { accessToken, refreshToken, handleRefresh }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
     );
     setEditingId(null);
     setEditForm({ name: "", color: "" });
     fetchCategories();
+    showAlert("UPDATE_SUCCESS");
   };
 
   const handleChange = (e) => {
@@ -78,13 +82,15 @@ export function useCategory(categoryId) {
     await apiFetch(
       `${base_url}${id}`,
       { method: "DELETE" },
-      { accessToken, refreshToken, handleRefresh }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
     );
     // 即時反映（サーバーの再取得前にUI更新）
     setCategories((prev) => prev.filter((c) => String(c.id) !== String(id)));
 
     // 念のためサーバーから再取得して同期
     fetchCategories();
+
+    showAlert("DELETE_SUCCESS");
   };
 
   // 編集モードの切り替え
@@ -116,7 +122,5 @@ export function useCategory(categoryId) {
     handleDelete,
     handleEditClick,
     editingId,
-    error,
-    setError,
   };
 }

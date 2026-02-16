@@ -1,18 +1,16 @@
 import { useAuth } from "../context/AuthContext";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-
+import EntrancePage from "../pages/EntrancePage";
+import Loading from "./Loading";
 export default function RequireAuth({ children }) {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const { user, isLoading } = useAuth();
 
-  useEffect(() => {
-    // 非ログイン状態なら /login にリダイレクト
-    if (!user) {
-      navigate("/login");
-    }
-  }, [user, navigate]);
+  if (isLoading && !user) {
+    return <Loading />;
+  }
 
-  // ログイン済みならコンテンツを表示
-  return user ? children : null;
+  if (!user) {
+    return <EntrancePage />;
+  }
+
+  return children;
 }

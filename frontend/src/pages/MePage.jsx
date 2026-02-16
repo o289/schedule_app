@@ -27,7 +27,7 @@ export default function MePage() {
   useEffect(() => {
     if (!user) {
       // 未ログインならログインページへ
-      navigate("/login");
+      navigate("/");
     }
   }, [user, navigate]);
 

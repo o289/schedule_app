@@ -1,46 +1,45 @@
-from fastapi import APIRouter, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, status, Response
 from uuid import UUID
 
-from app.models.user import User
-from app.models.schedule import Schedule
-from app.schemas.todo import TodoCreate, TodoUpdate, TodoResponse
-from app.crud.todo import TodoRepository
 from app.api.deps import CurrentUser, SessionDep
+from app.schemas.todo import TodoCreate, TodoUpdate, TodoResponse
+from app.services.todo_service import TodoService
 
-router = APIRouter(prefix="/schedules/{schedule_id}/todos", tags=["todos"])
+router = APIRouter(
+    prefix="/schedules/{schedule_id}/todos",
+    tags=["todos"],
+)
 
 
-# --- スケジュールに紐づく Todo 一覧取得 ---
+# --- スケジュール配下 Todo 一覧 ---
 @router.get("/", response_model=list[TodoResponse])
 def list_todos(
     schedule_id: UUID,
     db: SessionDep,
     current_user: CurrentUser,
 ):
-
-    schedule = db.query(Schedule).filter(Schedule.id == schedule_id).first()
-    if not schedule or schedule.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="権限がありません")
-
-    repo = TodoRepository(db)
-    return repo.get_by_schedule(schedule_id)
+    service = TodoService(db)
+    return service.list_todos(current_user, schedule_id)
 
 
 # --- Todo 作成 ---
-@router.post("/", response_model=TodoResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=TodoResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def create_todo(
     schedule_id: UUID,
     todo_in: TodoCreate,
     db: SessionDep,
     current_user: CurrentUser,
 ):
-    schedule = db.query(Schedule).filter(Schedule.id == schedule_id).first()
-    if not schedule or schedule.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="権限がありません")
-
-    repo = TodoRepository(db)
-    return repo.create(todo_in, schedule_id)
+    service = TodoService(db)
+    return service.create_todo(
+        current_user,
+        schedule_id,
+        todo_in,
+    )
 
 
 # --- Todo 更新 ---
@@ -51,20 +50,12 @@ def update_todo(
     db: SessionDep,
     current_user: CurrentUser,
 ):
-    repo = TodoRepository(db)
-    todo_item = repo.get(todo_id)
-    if not todo_item:
-        raise HTTPException(status_code=404, detail="このTodoはありません")
-
-    if todo_item.schedule.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="権限がありません")
-
-    todo = repo.update(todo_id, todo_in)
-
-    if not todo:
-        raise HTTPException(status_code=500, detail="更新に失敗しました")
-
-    return todo
+    service = TodoService(db)
+    return service.update_todo(
+        current_user,
+        todo_id,
+        todo_in,
+    )
 
 
 # --- Todo 削除 ---
@@ -74,17 +65,6 @@ def delete_todo(
     db: SessionDep,
     current_user: CurrentUser,
 ):
-    repo = TodoRepository(db)
-
-    todo = repo.get(todo_id)
-
-    if not todo:
-        raise HTTPException(status_code=404, detail="Todo not found")
-
-    # 所属するスケジュールのユーザーが自分か確認
-    if todo.schedule.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="権限がありません")
-
-    repo.delete(todo_id=todo_id)
-
-    return None
+    service = TodoService(db)
+    service.delete_todo(current_user, todo_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
