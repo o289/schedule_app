@@ -17,8 +17,6 @@ export default function Navbar() {
     "/categories": "カテゴリー",
     "/schedules": "スケジュール",
     "/me": "マイページ",
-    "/login": "ログイン",
-    "/signup": "サインアップ",
   };
 
   // 現在のパスに応じたタイトル
@@ -72,22 +70,7 @@ export default function Navbar() {
                 </Link>
               </div>
             ) : (
-              <div className="dropdown-menu">
-                <Link
-                  to="/signup"
-                  className="dropdown-item"
-                  onClick={() => setDropdownOpen(false)}
-                >
-                  サインアップ
-                </Link>
-                <Link
-                  to="/login"
-                  className="dropdown-item"
-                  onClick={() => setDropdownOpen(false)}
-                >
-                  ログイン
-                </Link>
-              </div>
+              <div className="dropdown-menu">認証待ち</div>
             ))}
         </div>
       </div>

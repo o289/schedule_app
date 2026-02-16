@@ -1,6 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
-export async function apiFetch(url, options = {}, auth = null) {
+export async function apiFetch(url, options = {}, auth = null, config = {}) {
   let accessToken = null;
   let refreshToken = null;
   let handleRefresh = null;
@@ -12,6 +12,8 @@ export async function apiFetch(url, options = {}, auth = null) {
     ({ accessToken, refreshToken, handleRefresh, showAlert, clearSession } =
       auth);
   }
+
+  const { silentCodes = [] } = config;
 
   const headers = {
     ...options.headers,
@@ -45,14 +47,18 @@ export async function apiFetch(url, options = {}, auth = null) {
       } else {
         const code = data?.code || "INVALID_REFRESH_TOKEN";
         clearSession?.();
-        showAlert?.(code);
+        if (!silentCodes.includes(code)) {
+          showAlert?.(code);
+        }
         throw { code };
       }
     }
 
     // 上記以外のエラーは code のみで扱う
     const code = data?.code || "SERVER_ERROR";
-    showAlert?.(code);
+    if (!silentCodes.includes(code)) {
+      showAlert?.(code);
+    }
     throw { code };
   }
 

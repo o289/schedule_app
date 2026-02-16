@@ -1,7 +1,8 @@
 # backend/app/services/passkey_service.py
 
 from datetime import datetime, timedelta
-from uuid import uuid4
+
+import secrets
 
 import base64
 import json
@@ -15,6 +16,11 @@ from app.core.webauthn import (
     verify_registration,
     create_authentication_options,
     verify_authentication,
+)
+from webauthn.helpers import options_to_json
+from webauthn.helpers.structs import (
+    PublicKeyCredentialDescriptor,
+    PublicKeyCredentialType,
 )
 
 from app.crud.user import UserRepository
@@ -67,13 +73,9 @@ class AuthService:
         if not user:
             user = self.user_repo.create_user(email)
 
-        # 2. 既にpasskey登録済みなら409
-        existing_passkeys = self.passkey_repo.get_by_user(user.id)
-        if existing_passkeys:
-            raise ConflictError("PASSKEY_ALREADY_REGISTERED")
-
-        # 3. challenge生成（uuid使用）
-        challenge_value = str(uuid4())
+        # 3. challenge生成（secure random bytes使用）
+        challenge_bytes = secrets.token_bytes(32)
+        challenge_value = base64.urlsafe_b64encode(challenge_bytes).decode().rstrip("=")
         expires_at = datetime.utcnow() + timedelta(minutes=5)
 
         challenge_schema = ChallengeCreate(
@@ -86,14 +88,32 @@ class AuthService:
         # 4. challenge保存（既存削除含む）
         self.challenge_repo.create_or_replace(challenge_schema)
 
+        # 既存passkey取得（excludeCredentials用）
+        existing_passkeys = self.passkey_repo.get_by_user(user.id)
+        exclude_credentials = []
+
+        for pk in existing_passkeys:
+            padding = "=" * (-len(pk.credential_id) % 4)
+            credential_id_bytes = base64.urlsafe_b64decode(pk.credential_id + padding)
+
+            exclude_credentials.append(
+                PublicKeyCredentialDescriptor(
+                    id=credential_id_bytes,
+                    type=PublicKeyCredentialType.PUBLIC_KEY,
+                )
+            )
+
         # 5. WebAuthn options生成
         options = create_registration_options(
             user_id=str(user.id),
             email=email,
-            challenge=challenge_value,
+            challenge=challenge_bytes,
+            exclude_credentials=exclude_credentials,
         )
 
-        return PasskeyRegisterOptionsResponse(data={"publicKey": options})
+        return PasskeyRegisterOptionsResponse(
+            data={"publicKey": json.loads(options_to_json(options))}
+        )
 
     # =========================
     # Register Verify
@@ -154,11 +174,13 @@ class AuthService:
         DB上のchallengeと一致するuserを取得
         """
 
-        client_data_json = base64.urlsafe_b64decode(payload.response["clientDataJSON"])
+        encoded_client_data = payload.response["clientDataJSON"]
+        padding = "=" * (-len(encoded_client_data) % 4)
+        client_data_json = base64.urlsafe_b64decode(encoded_client_data + padding)
         client_data = json.loads(client_data_json)
         received_challenge = client_data.get("challenge")
 
-        # challenge一致ユーザー検索
+        # challenge一致ユーザー検索（base64url文字列のまま比較）
         challenge_obj = self.challenge_repo.get_by_challenge(received_challenge)
 
         if not challenge_obj:
@@ -168,24 +190,30 @@ class AuthService:
 
         try:
             # 4. WebAuthn検証
+            padding = "=" * (-len(challenge_obj.challenge) % 4)
+            expected_challenge_bytes = base64.urlsafe_b64decode(
+                challenge_obj.challenge + padding
+            )
+
             verification = verify_registration(
                 credential=credential,
-                expected_challenge=challenge_obj.challenge,
+                expected_challenge=expected_challenge_bytes,
             )
 
             # 5. Passkey保存
             passkey_schema = PasskeyCreate(
                 user_id=user_id,
                 credential_id=credential_id,
-                public_key=verification.credential_public_key,
+                public_key=base64.urlsafe_b64encode(
+                    verification.credential_public_key
+                ).decode(),
                 sign_count=verification.sign_count,
                 transports=None,
             )
 
             self.passkey_repo.create(passkey_schema)
 
-        except ValueError:
-            # 仕様: 検証失敗時もUser削除しない
+        except ValueError():
             raise BadRequestError("PASSKEY_VERIFICATION_FAILED")
 
         finally:
@@ -228,8 +256,9 @@ class AuthService:
         if not passkeys:
             raise BadRequestError("PASSKEY_NOT_FOUND")
 
-        # 3. challenge生成
-        challenge_value = str(uuid4())
+        # 3. challenge生成（secure random bytes使用）
+        challenge_bytes = secrets.token_bytes(32)
+        challenge_value = base64.urlsafe_b64encode(challenge_bytes).decode().rstrip("=")
         expires_at = datetime.utcnow() + timedelta(minutes=5)
 
         challenge_schema = ChallengeCreate(
@@ -243,21 +272,27 @@ class AuthService:
         self.challenge_repo.create_or_replace(challenge_schema)
 
         # 5. allowCredentials生成
-        allow_credentials = [
-            {
-                "type": "public-key",
-                "id": pk.credential_id,
-            }
-            for pk in passkeys
-        ]
+        allow_credentials = []
+        for pk in passkeys:
+            padding = "=" * (-len(pk.credential_id) % 4)
+            credential_id_bytes = base64.urlsafe_b64decode(pk.credential_id + padding)
+
+            allow_credentials.append(
+                PublicKeyCredentialDescriptor(
+                    id=credential_id_bytes,
+                    type=PublicKeyCredentialType.PUBLIC_KEY,
+                )
+            )
 
         # 6. WebAuthn options生成
         options = create_authentication_options(
-            challenge=challenge_value,
+            challenge=challenge_bytes,
             allow_credentials=allow_credentials,
         )
 
-        return PasskeyLoginOptionsResponse(data={"publicKey": options})
+        return PasskeyLoginOptionsResponse(
+            data={"publicKey": json.loads(options_to_json(options))}
+        )
 
     # =========================
     # Login Verify
@@ -304,16 +339,26 @@ class AuthService:
 
         try:
             # 4. WebAuthn署名検証
+            padding = "=" * (-len(passkey.public_key) % 4)
+            public_key_bytes = base64.urlsafe_b64decode(passkey.public_key + padding)
+
+            padding = "=" * (-len(challenge_obj.challenge) % 4)
+            expected_challenge_bytes = base64.urlsafe_b64decode(
+                challenge_obj.challenge + padding
+            )
+
             verification = verify_authentication(
                 credential=credential,
-                expected_challenge=challenge_obj.challenge,
-                credential_public_key=passkey.public_key,
+                expected_challenge=expected_challenge_bytes,
+                credential_public_key=public_key_bytes,
                 credential_current_sign_count=passkey.sign_count,
             )
 
             # 5. sign_count比較（リプレイ攻撃防止）
             new_sign_count = verification.new_sign_count
-            if new_sign_count <= passkey.sign_count:
+
+            # WebAuthn推奨: new_sign_count < stored の場合のみ不正
+            if new_sign_count < passkey.sign_count:
                 raise BadRequestError("PASSKEY_VERIFICATION_FAILED")
 
             # 6. sign_count更新

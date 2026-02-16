@@ -1,4 +1,4 @@
-# backend/app/core/security/webauthn.py
+# backend/app/core/webauthn.py
 
 from typing import List, Optional
 from webauthn import (
@@ -20,7 +20,12 @@ from app.core.config import settings
 # =========================
 
 
-def create_registration_options(user_id, email, challenge: str):
+def create_registration_options(
+    user_id,
+    email,
+    challenge: str,
+    exclude_credentials: Optional[List] = None,
+):
     authenticator_selection = AuthenticatorSelectionCriteria(
         user_verification=UserVerificationRequirement.PREFERRED
     )
@@ -31,9 +36,10 @@ def create_registration_options(user_id, email, challenge: str):
         user_id=user_id.encode(),
         user_name=email,
         user_display_name=email,
-        challenge=challenge.encode(),
+        challenge=challenge,
         attestation=AttestationConveyancePreference.NONE,
         authenticator_selection=authenticator_selection,
+        exclude_credentials=exclude_credentials,
     )
 
 
@@ -68,7 +74,7 @@ def create_authentication_options(
     return generate_authentication_options(
         rp_id=settings.RP_ID,
         allow_credentials=allow_credentials,
-        challenge=challenge.encode(),
+        challenge=challenge,
         user_verification=UserVerificationRequirement.PREFERRED,
     )
 
