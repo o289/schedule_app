@@ -271,23 +271,9 @@ class AuthService:
         # 4. challenge保存（既存削除含む）
         self.challenge_repo.create_or_replace(challenge_schema)
 
-        # 5. allowCredentials生成
-        allow_credentials = []
-        for pk in passkeys:
-            padding = "=" * (-len(pk.credential_id) % 4)
-            credential_id_bytes = base64.urlsafe_b64decode(pk.credential_id + padding)
-
-            allow_credentials.append(
-                PublicKeyCredentialDescriptor(
-                    id=credential_id_bytes,
-                    type=PublicKeyCredentialType.PUBLIC_KEY,
-                )
-            )
-
         # 6. WebAuthn options生成
         options = create_authentication_options(
             challenge=challenge_bytes,
-            allow_credentials=allow_credentials,
         )
 
         return PasskeyLoginOptionsResponse(
