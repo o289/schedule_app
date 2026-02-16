@@ -13,7 +13,8 @@ export default function Navbar() {
 
   // パスごとのタイトルマッピング
   const pathTitles = {
-    "/": "ページトップ",
+    "/": "エントランス",
+    "/home": "ホーム",
     "/categories": "カテゴリー",
     "/schedules": "スケジュール",
     "/me": "マイページ",
