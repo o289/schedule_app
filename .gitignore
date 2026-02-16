@@ -5,7 +5,7 @@ frontend/dist/
 # ドキュメントマークダウン
 docs/flow
 # バージョン管理ようフォルダ
-versions
+/versions
 
 # Python
 __pycache__/
