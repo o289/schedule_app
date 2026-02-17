@@ -40,14 +40,10 @@ export default function MePage() {
     <div>
       <div className="profile-card">
         <div className="profile-header">
-          <h2 className="profile-title">{user.name}</h2>
+          <h2 className="profile-title">{user.email}</h2>
         </div>
 
         <div className="profile-body">
-          <p>
-            <span className="label">Email:</span>
-            {user.email}
-          </p>
           <Button
             variant="contained"
             color="error"

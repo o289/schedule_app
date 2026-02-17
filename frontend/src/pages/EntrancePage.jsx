@@ -60,7 +60,7 @@ export default function EntrancePage() {
     );
 
     setUser(meRes);
-    navigate("/home");
+    navigate("/schedules");
   };
 
   const handleSubmit = async (e) => {

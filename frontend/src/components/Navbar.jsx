@@ -27,7 +27,7 @@ export default function Navbar() {
     <nav className="navbar">
       {/* 左側 */}
       <div className="navbar-left">
-        <Link to="/" className="navbar-brand">
+        <Link to="/home" className="navbar-brand">
           <img src="/app_icon.png" alt="App Icon" className="app-icon" />
         </Link>
       </div>
@@ -71,7 +71,7 @@ export default function Navbar() {
                 </Link>
               </div>
             ) : (
-              <div className="dropdown-menu">認証待ち</div>
+              <div className="dropdown-menu">ログインをしてください</div>
             ))}
         </div>
       </div>
