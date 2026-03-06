@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@mui/material";
 
+import { generateMonthGrid, shiftMonth } from "../utils/monthGrid";
 //
 import TimePicker from "./commonPicker/TimePicker";
 //
@@ -34,47 +35,28 @@ function MultiDateCalendar({ selectedDates, setSelectedDates }) {
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1); // month is 1-based
 
-  // 当月の日数を取得
-  const daysInMonth = new Date(year, month, 0).getDate();
-
-  // YYYY-MM-DD 形式を生成
-  const formatDate = (day) =>
-    `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-
-  // 日付クリックでトグル選択
-  const handleClick = (day) => {
-    const dateStr = String(formatDate(day));
-
+  const handleClick = (dateString) => {
     setSelectedDates((prev) => {
-      // 現在の配列(prev)をもとに新しい状態を決定
-      const updated = prev.includes(dateStr)
-        ? prev.filter((d) => d !== dateStr) // すでに選択済なら削除
-        : [...prev, dateStr]; // 未選択なら追加
-
-      // 最新の状態を返す（このreturnが新しいstateになる）
+      const updated = prev.includes(dateString)
+        ? prev.filter((d) => d !== dateString)
+        : [...prev, dateString];
       return updated;
     });
   };
 
-  // 前の月へ
   const prevMonth = () => {
-    if (month === 1) {
-      setYear((y) => y - 1);
-      setMonth(12);
-    } else {
-      setMonth((m) => m - 1);
-    }
+    const { year: newYear, month: newMonth } = shiftMonth(year, month, -1);
+    setYear(newYear);
+    setMonth(newMonth);
   };
 
-  // 次の月へ
   const nextMonth = () => {
-    if (month === 12) {
-      setYear((y) => y + 1);
-      setMonth(1);
-    } else {
-      setMonth((m) => m + 1);
-    }
+    const { year: newYear, month: newMonth } = shiftMonth(year, month, 1);
+    setYear(newYear);
+    setMonth(newMonth);
   };
+
+  const weeks = generateMonthGrid(year, month);
 
   // スタイル
   const gridStyle = {
@@ -116,19 +98,28 @@ function MultiDateCalendar({ selectedDates, setSelectedDates }) {
         </div>
       </div>
       <div style={gridStyle}>
-        {[...Array(daysInMonth)].map((_, i) => {
-          const day = i + 1;
-          const dateStr = formatDate(day);
-          return (
-            <div
-              key={day}
-              style={dayStyle(selectedDates.includes(dateStr))}
-              onClick={() => handleClick(day)}
-            >
-              {day}
-            </div>
-          );
-        })}
+        {weeks.map((week, weekIndex) =>
+          week.map((dayObj, dayIndex) => {
+            const { dateString, day, isCurrentMonth } = dayObj;
+            const isSelected = selectedDates.includes(dateString);
+
+            return (
+              <div
+                key={`${weekIndex}-${dayIndex}`}
+                style={{
+                  ...dayStyle(isSelected),
+                  opacity: isCurrentMonth ? 1 : 0.25,
+                }}
+                onClick={() => {
+                  if (!isCurrentMonth) return;
+                  handleClick(dateString);
+                }}
+              >
+                {day}
+              </div>
+            );
+          }),
+        )}
       </div>
     </div>
   );

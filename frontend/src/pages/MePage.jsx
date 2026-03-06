@@ -4,8 +4,6 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useSchedule } from "./schedules/useSchedule.js";
 import "./ProfileCard.css";
 
-import ScheduleCardLite from "../components/card/schedule/ScheduleCardLite.jsx";
-
 import { Button } from "@mui/material";
 import UndoIcon from "@mui/icons-material/Undo";
 
@@ -13,7 +11,7 @@ export default function MePage() {
   const { schedules } = useSchedule();
   const today = new Date().toISOString().split("T")[0];
   const todaySchedules = schedules.filter((s) =>
-    s.dates?.some((d) => d.start_date.startsWith(today))
+    s.dates?.some((d) => d.start_date.startsWith(today)),
   );
 
   const navigate = useNavigate();
@@ -53,16 +51,6 @@ export default function MePage() {
             ログアウト
           </Button>
         </div>
-      </div>
-
-      {/* 今日のスケジュールを表示するため */}
-      <div>
-        <h2 className="profile-title">今日の予定</h2>
-        {todaySchedules.map((s) => (
-          <div key={s.id}>
-            <ScheduleCardLite schedule={s} />
-          </div>
-        ))}
       </div>
     </div>
   );
