@@ -32,12 +32,14 @@
   background: #4a90e2;
   color: white;
 }
-
 .aside-btn.secondary {
   background: #ffd54f;
 }
 .aside-btn.cancel {
   background-color: gray;
+}
+.aside-btn.third {
+  background-color: darkorange;
 }
 
 @media (max-width: 768px) {

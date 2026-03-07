@@ -8,9 +8,9 @@ import MiniMonthNav from "../MiniMonthNav/MiniMonthNav";
 import useIsMobile from "../../../hooks/useIsMobile";
 import { useCategory } from "../../../pages/categories/categoryHandlers";
 import { useSchedule } from "../../../pages/schedules/useSchedule";
-import ScheduleForm from "../../../pages/schedules/ScheduleForm";
 import ScheduleAsideForm from "../ScheduleAsideForm/ScheduleAsideForm";
 import ScheduleAsideDetail from "../ScheduleAsideDetail";
+import CategoryAsidePage from "../../../pages/categories/CategoryAsidePage";
 
 export default function CalendarAside({
   selectedDate,
@@ -68,6 +68,8 @@ export default function CalendarAside({
             setIsDrawerOpen={setIsDrawerOpen}
           />
         );
+      case "category":
+        return <CategoryAsidePage setAsideMode={setAsideMode} />;
       default:
         return (
           <>
@@ -103,14 +105,21 @@ export default function CalendarAside({
                 仮押さえ登録
               </Button>
 
+              <Button
+                variant="contained"
+                className="aside-btn third"
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  setAsideMode("category");
+                  // resetForm();
+                  // closeButton;
+                }}
+              >
+                カテゴリー登録
+              </Button>
+
               <Link to="/me" className="dropdown-item">
                 マイページ
-              </Link>
-              <Link to="/categories" className="dropdown-item">
-                カテゴリー
-              </Link>
-              <Link to="/schedules" className="dropdown-item">
-                スケジュール
               </Link>
 
               {closeButton && (

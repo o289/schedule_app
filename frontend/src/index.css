@@ -31,7 +31,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   color: black;
-  background-color: white;
+  background: #f5f6f8;
   text-align: center;
   font-family: sans-serif;
 }
