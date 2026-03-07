@@ -4,9 +4,16 @@ import { apiFetch } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { useAlert } from "../../context/AlertContext";
 
+const initialTodo = {
+  title: "",
+  priority: "",
+  due_date: null,
+};
+
 export function useTodo(scheduleId) {
   const { accessToken, refreshToken, handleRefresh, clearSession } = useAuth();
   const { showAlert } = useAlert();
+  const [formData, setFormData] = useState(initialTodo);
 
   const [todos, setTodos] = useState([]);
 
@@ -17,7 +24,7 @@ export function useTodo(scheduleId) {
     const res = await apiFetch(
       `${base_todo_url}`,
       { method: "GET" },
-      { accessToken, refreshToken, handleRefresh, clearSession }
+      { accessToken, refreshToken, handleRefresh, clearSession },
     );
     setTodos(res);
   };
@@ -30,9 +37,10 @@ export function useTodo(scheduleId) {
         method: "POST",
         body: JSON.stringify({ ...newTodo, schedule_id: scheduleId }),
       },
-      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert },
     );
     fetchTodos();
+    setFormData(initialTodo);
     showAlert("CREATE_SUCCESS");
   };
 
@@ -44,7 +52,7 @@ export function useTodo(scheduleId) {
         method: "PUT",
         body: JSON.stringify(payload),
       },
-      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert },
     );
     fetchTodos();
     showAlert("UPDATE_SUCCESS");
@@ -55,7 +63,7 @@ export function useTodo(scheduleId) {
     await apiFetch(
       `${base_todo_url}${todoId}`,
       { method: "DELETE" },
-      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert },
     );
     fetchTodos();
     showAlert("DELETE_SUCCESS");
@@ -63,6 +71,8 @@ export function useTodo(scheduleId) {
 
   return {
     todos,
+    formData,
+    setFormData,
     fetchTodos,
     handleTodoCreate,
     handleTodoUpdate,

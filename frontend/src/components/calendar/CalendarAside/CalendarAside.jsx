@@ -99,23 +99,21 @@ export default function CalendarAside({
 
               <Button
                 variant="contained"
-                className="aside-btn secondary"
-                startIcon={<AddIcon />}
-              >
-                仮押さえ登録
-              </Button>
-
-              <Button
-                variant="contained"
                 className="aside-btn third"
                 startIcon={<AddIcon />}
                 onClick={() => {
                   setAsideMode("category");
-                  // resetForm();
-                  // closeButton;
                 }}
               >
                 カテゴリー登録
+              </Button>
+
+              <Button
+                variant="contained"
+                className="aside-btn secondary"
+                startIcon={<AddIcon />}
+              >
+                仮押さえ登録
               </Button>
 
               <Link to="/me" className="dropdown-item">

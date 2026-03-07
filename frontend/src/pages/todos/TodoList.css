@@ -32,6 +32,10 @@
   gap: 0.5rem;
 }
 
+.todo-title span {
+  width: 100%;
+}
+
 .todo-meta {
   font-size: 0.85rem;
   color: #666;
