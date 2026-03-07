@@ -31,7 +31,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   color: black;
-  background-color: white;
+  background: #f5f6f8;
   text-align: center;
   font-family: sans-serif;
 }
@@ -41,8 +41,6 @@ h1 {
   line-height: 1.1;
   margin-top: 0;
 }
-
-
 
 @media (prefers-color-scheme: light) {
   :root {
@@ -57,7 +55,6 @@ h1 {
   }
 }
 
-
 /* カードデザイン */
 
 /* 共通カードデザイン */
@@ -67,8 +64,8 @@ h1 {
   padding: 1.5rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 
-  display: flex;         /* デフォルトは横並び */
-  gap: 1rem;             /* 子要素の余白 */
+  display: flex; /* デフォルトは横並び */
+  gap: 1rem; /* 子要素の余白 */
   margin: 1rem auto;
   max-width: 900px;
   width: 100%;
@@ -78,7 +75,7 @@ h1 {
 /* レスポンシブ対応（スマホ以下は縦並び） */
 @media (max-width: 768px) {
   .card {
-    display: block;      /* フレックス解除 */
+    display: block; /* フレックス解除 */
     padding: 1rem;
   }
 }

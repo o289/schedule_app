@@ -4,9 +4,9 @@ import { useAuth } from "../../context/AuthContext";
 import { apiFetch } from "../../api/client";
 import { useCategory } from "../categories/categoryHandlers";
 import { useDateTime } from "../schedules/useDateTime";
-import { getNowDateTime, getNowPlusOneHour } from "../../utils/date";
 import useLoading from "../../hooks/useLoading";
 import { useAlert } from "../../context/AlertContext";
+import { useScheduleForm } from "../../hooks/schedule/useScheduleForm";
 
 export function useSchedule(id = null) {
   const { accessToken, refreshToken, handleRefresh, clearSession } = useAuth();
@@ -15,20 +15,9 @@ export function useSchedule(id = null) {
   const [schedule, setSchedule] = useState(null);
   const [schedules, setSchedules] = useState([]);
 
-  const { selectedDate, selectedDates, setSelectedDates } =
-    useDateTime(schedules);
-
-  const [isCreating, setIsCreating] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-
+  const { draftSchedule, setDraftSchedule, resetDraft, handleChange } =
+    useScheduleForm();
   const { isFetching, startFetching, stopFetching } = useLoading();
-
-  const [formData, setFormData] = useState({
-    title: "",
-    note: "",
-    dates: [],
-    category_id: "",
-  });
 
   const navigate = useNavigate();
 
@@ -43,7 +32,7 @@ export function useSchedule(id = null) {
       const res = await apiFetch(
         base_url,
         { method: "GET" },
-        { accessToken, refreshToken, handleRefresh, clearSession }
+        { accessToken, refreshToken, handleRefresh, clearSession },
       );
       setSchedules(res);
     } finally {
@@ -58,15 +47,9 @@ export function useSchedule(id = null) {
       const res = await apiFetch(
         `${base_url}${id}`,
         { method: "GET" },
-        { accessToken, refreshToken, handleRefresh, clearSession }
+        { accessToken, refreshToken, handleRefresh, clearSession },
       );
       setSchedule(res);
-      setFormData({
-        title: res.title,
-        note: res.note || "",
-        dates: res.dates || [],
-        category_id: res.category_id,
-      });
     } finally {
       stopFetching();
     }
@@ -78,20 +61,13 @@ export function useSchedule(id = null) {
 
     await apiFetch(
       base_url,
-      { method: "POST", body: JSON.stringify(formData) },
-      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
+      { method: "POST", body: JSON.stringify(draftSchedule) },
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert },
     );
 
-    resetForm();
-    setIsCreating(false);
-    fetchSchedules();
-    navigate("/schedules");
+    resetDraft();
+    await fetchSchedules();
     showAlert("CREATE_SUCCESS");
-  };
-
-  // --- 入力変更 ---
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   // --- 更新 ---
@@ -99,8 +75,8 @@ export function useSchedule(id = null) {
     e.preventDefault();
 
     const payload = {
-      ...formData,
-      dates: formData.dates.map((d) => ({
+      ...draftSchedule,
+      dates: draftSchedule.dates.map((d) => ({
         id: d.id || crypto.randomUUID(), // ← idを維持または生成
         start_date: d.start_date,
         end_date: d.end_date,
@@ -108,16 +84,15 @@ export function useSchedule(id = null) {
     };
 
     await apiFetch(
-      `${base_url}${id}`,
+      `${base_url}${draftSchedule.id}`,
       {
         method: "PUT",
         body: JSON.stringify(payload),
       },
-      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert },
     );
 
-    setIsEditMode(false);
-    navigate(`/schedules`);
+    await fetchSchedules();
     showAlert("UPDATE_SUCCESS");
   };
 
@@ -125,22 +100,12 @@ export function useSchedule(id = null) {
   const handleScheduleDelete = async () => {
     if (!window.confirm("本当に削除しますか？")) return;
     await apiFetch(
-      `${base_url}${id}`,
+      `${base_url}${draftSchedule.id}`,
       { method: "DELETE" },
-      { accessToken, refreshToken, handleRefresh, clearSession, showAlert }
+      { accessToken, refreshToken, handleRefresh, clearSession, showAlert },
     );
-    navigate("/schedules");
+    await fetchSchedules();
     showAlert("DELETE_SUCCESS");
-  };
-
-  // フォームを初期値に戻す
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      note: "",
-      dates: [],
-      category_id: "",
-    });
   };
 
   return {
@@ -149,14 +114,12 @@ export function useSchedule(id = null) {
     isFetching,
     fetchSchedules,
     fetchSchedule,
-    formData,
+    draftSchedule,
+    setDraftSchedule,
+    resetDraft,
     handleScheduleCreate,
-    isCreating,
-    setIsCreating,
     handleChange,
     handleScheduleUpdate,
-    isEditMode,
-    setIsEditMode,
     handleScheduleDelete,
   };
 }
