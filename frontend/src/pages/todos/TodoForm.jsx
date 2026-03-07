@@ -6,7 +6,7 @@ import { PRIORITIES } from "../../constants/priority";
 export default function TodoForm({ formData, onChange, onSubmit, onCancel }) {
   return (
     <BaseForm onSubmit={onSubmit} onCancel={onCancel} submitLabel="ToDo追加">
-      <FormField label="タイトル">
+      <FormField label="タスク">
         <input
           type="text"
           name="title"

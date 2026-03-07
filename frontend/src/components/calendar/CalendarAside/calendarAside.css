@@ -1,0 +1,50 @@
+.calendar-aside {
+  width: 280px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border-right: 1px solid #eee;
+  background: #fafafa;
+  height: 100%;
+}
+
+.aside-mini {
+  display: flex;
+  justify-content: center;
+}
+
+.aside-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aside-btn {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.aside-btn.primary {
+  background: #4a90e2;
+  color: white;
+}
+.aside-btn.secondary {
+  background: #ffd54f;
+}
+.aside-btn.cancel {
+  background-color: gray;
+}
+.aside-btn.third {
+  background-color: darkorange;
+}
+
+@media (max-width: 768px) {
+  .calendar-aside {
+    width: 100%;
+    border-right: none;
+  }
+}

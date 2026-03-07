@@ -10,16 +10,23 @@ export function useDateTime(schedules) {
       return;
     }
 
-    // 各 schedule の中の dates を展開して FullCalendar 用イベントに変換
     const allEvents = schedules.flatMap((s) =>
       (s.dates || []).map((d) => ({
         id: d.id,
-        scheduleId: s.id,
         title: s.title,
         start: d.start_date,
         end: d.end_date,
-        categoryColor: s.category?.color || "gray",
-      }))
+        allDay: false,
+
+        color: s.category?.color || "#000000",
+        borderColor: "transparent",
+        textColor: "#ffffff",
+
+        extendedProps: {
+          // scheduleId: s.id, // ← ここへ移動
+          schedule: s,
+        },
+      })),
     );
 
     setEvents(allEvents);
@@ -36,7 +43,7 @@ export function useDateTime(schedules) {
 // Single Source of Truth は formData.dates
 export function handleDateTime(formData, onChange) {
   const [dates, setDates] = useState(
-    Array.isArray(formData.dates) ? formData.dates : []
+    Array.isArray(formData.dates) ? formData.dates : [],
   );
   // formData.dates を唯一の真実として同期する
   useEffect(() => {
@@ -46,56 +53,76 @@ export function handleDateTime(formData, onChange) {
       setDates([]);
     }
   }, [formData.dates]);
+
+  // --- 編集時：最も多い時間帯を代表値として start / end に反映 ---
+  const extractTime = (dateTime) =>
+    typeof dateTime === "string" ? dateTime.slice(11, 16) : "";
+
+  const getMostCommonTimePair = (datesArray) => {
+    const counter = {};
+
+    datesArray.forEach((d) => {
+      const startTime = extractTime(d.start_date);
+      const endTime = extractTime(d.end_date);
+      const key = `${startTime}-${endTime}`;
+      counter[key] = (counter[key] || 0) + 1;
+    });
+
+    let maxCount = 0;
+    let mostCommonKey = null;
+
+    Object.entries(counter).forEach(([key, count]) => {
+      if (count > maxCount) {
+        maxCount = count;
+        mostCommonKey = key;
+      }
+    });
+
+    if (!mostCommonKey) return { start: "", end: "" };
+
+    const [mostStart, mostEnd] = mostCommonKey.split("-");
+    return { start: mostStart, end: mostEnd };
+  };
+
+  useEffect(() => {
+    if (Array.isArray(formData.dates) && formData.dates.length > 0) {
+      const { start: mostStart, end: mostEnd } = getMostCommonTimePair(
+        formData.dates,
+      );
+      setStart(mostStart);
+      setEnd(mostEnd);
+    }
+  }, [formData.dates]);
+
   const [selectedDates, setSelectedDates] = useState([]);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
 
   const [datesDisable, setDatesDisable] = useState(false);
 
-  const addDate = (selectedDates) => {
-    if (
-      !Array.isArray(selectedDates) ||
-      !selectedDates ||
-      selectedDates.length === 0 ||
-      !start ||
-      !end
-    )
-      return;
+  const addDate = (dateString) => {
+    if (!start || !end) return;
 
-    const newDateObjects = selectedDates.map((dateObj) => {
-      const dateStr =
-        typeof dateObj === "object" && dateObj.start_date
-          ? dateObj.start_date.split("T")[0]
-          : dateObj;
+    const startDateTime = `${dateString}T${start}`;
+    const endDateTime = `${dateString}T${end}`;
 
-      const startDateTime = `${dateStr}T${start}`;
-      const endDateTime = `${dateStr}T${end}`;
-      return { start_date: startDateTime, end_date: endDateTime };
-    });
+    const normalize = (str) => str.slice(0, 16);
 
-    // 既存datesと重複を除外して結合
-    const normalize = (str) => str.slice(0, 16); // "YYYY-MM-DDTHH:mm" まで
-    const uniqueDates = newDateObjects.filter(
-      (d) =>
-        !dates.some(
-          (existing) =>
-            normalize(existing.start_date) === normalize(d.start_date) &&
-            normalize(existing.end_date) === normalize(d.end_date)
-        )
+    const exists = dates.some(
+      (existing) =>
+        normalize(existing.start_date) === normalize(startDateTime) &&
+        normalize(existing.end_date) === normalize(endDateTime),
     );
 
-    if (uniqueDates.length === 0) return;
+    if (exists) return;
 
-    const newDates = [...dates, ...uniqueDates];
+    const newDates = [
+      ...dates,
+      { start_date: startDateTime, end_date: endDateTime },
+    ];
+
     setDates(newDates);
-
-    // onChange で親フォームに反映
     onChange({ target: { name: "dates", value: newDates } });
-
-    // 入力をリセット
-    setSelectedDates([]);
-    setStart("");
-    setEnd("");
   };
 
   const removeDate = (index) => {
