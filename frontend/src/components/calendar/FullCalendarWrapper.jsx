@@ -12,7 +12,7 @@ const FullCalendarWrapper = forwardRef(function FullCalendarWrapper(
   {
     events = [],
     selectedDate,
-    setSelectedDate,
+    setSelectedEvent,
     currentView,
     onDateClick,
     setDraftSchedule,
@@ -111,8 +111,8 @@ const FullCalendarWrapper = forwardRef(function FullCalendarWrapper(
         hour12: false,
       }}
       eventClick={(info) => {
+        setSelectedEvent(info.event)
         setDraftSchedule(info.event.extendedProps.schedule);
-        setSelectedDate(info.event.start);
         if (setIsDrawerOpen) {
           setIsDrawerOpen(true);
         }

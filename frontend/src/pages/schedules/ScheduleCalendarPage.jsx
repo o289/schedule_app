@@ -4,6 +4,7 @@ import { useCategory } from "../categories/categoryHandlers";
 import { useDateTime } from "../schedules/useDateTime";
 import { useSchedule } from "../schedules/useSchedule";
 import { useScheduleForm } from "../../hooks/schedule/useScheduleForm";
+import { useCalendarEvents } from "../../components/calendar/useCalendarEvent";
 
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -33,8 +34,8 @@ export default function ScheduleCalendarPage() {
     handleChange,
   } = useSchedule();
 
-  const { handleDateClick, events } = useDateTime(schedules);
-
+  const { handleDateClick } = useDateTime(schedules);
+  const { events } = useCalendarEvents(schedules);
   const [asideMode, setAsideMode] = useState(null);
 
   // =============================
@@ -42,6 +43,7 @@ export default function ScheduleCalendarPage() {
   // =============================
 
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [currentView, setCurrentView] = useState("week");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -90,6 +92,7 @@ export default function ScheduleCalendarPage() {
         <CalendarAside
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
+          selectedEvent={selectedEvent}
           onDayClick={handleDaySelect}
           onWeekClick={handleWeekSelect}
           draftSchedule={draftSchedule}
@@ -120,7 +123,7 @@ export default function ScheduleCalendarPage() {
             }}
             setDraftSchedule={setDraftSchedule}
             setAsideMode={setAsideMode}
-            setSelectedDate={setSelectedDate}
+            setSelectedEvent={setSelectedEvent}
           />
         </div>
       </div>
@@ -157,7 +160,7 @@ export default function ScheduleCalendarPage() {
         }}
         setDraftSchedule={setDraftSchedule}
         setAsideMode={setAsideMode}
-        setSelectedDate={setSelectedDate}
+        setSelectedEvent={setSelectedEvent}
         setIsDrawerOpen={setIsDrawerOpen}
       />
 
@@ -168,6 +171,7 @@ export default function ScheduleCalendarPage() {
             <CalendarAside
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}
+              selectedEvent={selectedEvent}
               onDayClick={handleDaySelect}
               onWeekClick={handleWeekSelect}
               draftSchedule={draftSchedule}
