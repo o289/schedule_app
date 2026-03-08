@@ -9,12 +9,13 @@ import { Delete as DeleteIcon } from "@mui/icons-material";
 import TodoList from "../../pages/todos/TodoList";
 import TodoForm from "../../pages/todos/TodoForm";
 import { useTodo } from "../../pages/todos/useTodo";
-
+import { formatDateTime } from "../../utils/date";
+import "./scheduleAsideDetail.css"
 export default function ScheduleAsideDetail({
   schedule,
   handleScheduleDelete,
   setAsideMode,
-  selectedDate,
+  selectedEvent,
   setIsDrawerOpen = null,
 }) {
   if (!schedule) {
@@ -22,14 +23,17 @@ export default function ScheduleAsideDetail({
   }
 
   const [openForm, setOpenForm] = useState(false);
-  const selectedDateStr = selectedDate
-    ? new Date(selectedDate).toISOString().slice(0, 10)
+  const start = selectedEvent?.start;
+  const end = selectedEvent?.end;
+
+  const selectedDateStr = start
+    ? formatDateTime(start, "date")
     : null;
 
   const otherDates = Array.isArray(schedule?.dates)
     ? schedule.dates.filter((d) => {
         if (!selectedDateStr) return true;
-        const dStr = new Date(d.start_date).toISOString().slice(0, 10);
+        const dStr = formatDateTime(d.start_date,"date")
         return dStr !== selectedDateStr;
       })
     : [];
@@ -60,16 +64,19 @@ export default function ScheduleAsideDetail({
             setIsDrawerOpen(false);
           }
         }}
+        className="mui-button"
       >
         戻る
       </Button>
 
       <Button
         type="button"
+        color="warning"
         variant="contained"
         onClick={() => {
           setAsideMode("edit");
         }}
+        className="mui-button"
       >
         編集
       </Button>
@@ -77,18 +84,24 @@ export default function ScheduleAsideDetail({
       <Button
         type="button"
         variant="contained"
+        color="error"
         startIcon={<DeleteIcon />}
         onClick={() => {
           handleScheduleDelete();
           setAsideMode(null);
         }}
+        className="mui-button"
       >
         削除
       </Button>
 
       <h2>{schedule.title}</h2>
 
-      <h3>{selectedDateStr || "日付不明"}</h3>
+      <h3>{formatDateTime(start, "date") || "日付不明"}</h3>
+
+      <p>
+        {formatDateTime(start,"time")} - {formatDateTime(end,"time")}
+      </p>
 
       <div>
         <strong>カテゴリー:</strong> {schedule.category?.name || "なし"}
@@ -140,6 +153,7 @@ export default function ScheduleAsideDetail({
           <Button
             type="button"
             variant="contained"
+            className="mui-button"
             onClick={() => {
               setOpenForm(true);
             }}

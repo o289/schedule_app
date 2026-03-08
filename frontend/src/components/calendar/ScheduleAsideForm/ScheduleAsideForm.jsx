@@ -153,7 +153,7 @@ export default function ScheduleAsideForm({
                   return (
                     <div
                       key={`${weekIndex}-${dayIndex}`}
-                      className={`day ${isSelected ? "selected" : ""}`}
+                      className={`day ${isSelected ? "selected" : ""}${!isCurrentMonth ? "other-month" : ""}`}
                       onClick={() => {
                         if (!isCurrentMonth) return;
                         handleClick(dateString);

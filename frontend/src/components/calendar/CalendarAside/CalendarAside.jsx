@@ -1,6 +1,9 @@
+import { useAuth } from "../../../context/AuthContext.jsx";
+
 import { Button } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
+import UndoIcon from "@mui/icons-material/Undo";
 import { Link } from "react-router-dom";
 
 import "./calendarAside.css";
@@ -15,6 +18,7 @@ import CategoryAsidePage from "../../../pages/categories/CategoryAsidePage";
 export default function CalendarAside({
   selectedDate,
   setSelectedDate,
+  selectedEvent,
   onDayClick,
   onWeekClick,
   draftSchedule,
@@ -30,6 +34,12 @@ export default function CalendarAside({
   closeButton = null,
 }) {
   const isMobile = useIsMobile();
+
+  const {user, handleLogout} = useAuth();
+  const onLogout = () => {
+    if (!window.confirm("ログアウトしますか？")) return;
+    handleLogout()
+  }
 
   function renderAsideContent() {
     switch (asideMode) {
@@ -65,6 +75,7 @@ export default function CalendarAside({
             handleScheduleDelete={handleScheduleDelete}
             setAsideMode={setAsideMode}
             selectedDate={selectedDate}
+            selectedEvent={selectedEvent}
             setIsDrawerOpen={setIsDrawerOpen}
           />
         );
@@ -108,17 +119,24 @@ export default function CalendarAside({
                 カテゴリー登録
               </Button>
 
-              <Button
+              {/* <Button
                 variant="contained"
                 className="aside-btn secondary"
                 startIcon={<AddIcon />}
               >
                 仮押さえ登録
+              </Button> */}
+              <Button
+                variant="contained"
+                color="error"
+                startIcon={<UndoIcon />}
+                onClick={onLogout}
+              >
+                ログアウト
               </Button>
 
-              <Link to="/me" className="dropdown-item">
-                マイページ
-              </Link>
+              <p>ユーザー: {user.email}</p>
+              
 
               {closeButton && (
                 <Button

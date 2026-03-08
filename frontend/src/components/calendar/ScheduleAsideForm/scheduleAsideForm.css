@@ -68,6 +68,9 @@ textarea {
   border-radius: 6px;
   cursor: pointer;
 }
+.day.other-month {
+  color: #aaa;
+}
 
 .day:hover {
   background: #e6f0ff;
