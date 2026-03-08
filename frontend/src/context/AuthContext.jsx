@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect, useRef } from "react";
 import { apiFetch } from "../api/client";
 import { useAlert } from "./AlertContext";
 
@@ -12,6 +12,7 @@ export function AuthProvider({ children }) {
 
   const { showAlert } = useAlert();
 
+  const refreshPromiseRef = useRef(null);
   const authFetch = (url, options = {}, fetchOptions = {}) => {
     return apiFetch(url, options, {
       accessToken,
@@ -53,23 +54,38 @@ export function AuthProvider({ children }) {
     const token = tokenOverride || refreshToken;
     if (!token) return false;
 
-    const res = await apiFetch(
-      "/auth/refresh",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refresh_token: token }),
-      },
-      { showAlert }
-    );
-
-    if (res?.data?.access_token) {
-      setAccessToken(res.data.access_token);
-      localStorage.setItem("accessToken", res.data.access_token);
-      return res.data.access_token;
+    if (refreshPromiseRef.current) {
+      return refreshPromiseRef.current;
     }
 
-    return false;
+    refreshPromiseRef.current = (async () => {
+      try {
+        const res = await apiFetch(
+          "/auth/refresh",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refresh_token: token }),
+          },
+          { showAlert }
+        );
+
+        if (res?.data?.access_token) {
+          const newToken = res.data.access_token;
+
+          setAccessToken(newToken);
+          localStorage.setItem("accessToken", newToken);
+
+          return newToken;
+        }
+
+        return false;
+      } finally {
+        refreshPromiseRef.current = null;
+      }
+    })();
+
+    return refreshPromiseRef.current;
   };
 
   // 初期化: localStorageから復元
@@ -78,22 +94,29 @@ export function AuthProvider({ children }) {
     const savedRefresh = localStorage.getItem("refreshToken");
 
     const initAuth = async () => {
-      if (savedAccess && savedRefresh) {
-        setAccessToken(savedAccess);
-        setRefreshToken(savedRefresh);
+      try {
+        if (savedRefresh) {
 
-        // ここで必ずリフレッシュ
-        const newToken = await handleRefresh(savedRefresh);
-        if (newToken) {
-          const me = await apiFetch(
-            "/auth/me",
-            { method: "GET" },
-            { accessToken: newToken, showAlert }
-          );
-          setUser(me);
+          const newToken = await handleRefresh(savedRefresh);
+
+          if (newToken) {
+            setAccessToken(newToken);
+            setRefreshToken(savedRefresh);
+
+            const me = await apiFetch(
+              "/auth/me",
+              { method: "GET" },
+              { accessToken: newToken, showAlert }
+            );
+
+            setUser(me);
+          }
         }
+      } catch (error) {
+        clearSession();
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false); // ← リフレッシュが終わってから
     };
 
     initAuth();
