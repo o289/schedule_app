@@ -17,6 +17,7 @@
 ## 2. 機能
 
 ### ベース機能
+
 - パスキーログイン
 - スケジュールの CRUD
 - カテゴリ管理（色分け）
@@ -36,7 +37,7 @@
 
 - 言語: Python, javascript
 - Backend: FastAPI / SQLAlchemy / Alembic
-- Frontend: React / MUI  
+- Frontend: React / MUI
 - Auth: JWT, webAuthn
 - Infra: Docker Compose / Nginx / XServer VPS / Cloudflare
 - DB: PostgreSQL（開発環境から本番同等を想定）
@@ -65,7 +66,9 @@
 
 ---
 
-## 4. アーキテクチャ
+## 4. アーキテクチャ・アプリケーション構成図
+
+### アーキテクチャ
 
 ```mermaid
 flowchart TD
@@ -76,7 +79,24 @@ Cloudflare --> Nginx
 Nginx --> FastAPI
 FastAPI --> PostgreSQL
 ```
+
 Docker Composeでコンテナ管理
+
+### アプリケーション構成図
+
+```mermaid
+flowchart TD
+
+React[React Frontend] --> Router[FastAPI Router]
+Router --> Service[Service Layer]
+Service --> Repo[Repository Layer]
+Repo --> DB[(PostgreSQL)]
+```
+
+RouterではHTTP処理のみを行い、ビジネスロジックはService層にまとめました。
+これによりAPIの変更と業務ロジックの変更を分離できるようにしています。
+
+---
 
 ---
 
@@ -140,6 +160,7 @@ erDiagram
 フロントエンドでの処理を簡潔にするため、APIレスポンス形式を統一した。
 
 **Backend Response**
+
 ```code
 {
   status_code,
@@ -147,7 +168,9 @@ erDiagram
   message
 }
 ```
+
 **Frontend AlertMessage**
+
 ```code
 {
   type: success | warning | error
@@ -163,8 +186,8 @@ erDiagram
 
 main: 本番
 release: テスト環境
-feature/*: 機能開発
-hotfix/*: 緊急修正
+feature/_: 機能開発
+hotfix/_: 緊急修正
 
 mainブランチは直接編集せず、feature → release → main の流れで管理。
 
