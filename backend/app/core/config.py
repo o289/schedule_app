@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
 
 class Settings(BaseSettings):
@@ -23,8 +24,7 @@ class Settings(BaseSettings):
     API_PORT: int = 8000
     WEB_PORT: int = 3000
 
-    class Config:
-        env_file = ".env"  # プロジェクトルートの.envを読み込む
+    model_config = ConfigDict(env_file=".env")
 
     # 組み立て用プロパティ
     @property
