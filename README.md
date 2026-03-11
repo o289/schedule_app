@@ -162,17 +162,32 @@ erDiagram
 ```code
 {
   status_code,
-  code,
-  message
+  code
+}
+```
+
+```python
+# 例
+{
+  status_code: 400,
+  code: "INVALID_TIME"
 }
 ```
 
 **Frontend AlertMessage**
 
 ```code
-{
+CODE: {
   type: success | warning | error
   message: string
+}
+```
+
+```javascript
+// 例
+INVALID_TIME: {
+  type: "warning",
+  message: "終了時刻を開始時刻より前に入力しないでください",
 }
 ```
 
