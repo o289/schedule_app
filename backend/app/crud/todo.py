@@ -13,7 +13,7 @@ class TodoRepository(BaseRepository):
     # --- 作成 ---
     def create(self, todo_in: TodoCreate, schedule_id: UUID) -> Todo:
         todo = self.base_create_instance(
-            model=Todo, schema_in=todo_in, extra={"schedule_id": schedule_id}
+            model=self.model, schema_in=todo_in, extra={"schedule_id": schedule_id}
         )
         return self.base_add(todo)
 
@@ -27,7 +27,7 @@ class TodoRepository(BaseRepository):
 
     # --- 削除 ---
     def delete(self, todo_id: UUID) -> bool:
-        obj = self.db.query(Todo).filter(Todo.id == todo_id).first()
+        obj = self.db.query(self.model).filter(self.model.id == todo_id).first()
         if not obj:
             return False
         return self.base_delete(obj)  # ← オブジェクトを渡す
