@@ -18,8 +18,9 @@ services:
       dockerfile: Dockerfile.prod
     image: schedule_app-backend-stg:latest
     environment:
+      - POSTGRES_HOST=db-stg
       - RP_ID=stg-sukejuru.yudais-prod.com
-      - ORIGIN=https://stg-sukejuru.yudais-prod.com:8443
+      - ORIGIN=https://stg-sukejuru.yudais-prod.com
     depends_on:
       db-stg:
         condition: service_healthy
