@@ -1,61 +1,50 @@
+x-common: &common
+  env_file: ../../.env.prod
+  networks:
+    - schedule_app_net
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
-  backend:
+  backend-prod:
+    <<: *common
     working_dir: /app
     build:
       context: ../../backend
       dockerfile: Dockerfile.prod
     image: schedule_app-backend:latest
-    restart: always
-    env_file: ../../.env.prod
     depends_on:
-      - db
-    networks:
-      - schedule_app_prod_net
+      db-prod:
+        condition: service_healthy
 
-  frontend:
+  frontend-prod:
+    <<: *common
     build:
       context: ../../frontend
       dockerfile: Dockerfile.prod
       args:
         VITE_API_URL: /api
     image: schedule_app-frontend:latest
-    env_file:
-      - ../../.env.prod
-    restart: always
-    ports:
-      - "80:80"
     depends_on:
-      - backend
-    networks:
-      - schedule_app_prod_net
-
-  ingress-nginx:
-    image: nginx:alpine
-    container_name: ingress-nginx-prod
-    ports:
-      - "443:443"
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - ../../infra/nginx/ingress.common.conf:/etc/nginx/ingress.common.conf:ro
-      - ../../infra/nginx/ingress.prod.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - schedule_app_prod_net
-
-  db:
+      - backend-prod
+  db-prod:
+    <<: *common
     image: postgres:15
-    restart: always
-    env_file: ../../.env.prod
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - schedule_app_prod_net
+      - postgres_data_prod:/var/lib/postgresql/data
 
 volumes:
-  postgres_data:
+  postgres_data_prod:
 
 networks:
-  schedule_app_prod_net:
-    driver: bridge
+  schedule_app_net:
+    external: true
