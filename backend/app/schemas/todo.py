@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 from datetime import date, datetime
 from typing import Optional
@@ -27,5 +27,4 @@ class TodoResponse(TodoBase):
     id: UUID
     done_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

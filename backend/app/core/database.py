@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, Column
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import sessionmaker, Session
 from app.core.config import settings
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 
 engine = create_engine(settings.DATABASE_URL)

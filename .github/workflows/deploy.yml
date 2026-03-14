@@ -137,7 +137,7 @@ jobs:
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             echo "🔨 Build backend and frontend images (no-cache)..."
-            docker compose -f infra/docker/docker-compose.prod.yml build --no-cache backend frontend
+            docker compose -f infra/docker/docker-compose.prod.yml build --no-cache backend-prod frontend-prod
 
   migrate:
     needs: build
@@ -154,7 +154,7 @@ jobs:
             # Check for new migration files
             if [ "$(ls -A backend/alembic/versions/*.py 2>/dev/null)" ]; then
               echo "🗄️ Running Alembic migrations..."
-              docker compose -f infra/docker/docker-compose.prod.yml run --rm backend alembic upgrade head
+              docker compose -f infra/docker/docker-compose.prod.yml run --rm backend-prod alembic upgrade head
             else
               echo "ℹ️ No Alembic migration files detected, skipping."
             fi
@@ -190,8 +190,8 @@ jobs:
                 docker load -i "$FRONTEND_IMAGE"
 
                 # DBコンテナは止めずに、アプリケーションだけ再起動
-                docker compose -f infra/docker/docker-compose.prod.yml stop backend frontend || true
-                docker compose -f infra/docker/docker-compose.prod.yml rm -f backend frontend || true
+                docker compose -f infra/docker/docker-compose.prod.yml stop backend-prod frontend-prod || true
+                docker compose -f infra/docker/docker-compose.prod.yml rm -f backend-prod frontend-prod || true
                 docker compose -f infra/docker/docker-compose.prod.yml up -d --no-build
 
                 echo "✅ Rolled back to stable version (DB preserved)."
@@ -266,13 +266,13 @@ jobs:
             fi
 
             echo "🛑 Stopping backend and frontend containers..."
-            docker compose -f infra/docker/docker-compose.prod.yml stop backend frontend || true
+            docker compose -f infra/docker/docker-compose.prod.yml stop backend-prod frontend-prod || true
 
             echo "🗑️ Removing backend and frontend containers..."
-            docker compose -f infra/docker/docker-compose.prod.yml rm -f backend frontend || true
+            docker compose -f infra/docker/docker-compose.prod.yml rm -f backend-prod frontend-prod || true
 
             echo "🚀 Starting backend and frontend containers with restored images..."
-            docker compose -f infra/docker/docker-compose.prod.yml up -d --no-build backend frontend
+            docker compose -f infra/docker/docker-compose.prod.yml up -d --no-build backend-prod frontend-prod
 
             echo "✅ Rollback completed. Backend and frontend containers restored. DB container is preserved."
 

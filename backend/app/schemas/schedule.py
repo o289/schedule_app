@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator, conlist
+from pydantic import BaseModel, ConfigDict, conlist
 from uuid import UUID
 from datetime import datetime
 from typing import Optional, List
@@ -24,8 +24,7 @@ class ScheduleDateUpdate(BaseModel):
 class ScheduleDateResponse(ScheduleDateBase):
     id: UUID
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # --- 本クラス ---
@@ -53,5 +52,4 @@ class ScheduleResponse(ScheduleBase):
     dates: List[ScheduleDateResponse]
     category: CategoryBase  # ← レスポンス専用にネスト
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
