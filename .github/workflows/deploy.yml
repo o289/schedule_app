@@ -96,7 +96,7 @@ jobs:
           script: |
             cd /home/${{ secrets.VPS_USER }}/schedule_app
             echo "🧹 Cleaning invalid and orphaned schedules..."
-            docker compose -f infra/docker/docker-compose.prod.yml exec -T db-prod \
+            docker compose -f infra/docker/docker-compose.prod.yml exec -T db \
             psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
             "DELETE FROM schedule_dates WHERE end_date <= start_date; \
              DELETE FROM schedules WHERE NOT EXISTS (SELECT 1 FROM schedule_dates WHERE schedule_dates.schedule_id = schedules.id);"
@@ -115,16 +115,16 @@ jobs:
             mkdir -p backups
 
             echo "🔄 Restarting DB container to ensure env is loaded..."
-            docker compose -f infra/docker/docker-compose.prod.yml up -d db-prod
+            docker compose -f infra/docker/docker-compose.prod.yml up -d db
 
             echo "⏳ Waiting for PostgreSQL to be ready..."
-            until docker compose -f infra/docker/docker-compose.prod.yml exec -T db-prod \
+            until docker compose -f infra/docker/docker-compose.prod.yml exec -T db \
               pg_isready -U "$POSTGRES_USER"; do
               sleep 2
             done
 
             echo "💾 Taking database backup..."
-            docker compose -f infra/docker/docker-compose.prod.yml exec -T db-prod \
+            docker compose -f infra/docker/docker-compose.prod.yml exec -T db \
               sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' \
               > backups/backup_$(date +%F_%H-%M).sql
 
