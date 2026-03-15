@@ -1,6 +1,6 @@
 # backend/app/schemas/challenge.py
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
 from typing import Literal
@@ -29,4 +29,5 @@ class ChallengeResponse(BaseModel):
     type: str
     expires_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True

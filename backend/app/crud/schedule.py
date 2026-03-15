@@ -35,8 +35,8 @@ class ScheduleRepository(BaseRepository):
     # --- 削除 ---
     def delete(self, schedule_id: UUID, user_id: UUID) -> bool:
         obj = (
-            self.db.query(self.model)
-            .filter(self.model.id == schedule_id, self.model.user_id == user_id)
+            self.db.query(Schedule)
+            .filter(Schedule.id == schedule_id, Schedule.user_id == user_id)
             .first()
         )
         if not obj:

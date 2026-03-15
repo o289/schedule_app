@@ -12,7 +12,7 @@ class CategoryRepository(BaseRepository):
     # --- 作成 ---
     def create(self, category_in: CategoryCreate, user_id: UUID) -> Category:
         category = self.base_create_instance(
-            model=self.model, schema_in=category_in, extra={"user_id": user_id}
+            model=Category, schema_in=category_in, extra={"user_id": user_id}
         )
 
         return self.base_add(category)
@@ -28,8 +28,8 @@ class CategoryRepository(BaseRepository):
     # --- 削除 ---
     def delete(self, category_id: UUID, user_id: UUID) -> bool:
         obj = (
-            self.db.query(self.model)
-            .filter(self.model.id == category_id, self.model.user_id == user_id)
+            self.db.query(Category)
+            .filter(Category.id == category_id, Category.user_id == user_id)
             .first()
         )
         if not obj:

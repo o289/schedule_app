@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from uuid import UUID
 from enum import Enum
 from typing import Optional
@@ -38,4 +38,5 @@ class CategoryResponse(CategoryBase):
     id: UUID
     user_id: UUID
 
-    model_config = ConfigDict(from_attributes=True)  # SQLAlchemyからの変換用
+    class Config:
+        from_attributes = True  # SQLAlchemyからの変換用

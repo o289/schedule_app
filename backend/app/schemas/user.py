@@ -1,8 +1,9 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 
 class UserResponse(BaseModel):  # サインアップ出力
     email: Optional[EmailStr]
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True

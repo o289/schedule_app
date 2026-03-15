@@ -15,7 +15,7 @@ class UserRepository(BaseRepository):
     def get_by_email(self, email: str):
         # ヒント: query(User).filter(User.email == email).first()
         ...
-        return self.db.query(self.model).filter(self.model.email == email).first()
+        return self.db.query(User).filter(User.email == email).first()
 
     def update_refresh_token(self, user: User, token: str):
         user.refresh_token = token
@@ -24,6 +24,4 @@ class UserRepository(BaseRepository):
         return user
 
     def get_by_refresh_token(self, token: str):
-        return (
-            self.db.query(self.model).filter(self.model.refresh_token == token).first()
-        )
+        return self.db.query(User).filter(User.refresh_token == token).first()

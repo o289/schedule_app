@@ -51,6 +51,41 @@ def test_register_options_success(raw_client, db_session):
     assert challenge.type == "register"
 
 
+def test_register_options_duplicate_passkey(raw_client, db_session):
+    """
+    異常系:
+    - 既にpasskey登録済みユーザー
+    - 409 PASSKEY_ALREADY_REGISTERED
+    """
+
+    email = f"test-{uuid4()}@example.com"
+
+    # 事前にUser作成
+    user = User(email=email)
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    credential_id = str(uuid4())
+    passkey = Passkey(
+        user_id=user.id,
+        credential_id=credential_id,
+        public_key=b"dummy",
+        sign_count=1,
+        transports=None,
+    )
+    db_session.add(passkey)
+    db_session.commit()
+
+    res = raw_client.post(
+        "/auth/passkey/register/options",
+        json={"email": email},
+    )
+
+    assert res.status_code == 409
+    assert res.json()["code"] == "PASSKEY_ALREADY_REGISTERED"
+
+
 # =========================
 # Test: register/verify
 # =========================

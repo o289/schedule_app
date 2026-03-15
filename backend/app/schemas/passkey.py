@@ -1,6 +1,6 @@
 # backend/app/schemas/passkey.py
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
 from typing import Optional
@@ -33,4 +33,5 @@ class PasskeyResponse(BaseModel):
     created_at: datetime
     last_used_at: Optional[datetime]
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
