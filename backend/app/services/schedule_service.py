@@ -54,14 +54,16 @@ class ScheduleService:
         if schedule_in.dates is not None:
             self._validate_dates(schedule_in.dates)
         else:
-            schedule_in = schedule_in.copy(exclude={"dates"})
+            data = schedule_in.model_dump(exclude={"dates"})
+            schedule_in = ScheduleUpdate(**data)
 
         if schedule_in.category_id is not None:
             category = self.category_repo.get(schedule_in.category_id)
             if not category or category.user_id != user.id:
                 raise NotFoundError("NOT_FOUND_CATEGORY")
         else:
-            schedule_in = schedule_in.copy(exclude={"category_id"})
+            data = schedule_in.model_dump(exclude={"category_id"})
+            schedule_in = ScheduleUpdate(**data)
 
         return self.repo.update(schedule_id, schedule_in)
 
