@@ -1,7 +1,8 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env")
     # Database
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
@@ -22,9 +23,6 @@ class Settings(BaseSettings):
     # API / Web
     API_PORT: int = 8000
     WEB_PORT: int = 3000
-
-    class Config:
-        env_file = ".env"  # プロジェクトルートの.envを読み込む
 
     # 組み立て用プロパティ
     @property
