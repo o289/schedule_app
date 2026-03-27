@@ -174,6 +174,29 @@ def test_update_schedule_success_without_dates(client, schedule):
     assert res.status_code == 200
 
 
+def test_update_schedule_success_with_dates(client, schedule):
+    payload = {
+        "title": "updated meeting2",
+        "note": "updated note2",
+        "dates": [
+            {
+                "start_date": "2025-01-01T10:00:00",
+                "end_date": "2025-01-01T11:00:00",
+            },
+            {
+                "start_date": "2025-01-11T10:00:00",
+                "end_date": "2025-01-11T11:00:00",
+            },
+            {
+                "start_date": "2025-01-15T10:00:00",
+                "end_date": "2025-01-15T11:00:00",
+            },
+        ],
+    }
+    res = client.put(f"/schedules/{schedule.id}", json=payload)
+    assert res.status_code == 200
+
+
 #
 # --------------------------------
 # list: success (200)
