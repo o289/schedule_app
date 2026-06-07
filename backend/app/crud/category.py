@@ -12,7 +12,7 @@ class CategoryRepository(BaseRepository):
     # --- 作成 ---
     def create(self, category_in: CategoryCreate, user_id: UUID) -> Category:
         category = self.base_create_instance(
-            model=self.model, schema_in=category_in, extra={"user_id": user_id}
+            model=self.model, schema_in=category_in, overrides={"user_id": user_id}
         )
 
         return self.base_add(category)

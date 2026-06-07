@@ -14,7 +14,7 @@ class ScheduleRepository(BaseRepository):
         schedule = self.base_create_instance(
             model=self.model,
             schema_in=schedule_in,
-            extra={
+            overrides={
                 "user_id": user_id,
                 "dates": [
                     ScheduleDate(
