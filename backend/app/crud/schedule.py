@@ -10,18 +10,22 @@ class ScheduleRepository(BaseRepository):
         super().__init__(db, Schedule)
 
     # --- 作成 ---
-    # スケジュールの予定はdatesモデルも絡んでいるため、base_create_instanceの導入は見送り
     def create(self, user_id: UUID, schedule_in: ScheduleCreate) -> Schedule:
-        schedule = Schedule(
-            title=schedule_in.title,
-            note=schedule_in.note,
-            dates=[
-                ScheduleDate(start_date=d.start_date, end_date=d.end_date)
-                for d in schedule_in.dates
-            ],
-            category_id=schedule_in.category_id,  # Enum → str
-            user_id=user_id,
+        schedule = self.base_create_instance(
+            model=self.model,
+            schema_in=schedule_in,
+            extra={
+                "user_id": user_id,
+                "dates": [
+                    ScheduleDate(
+                        start_date=d.start_date,
+                        end_date=d.end_date,
+                    )
+                    for d in schedule_in.dates
+                ],
+            },
         )
+
         return self.base_add(schedule)
 
     # --- 取得（ID指定） ---
