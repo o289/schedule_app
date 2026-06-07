@@ -59,7 +59,7 @@ class BaseRepository:
         except Exception:
             return None
 
-    def base_create_instance(self, model, schema_in, extra: dict | None = None):
+    def base_create_instance(self, model, schema_in, overrides: dict | None = None):
         """
         任意のモデルに対応できる共通「新規作成」関数
 
@@ -75,9 +75,9 @@ class BaseRepository:
         """
         data = schema_in.model_dump()
 
-        # extra を安全にマージ
-        if extra:
-            for key, value in extra.items():
+        # overrides を安全にマージ
+        if overrides:
+            for key, value in overrides.items():
                 if hasattr(model, key):
                     data[key] = value
 

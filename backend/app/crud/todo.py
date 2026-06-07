@@ -13,7 +13,7 @@ class TodoRepository(BaseRepository):
     # --- 作成 ---
     def create(self, todo_in: TodoCreate, schedule_id: UUID) -> Todo:
         todo = self.base_create_instance(
-            model=self.model, schema_in=todo_in, extra={"schedule_id": schedule_id}
+            model=self.model, schema_in=todo_in, overrides={"schedule_id": schedule_id}
         )
         return self.base_add(todo)
 
