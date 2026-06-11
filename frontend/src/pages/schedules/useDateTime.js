@@ -125,8 +125,9 @@ export function handleDateTime(formData, onChange) {
     onChange({ target: { name: "dates", value: newDates } });
   };
 
-  const removeDate = (index) => {
-    const newDates = dates.filter((_, i) => i !== index);
+  const removeDate = (dateString) => {
+    const newDates = dates.filter((d) => !d.start_date.startsWith(dateString));
+
     setDates(newDates);
     onChange({ target: { name: "dates", value: newDates } });
   };

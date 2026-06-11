@@ -53,15 +53,6 @@ export default function ScheduleAsideForm({
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1); // month is 1-based
 
-  const handleClick = (dateString) => {
-    setSelectedDates((prev) => {
-      const updated = prev.includes(dateString)
-        ? prev.filter((d) => d !== dateString)
-        : [...prev, dateString];
-      return updated;
-    });
-  };
-
   const prevMonth = () => {
     const { year: newYear, month: newMonth } = shiftMonth(year, month, -1);
     setYear(newYear);
@@ -156,8 +147,12 @@ export default function ScheduleAsideForm({
                       className={`day ${isSelected ? "selected" : ""}${!isCurrentMonth ? "other-month" : ""}`}
                       onClick={() => {
                         if (!isCurrentMonth) return;
-                        handleClick(dateString);
-                        addDate(dateString);
+
+                        if (!isSelected) {
+                          addDate(dateString);
+                        } else {
+                          removeDate(dateString);
+                        }
                       }}
                     >
                       {day}
