@@ -44,3 +44,6 @@ ui_check.html
 
 # codexのプロンプト
 CODEX.md
+
+# dev-containerの設定フォルダ
+.devcontainer
