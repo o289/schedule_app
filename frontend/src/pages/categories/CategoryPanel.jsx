@@ -23,17 +23,21 @@ export default function CategoryPanel({
   const visibleCategories = renderCategories(categories, expanded);
 
   return (
-    <div className="category-container">
-      <div className="category-create">
+    <div className="w-full">
+      <div className="mb-6 rounded-[14px] bg-white p-5 shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
         <form
+          className="flex flex-col"
           onSubmit={(e) => {
             e.preventDefault();
             onSubmit();
           }}
         >
-          <h3>{editingCategory ? "カテゴリ編集" : "カテゴリ作成"}</h3>
+          <h3 className="mb-4">
+            {editingCategory ? "カテゴリ編集" : "カテゴリ作成"}
+          </h3>
 
           <input
+            className="mb-3 w-full rounded-lg border border-[#ccc] p-3 text-[16px] leading-[1.4]"
             name="name"
             value={formData.name}
             onChange={onChange}
@@ -41,6 +45,7 @@ export default function CategoryPanel({
             required
           />
           <select
+            className="mb-3 w-full rounded-lg border border-[#ccc] p-3 text-[16px] leading-[1.4]"
             name="color"
             value={formData.color}
             onChange={onChange}
@@ -53,13 +58,19 @@ export default function CategoryPanel({
             ))}
           </select>
 
-          <Button variant="contained" type="submit" startIcon={<AddIcon />}>
+          <Button
+            className="!mt-[10px] !w-full"
+            variant="contained"
+            type="submit"
+            startIcon={<AddIcon />}
+          >
             {editingCategory ? "更新" : "作成"}
           </Button>
 
           {editingCategory && (
             <>
               <Button
+                className="!mt-[10px] !w-full"
                 variant="contained"
                 startIcon={<CloseIcon />}
                 onClick={onCancelEdit}
@@ -71,7 +82,7 @@ export default function CategoryPanel({
         </form>
       </div>
 
-      <div className="category-list">
+      <div className="flex flex-col gap-[16px]">
         {visibleCategories.map((cat) => (
           <CategoryCard
             key={cat.id}
@@ -83,12 +94,18 @@ export default function CategoryPanel({
       </div>
 
       {categories.length > 5 && (
-        <div className="category-toggle" onClick={onToggle}>
+        <div
+          className="mt-4 cursor-pointer text-center text-[18px] font-semibold text-[#4a90e2]"
+          onClick={onToggle}
+        >
           {expanded ? "閉じる" : `＋${categories.length - 5}件表示`}
         </div>
       )}
 
-      <div className="category-toggle" onClick={() => setAsideMode(null)}>
+      <div
+        className="mt-4 cursor-pointer text-center text-[18px] font-semibold text-[#4a90e2]"
+        onClick={() => setAsideMode(null)}
+      >
         戻る
       </div>
     </div>
