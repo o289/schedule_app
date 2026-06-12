@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { apiFetch } from "../../api/client";
 import { useCategory } from "../categories/categoryHandlers";
@@ -17,8 +16,6 @@ export function useSchedule(id = null) {
   const { draftSchedule, setDraftSchedule, resetDraft, handleChange } =
     useScheduleForm();
   const { isFetching, startFetching, stopFetching } = useLoading();
-
-  const navigate = useNavigate();
 
   const base_url = "/schedules/";
 
