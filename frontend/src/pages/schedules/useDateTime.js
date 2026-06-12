@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 
 export function useDateTime(schedules) {
-  const [selectedDate, setSelectedDate] = useState(null);
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
@@ -33,8 +32,6 @@ export function useDateTime(schedules) {
   }, [schedules]);
 
   return {
-    selectedDate,
-    setSelectedDate,
     events,
   };
 }
@@ -94,7 +91,6 @@ export function handleDateTime(formData, onChange) {
     }
   }, [formData.dates]);
 
-  const [selectedDates, setSelectedDates] = useState([]);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
 
@@ -135,8 +131,6 @@ export function handleDateTime(formData, onChange) {
   return {
     dates,
     setDates,
-    selectedDates,
-    setSelectedDates,
     start,
     setStart,
     end,
