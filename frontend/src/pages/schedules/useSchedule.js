@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { apiFetch } from "../../api/client";
 import { useCategory } from "../categories/categoryHandlers";
-import { useDateTime } from "../schedules/useDateTime";
 import useLoading from "../../hooks/useLoading";
 import { useAlert } from "../../context/AlertContext";
 import { useScheduleForm } from "../../hooks/schedule/useScheduleForm";

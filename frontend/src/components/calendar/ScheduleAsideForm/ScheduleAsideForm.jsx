@@ -20,8 +20,6 @@ export default function ScheduleAsideForm({
   const {
     dates,
     setDates,
-    selectedDates,
-    setSelectedDates,
     start,
     setStart,
     end,

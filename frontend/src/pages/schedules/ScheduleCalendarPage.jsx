@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCategory } from "../categories/categoryHandlers";
-import { useDateTime } from "../schedules/useDateTime";
 import { useSchedule } from "../schedules/useSchedule";
 import { useScheduleForm } from "../../hooks/schedule/useScheduleForm";
 import { useCalendarEvents } from "../../components/calendar/useCalendarEvent";
@@ -34,7 +33,6 @@ export default function ScheduleCalendarPage() {
     handleChange,
   } = useSchedule();
 
-  const { handleDateClick } = useDateTime(schedules);
   const { events } = useCalendarEvents(schedules);
   const [asideMode, setAsideMode] = useState(null);
 
