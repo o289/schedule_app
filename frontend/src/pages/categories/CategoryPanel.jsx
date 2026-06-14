@@ -1,4 +1,3 @@
-import "./category.css";
 import { renderCategories } from "./categoryUI";
 import CategoryCard from "./CategoryCard";
 import { CATEGORY_COLORS } from "../../constants/categoryColors";
