@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import "./scheduleAsideForm.css";
 import { generateMonthGrid, shiftMonth } from "../../../utils/monthGrid";
 import TimePicker from "../../commonPicker/TimePicker";
 import ScheduleDatesModal from "../../../pages/schedules/DatesModal";
