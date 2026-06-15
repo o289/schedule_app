@@ -4,6 +4,7 @@ import { Button } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
 import UndoIcon from "@mui/icons-material/Undo";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { Link } from "react-router-dom";
 
 import MiniMonthNav from "../MiniMonthNav/MiniMonthNav";
@@ -84,6 +85,19 @@ export default function CalendarAside({
       default:
         return (
           <>
+            <div className="flex items-center gap-3 px-2">
+              <CalendarMonthIcon
+                sx={{
+                  color: "#4a90e2",
+                  fontSize: 34,
+                }}
+              />
+
+              <h2 className="text-[28px] font-bold text-[#111827]">
+                マイカレンダー
+              </h2>
+            </div>
+
             <div className="flex justify-center">
               <MiniMonthNav
                 selectedDate={selectedDate}
