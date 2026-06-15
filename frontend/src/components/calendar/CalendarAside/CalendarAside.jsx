@@ -6,7 +6,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import UndoIcon from "@mui/icons-material/Undo";
 import { Link } from "react-router-dom";
 
-import "./calendarAside.css";
 import MiniMonthNav from "../MiniMonthNav/MiniMonthNav";
 import useIsMobile from "../../../hooks/useIsMobile";
 import { useCategory } from "../../../pages/categories/categoryHandlers";
@@ -14,6 +13,7 @@ import { useSchedule } from "../../../pages/schedules/useSchedule";
 import ScheduleAsideForm from "../ScheduleAsideForm/ScheduleAsideForm";
 import ScheduleAsideDetail from "../ScheduleAsideDetail";
 import CategoryAsidePage from "../../../pages/categories/CategoryAsidePage";
+import { getCategoryTheme } from "../../../utils/getCategoryTheme.js";
 
 export default function CalendarAside({
   selectedDate,
@@ -35,11 +35,11 @@ export default function CalendarAside({
 }) {
   const isMobile = useIsMobile();
 
-  const {user, handleLogout} = useAuth();
+  const { user, handleLogout } = useAuth();
   const onLogout = () => {
     if (!window.confirm("ログアウトしますか？")) return;
-    handleLogout()
-  }
+    handleLogout();
+  };
 
   function renderAsideContent() {
     switch (asideMode) {
@@ -84,7 +84,7 @@ export default function CalendarAside({
       default:
         return (
           <>
-            <div className="aside-mini">
+            <div className="flex justify-center">
               <MiniMonthNav
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
@@ -94,10 +94,10 @@ export default function CalendarAside({
               />
             </div>
 
-            <div className="aside-actions">
+            <div className="flex flex-col gap-3">
               <Button
                 variant="contained"
-                className="aside-btn primary"
+                className="!rounded-lg !bg-[#4a90e2] !px-3 !py-2.5 !text-[14px]"
                 startIcon={<AddIcon />}
                 onClick={() => {
                   setAsideMode("create");
@@ -108,42 +108,75 @@ export default function CalendarAside({
                 スケジュール登録
               </Button>
 
-              <Button
-                variant="contained"
-                className="aside-btn third"
-                startIcon={<AddIcon />}
-                onClick={() => {
-                  setAsideMode("category");
-                }}
-              >
-                カテゴリー登録
-              </Button>
+              <div className="mt-6 rounded-2xl border border-[#e5e7eb] bg-white shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between border-b border-[#e5e7eb] px-4 py-3">
+                  <div className="text-left text-[18px] font-bold text-[#111827]">
+                    カテゴリ
+                  </div>
 
-              {/* <Button
-                variant="contained"
-                className="aside-btn secondary"
-                startIcon={<AddIcon />}
-              >
-                仮押さえ登録
-              </Button> */}
+                  <button
+                    type="button"
+                    onClick={() => setAsideMode("category")}
+                    className="text-sm font-medium text-[#6b7280] hover:text-[#111827]"
+                  >
+                    編集
+                  </button>
+                </div>
+
+                {categories.map((category) => {
+                  const theme = getCategoryTheme(category.color);
+                  return (
+                    <div
+                      key={category.id}
+                      className="flex items-center gap-3 border-b border-[#f3f4f6] px-4 py-4 last:border-b-0"
+                    >
+                      <div
+                        className="h-3 w-3 rounded-full"
+                        style={{ backgroundColor: theme.border }}
+                      />
+
+                      <span className="text-[15px] text-[#374151]">
+                        {category.name}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
               <Button
-                variant="contained"
-                color="error"
+                variant="outlined"
                 startIcon={<UndoIcon />}
                 onClick={onLogout}
+                className="!mt-2 !h-14 !w-full !justify-start !rounded-xl !border-[#e5e7eb] !bg-white !px-5 !text-[#374151] shadow-sm"
               >
                 ログアウト
               </Button>
 
-              <p>ユーザー: {user.email}</p>
-              
+              <div className="mt-4 flex items-center justify-between rounded-xl border border-[#e5e7eb] bg-white px-4 py-3 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f3f4f6] text-xl text-[#9ca3af]">
+                    👤
+                  </div>
+
+                  <div className="text-left">
+                    <div className="text-sm font-semibold text-[#111827]">
+                      ユーザー名
+                    </div>
+                    <div className="text-xs break-all text-[#6b7280]">
+                      {user.email}
+                    </div>
+                  </div>
+                </div>
+
+                <span className="text-[#6b7280]">⌄</span>
+              </div>
 
               {closeButton && (
                 <Button
                   type="button"
                   variant="contained"
                   startIcon={<CloseIcon />}
-                  className="aside-btn cancel"
+                  className="!rounded-lg !bg-gray-500 !px-3 !py-2.5 !text-[14px]"
                   onClick={closeButton}
                 >
                   戻る
@@ -155,5 +188,9 @@ export default function CalendarAside({
     }
   }
 
-  return <aside className="calendar-aside">{renderAsideContent()}</aside>;
+  return (
+    <aside className="flex h-full w-[368px] flex-col gap-6 border-r border-[#eee] bg-[#fafafa] p-4 max-md:w-full max-md:border-r-0">
+      {renderAsideContent()}
+    </aside>
+  );
 }
