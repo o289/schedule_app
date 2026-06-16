@@ -1,19 +1,25 @@
-import { useState, useRef } from "react";
-import FullCalendarWrapper from "./FullCalendarWrapper";
+import { useState } from "react";
 import { useCalendarEvents } from "./useCalendarEvent";
+import { useCalendar } from "../../context/CalendarContext";
+import useIsMobile from "../../../hooks/useIsMobile";
 
 export default function CalendarMain({
   schedules,
-  selectedDate,
-  setSelectedDate,
   setDraftSchedule,
-  setAsideMode,
-  setSelectedEvent,
   setIsDrawerOpen = null,
 }) {
   const { events } = useCalendarEvents(schedules);
-  const calendarRef = useRef(null);
-  const [currentView, setCurrentView] = useState("week");
+
+  const {
+    calendarRef,
+    selectedDate,
+    setSelectedDate,
+    currentView,
+    setCurrentView,
+    setSelectedEvent,
+    setAsideMode,
+    handleDaySelect,
+  } = useCalendar();
 
   return (
     <div className="md:mt-6 rounded-2xl border border-[#e5e7eb] bg-white shadow-sm overflow-hidden">
@@ -22,15 +28,7 @@ export default function CalendarMain({
         events={events}
         selectedDate={selectedDate}
         currentView={currentView}
-        onDateClick={(date) => {
-          setSelectedDate(date);
-          setCurrentView("day");
-
-          const api = calendarRef.current?.getApi();
-          if (api) {
-            api.changeView("timeGridDay", date);
-          }
-        }}
+        onDateClick={(date) => handleDaySelect(date)}
         setDraftSchedule={setDraftSchedule}
         setAsideMode={setAsideMode}
         setSelectedEvent={setSelectedEvent}

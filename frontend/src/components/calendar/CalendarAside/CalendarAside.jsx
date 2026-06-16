@@ -5,36 +5,37 @@ import { Add as AddIcon } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
 import UndoIcon from "@mui/icons-material/Undo";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import { Link } from "react-router-dom";
+
+import useIsMobile from "../../../hooks/useIsMobile";
 
 import MiniMonthNav from "../MiniMonthNav/MiniMonthNav";
-import useIsMobile from "../../../hooks/useIsMobile";
-import { useCategory } from "../../../pages/categories/categoryHandlers";
-import { useSchedule } from "../../../pages/schedules/useSchedule";
 import ScheduleAsideForm from "../ScheduleAsideForm/ScheduleAsideForm";
 import ScheduleAsideDetail from "../ScheduleAsideDetail";
 import CategoryAsidePage from "../../../pages/categories/CategoryAsidePage";
 import { getCategoryTheme } from "../../../utils/getCategoryTheme.js";
+import { useCalendar } from "../../../context/CalendarContext.jsx";
 
 export default function CalendarAside({
-  selectedDate,
-  setSelectedDate,
-  selectedEvent,
-  onDayClick,
-  onWeekClick,
+  categories,
   draftSchedule,
   resetForm,
   handleScheduleCreate,
   handleScheduleUpdate,
   handleScheduleDelete,
   handleChange,
-  asideMode,
-  setAsideMode,
-  categories,
   setIsDrawerOpen = null,
   closeButton = null,
 }) {
   const isMobile = useIsMobile();
+  const {
+    selectedDate,
+    setSelectedDate,
+    selectedEvent,
+    asideMode,
+    setAsideMode,
+    handleDaySelect,
+    handleWeekSelect,
+  } = useCalendar();
 
   const { user, handleLogout } = useAuth();
   const onLogout = () => {
@@ -102,8 +103,8 @@ export default function CalendarAside({
               <MiniMonthNav
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
-                onDayClick={onDayClick}
-                onWeekClick={onWeekClick}
+                onDayClick={(date) => handleDaySelect(date)}
+                onWeekClick={(date) => handleWeekSelect(date)}
                 setIsDrawerOpen={setIsDrawerOpen}
               />
             </div>
