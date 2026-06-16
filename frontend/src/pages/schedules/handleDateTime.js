@@ -1,41 +1,5 @@
 import { useState, useEffect } from "react";
 
-export function useDateTime(schedules) {
-  const [events, setEvents] = useState([]);
-
-  useEffect(() => {
-    if (!schedules) {
-      setEvents([]);
-      return;
-    }
-
-    const allEvents = schedules.flatMap((s) =>
-      (s.dates || []).map((d) => ({
-        id: d.id,
-        title: s.title,
-        start: d.start_date,
-        end: d.end_date,
-        allDay: false,
-
-        color: s.category?.color || "#000000",
-        borderColor: "transparent",
-        textColor: "#ffffff",
-
-        extendedProps: {
-          // scheduleId: s.id, // ← ここへ移動
-          schedule: s,
-        },
-      })),
-    );
-
-    setEvents(allEvents);
-  }, [schedules]);
-
-  return {
-    events,
-  };
-}
-
 // scheduleのdatesを「追加・削除」するためのUI専用ロジック
 // Single Source of Truth は formData.dates
 export function handleDateTime(formData, onChange) {

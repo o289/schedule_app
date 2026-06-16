@@ -1,10 +1,8 @@
-import { useMemo } from "react"
+import { useMemo } from "react";
 
 export function useCalendarEvents(schedules) {
-
   const events = useMemo(() => {
-
-    if (!schedules) return []
+    if (!schedules) return [];
 
     return schedules.flatMap((s) =>
       (s.dates || []).map((d) => ({
@@ -13,15 +11,14 @@ export function useCalendarEvents(schedules) {
         start: d.start_date,
         end: d.end_date,
 
-        color: s.category?.color || "#000",
+        color: "transparent",
 
         extendedProps: {
-          schedule: s
-        }
-      }))
-    )
+          schedule: s,
+        },
+      })),
+    );
+  }, [schedules]);
 
-  }, [schedules])
-
-  return { events }
+  return { events };
 }
