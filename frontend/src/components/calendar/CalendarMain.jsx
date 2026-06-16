@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useCalendarEvents } from "./useCalendarEvent";
 import { useCalendar } from "../../context/CalendarContext";
-import useIsMobile from "../../../hooks/useIsMobile";
+import FullCalendarWrapper from "./FullCalendarWrapper";
 
 export default function CalendarMain({
   schedules,
