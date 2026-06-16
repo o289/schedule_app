@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { generateMonthGrid, shiftMonth } from "../../../utils/monthGrid";
 import TimePicker from "../../commonPicker/TimePicker";
 import ScheduleDatesModal from "../../../pages/schedules/DatesModal";
-import { handleDateTime } from "../../../pages/schedules/useDateTime";
+import { handleDateTime } from "../../../pages/schedules/handleDateTime";
 
 import {
   Button,

@@ -8,6 +8,7 @@ import jaLocale from "@fullcalendar/core/locales/ja";
 import { Link } from "react-router-dom";
 import useIsMobile from "../../hooks/useIsMobile";
 import { getCategoryTheme } from "../../utils/getCategoryTheme";
+import EventCard from "./EventCard";
 
 const FullCalendarWrapper = forwardRef(function FullCalendarWrapper(
   {
@@ -120,31 +121,9 @@ const FullCalendarWrapper = forwardRef(function FullCalendarWrapper(
         }
         setAsideMode("detail");
       }}
-      eventContent={(arg) => {
-        const theme = getCategoryTheme(
-          arg.event.extendedProps.schedule.category?.color,
-        );
-        return (
-          <div
-            style={{
-              backgroundColor: theme.bg,
-              borderLeft: `4px solid ${theme.border}`,
-              color: theme.text,
-              height: "100%",
-              padding: "4px 8px",
-            }}
-          >
-            <div className="event-card">
-              <div className="event-time">{arg.timeText}</div>
-
-              <div className="event-title-row">
-                <span className="event-dot" style={{ color: theme.border }} />
-                <span>{arg.event.title}</span>
-              </div>
-            </div>
-          </div>
-        );
-      }}
+      eventContent={(arg) => (
+        <EventCard event={arg.event} timeText={arg.timeText} />
+      )}
     />
   );
 });
