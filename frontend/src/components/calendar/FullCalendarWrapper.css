@@ -49,3 +49,9 @@
   background: transparent !important;
   border: none !important;
 }
+
+/* 枠線 */
+
+.fc .fc-timegrid-slot-minor {
+  border-top-style: none !important;
+}

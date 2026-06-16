@@ -1,15 +1,15 @@
 // components/FullCalendarWrapper.jsx
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useEffect, forwardRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import jaLocale from "@fullcalendar/core/locales/ja";
-import { Link } from "react-router-dom";
+
 import useIsMobile from "../../hooks/useIsMobile";
 import { getCategoryTheme } from "../../utils/getCategoryTheme";
 import EventCard from "./EventCard";
-
+import "./FullCalendarWrapper.css";
 const FullCalendarWrapper = forwardRef(function FullCalendarWrapper(
   {
     events = [],
@@ -101,12 +101,23 @@ const FullCalendarWrapper = forwardRef(function FullCalendarWrapper(
         const isCrossMonth = month - 1 !== viewStartMonth;
 
         if (day === 1 && isCrossMonth) {
-          return isMobileWeek
-            ? `${month}/${day}・${weekday}`
-            : `${month}月${day}日・${weekday}`;
+          const dayCrossMonth = isMobileWeek
+            ? `${month}/${day}${weekday}`
+            : `${month}月${day}日/${weekday}`;
+          return (
+            <div className="flex h-[72px] items-center justify-center">
+              <span className="text-lg font-semibold">{dayCrossMonth}</span>
+            </div>
+          );
         }
 
-        return isMobileWeek ? `${day}日・${weekday}` : `${day}日・${weekday}`;
+        return (
+          <div className="flex h-[72px] items-center justify-center">
+            <span className="text-lg font-semibold">
+              {day}/{weekday}
+            </span>
+          </div>
+        );
       }}
       eventTimeFormat={{
         hour: "2-digit",

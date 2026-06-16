@@ -16,6 +16,7 @@ import useIsMobile from "../../hooks/useIsMobile";
 import Loading from "../../components/Loading";
 
 import "./ScheduleCalendarPage.css";
+import CalendarMain from "../../components/calendar/CalendarMain";
 
 export default function ScheduleCalendarPage() {
   const { categories } = useCategory();
@@ -105,20 +106,10 @@ export default function ScheduleCalendarPage() {
         />
 
         <div className="calendar-main">
-          <FullCalendarWrapper
-            ref={calendarRef}
-            events={events}
+          <CalendarMain
+            schedules={schedules}
             selectedDate={selectedDate}
-            currentView={currentView}
-            onDateClick={(date) => {
-              setSelectedDate(date);
-              setCurrentView("day");
-
-              const api = calendarRef.current?.getApi();
-              if (api) {
-                api.changeView("timeGridDay", date);
-              }
-            }}
+            setSelectedDate={setSelectedDate}
             setDraftSchedule={setDraftSchedule}
             setAsideMode={setAsideMode}
             setSelectedEvent={setSelectedEvent}
@@ -142,20 +133,10 @@ export default function ScheduleCalendarPage() {
       </div>
 
       {/* Calendar */}
-      <FullCalendarWrapper
-        ref={calendarRef}
-        events={events}
+      <CalendarMain
+        schedules={schedules}
         selectedDate={selectedDate}
-        currentView={currentView}
-        onDateClick={(date) => {
-          setSelectedDate(date);
-          setCurrentView("day");
-
-          const api = calendarRef.current?.getApi();
-          if (api) {
-            api.changeView("timeGridDay", date);
-          }
-        }}
+        setSelectedDate={setSelectedDate}
         setDraftSchedule={setDraftSchedule}
         setAsideMode={setAsideMode}
         setSelectedEvent={setSelectedEvent}
