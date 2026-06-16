@@ -1,37 +1,21 @@
 import { TIME_OPTIONS } from "./timeOptions";
 import { getConstraints } from "./timeConstraints";
 
+import { FormControl, Select, MenuItem, InputAdornment } from "@mui/material";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+
 const styles = {
   row: {
     display: "flex",
-    alignItems: "center",
-    gap: "12px",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: "4px",
     marginBottom: "12px",
   },
   label: {
-    width: "48px",
     fontSize: "14px",
-  },
-  pickerWrapper: {
-    flex: 1,
-    position: "relative",
-  },
-  select: {
-    width: "100%",
-    height: "42px",
-    padding: "0 36px 0 12px",
-    borderRadius: "10px",
-    border: "1px solid #ddd",
-    appearance: "none",
-    cursor: "pointer",
-  },
-  arrow: {
-    position: "absolute",
-    right: "12px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    fontSize: "10px",
-    pointerEvents: "none",
+    fontWeight: 600,
+    color: "#666",
   },
 };
 
@@ -51,22 +35,36 @@ export default function TimePicker({
   });
 
   return (
-    <div style={styles.row}>
+    <div className="flex-1">
       <div style={styles.label}>{label}</div>
-      <div style={styles.pickerWrapper}>
-        <select
+
+      <FormControl fullWidth>
+        <Select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          style={styles.select}
+          startAdornment={
+            <InputAdornment position="start">
+              <AccessTimeIcon fontSize="small" />
+            </InputAdornment>
+          }
+          sx={{
+            height: 52,
+            borderRadius: "12px",
+            backgroundColor: "#fff",
+            "& .MuiSelect-select": {
+              display: "flex",
+              alignItems: "center",
+              fontSize: "16px",
+            },
+          }}
         >
           {options.map((time) => (
-            <option key={time} value={time}>
+            <MenuItem key={time} value={time}>
               {time}
-            </option>
+            </MenuItem>
           ))}
-        </select>
-        <span style={styles.arrow}>▼</span>
-      </div>
+        </Select>
+      </FormControl>
     </div>
   );
 }

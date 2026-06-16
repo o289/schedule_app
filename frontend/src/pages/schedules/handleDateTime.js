@@ -1,44 +1,5 @@
 import { useState, useEffect } from "react";
 
-export function useDateTime(schedules) {
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [events, setEvents] = useState([]);
-
-  useEffect(() => {
-    if (!schedules) {
-      setEvents([]);
-      return;
-    }
-
-    const allEvents = schedules.flatMap((s) =>
-      (s.dates || []).map((d) => ({
-        id: d.id,
-        title: s.title,
-        start: d.start_date,
-        end: d.end_date,
-        allDay: false,
-
-        color: s.category?.color || "#000000",
-        borderColor: "transparent",
-        textColor: "#ffffff",
-
-        extendedProps: {
-          // scheduleId: s.id, // ← ここへ移動
-          schedule: s,
-        },
-      })),
-    );
-
-    setEvents(allEvents);
-  }, [schedules]);
-
-  return {
-    selectedDate,
-    setSelectedDate,
-    events,
-  };
-}
-
 // scheduleのdatesを「追加・削除」するためのUI専用ロジック
 // Single Source of Truth は formData.dates
 export function handleDateTime(formData, onChange) {
@@ -94,7 +55,6 @@ export function handleDateTime(formData, onChange) {
     }
   }, [formData.dates]);
 
-  const [selectedDates, setSelectedDates] = useState([]);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
 
@@ -125,8 +85,9 @@ export function handleDateTime(formData, onChange) {
     onChange({ target: { name: "dates", value: newDates } });
   };
 
-  const removeDate = (index) => {
-    const newDates = dates.filter((_, i) => i !== index);
+  const removeDate = (dateString) => {
+    const newDates = dates.filter((d) => !d.start_date.startsWith(dateString));
+
     setDates(newDates);
     onChange({ target: { name: "dates", value: newDates } });
   };
@@ -134,8 +95,6 @@ export function handleDateTime(formData, onChange) {
   return {
     dates,
     setDates,
-    selectedDates,
-    setSelectedDates,
     start,
     setStart,
     end,

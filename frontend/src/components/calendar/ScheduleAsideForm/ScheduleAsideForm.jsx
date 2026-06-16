@@ -1,13 +1,22 @@
 import { useState, useEffect } from "react";
-import "./scheduleAsideForm.css";
 import { generateMonthGrid, shiftMonth } from "../../../utils/monthGrid";
 import TimePicker from "../../commonPicker/TimePicker";
 import ScheduleDatesModal from "../../../pages/schedules/DatesModal";
-import { handleDateTime } from "../../../pages/schedules/useDateTime";
+import { handleDateTime } from "../../../pages/schedules/handleDateTime";
 
-import { Button } from "@mui/material";
+import {
+  Button,
+  Box,
+  FormControl,
+  MenuItem,
+  Select,
+  TextField,
+  InputAdornment,
+} from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import { getCategoryTheme } from "../../../utils/getCategoryTheme";
 
 export default function ScheduleAsideForm({
   draftSchedule,
@@ -20,8 +29,6 @@ export default function ScheduleAsideForm({
   const {
     dates,
     setDates,
-    selectedDates,
-    setSelectedDates,
     start,
     setStart,
     end,
@@ -53,15 +60,6 @@ export default function ScheduleAsideForm({
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1); // month is 1-based
 
-  const handleClick = (dateString) => {
-    setSelectedDates((prev) => {
-      const updated = prev.includes(dateString)
-        ? prev.filter((d) => d !== dateString)
-        : [...prev, dateString];
-      return updated;
-    });
-  };
-
   const prevMonth = () => {
     const { year: newYear, month: newMonth } = shiftMonth(year, month, -1);
     setYear(newYear);
@@ -75,102 +73,205 @@ export default function ScheduleAsideForm({
   };
 
   const weeks = generateMonthGrid(year, month);
-
   return (
     <form onSubmit={onSubmit}>
-      <div className="section">
-        <div className="label">タイトル</div>
-        <input
+      <div className="mb-6">
+        <div className="mb-2 text-left text-[18px] font-bold text-[#222]">
+          タイトル
+        </div>
+
+        <TextField
+          fullWidth
+          variant="outlined"
           placeholder="タイトルを入力"
-          type="text"
           name="title"
           value={draftSchedule.title || ""}
           onChange={onChange}
-          required
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <CalendarMonthIcon />
+              </InputAdornment>
+            ),
+          }}
         />
       </div>
 
-      <div className="section">
-        <div className="label">カテゴリ</div>
-        <select
-          name="category_id"
-          value={draftSchedule.category_id || ""}
-          onChange={onChange}
-          required
-        >
-          <option value="">選択してください</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
+      <div className="md-6">
+        <div className="mb-2 text-left text-[18px] font-bold text-[#222]">
+          カテゴリ
+        </div>
+        <FormControl fullWidth>
+          <Select
+            displayEmpty
+            name="category_id"
+            value={draftSchedule.category_id || ""}
+            onChange={onChange}
+            required
+            renderValue={(selected) => {
+              if (!selected) {
+                return (
+                  <span style={{ color: "#b5b8c0" }}>選択してください</span>
+                );
+              }
+
+              const category = categories.find(
+                (cat) => String(cat.id) === String(selected),
+              );
+
+              if (!category) return "選択してください";
+
+              const theme = getCategoryTheme(category.color);
+
+              return (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      backgroundColor: theme.border,
+                    }}
+                  />
+                  {category.name}
+                </Box>
+              );
+            }}
+          >
+            <MenuItem value="">
+              <em>選択してください</em>
+            </MenuItem>
+
+            {categories.map((cat) => {
+              const theme = getCategoryTheme(cat.color);
+
+              return (
+                <MenuItem key={cat.id} value={cat.id}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Box
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        backgroundColor: theme.border,
+                      }}
+                    />
+                    {cat.name}
+                  </Box>
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </FormControl>
       </div>
 
-      <div className="section time-row">
-        {/* 開始時間 */}
-        <TimePicker
-          label="開始"
-          mode="start"
-          value={start}
-          constraintValue={end}
-          onChange={setStart}
-        />
+      <div className="md-6">
+        <div className="mb-2 text-left text-[18px] font-bold text-[#222]">
+          時刻
+        </div>
 
-        {/* 終了時間 */}
-        <TimePicker
-          label="終了"
-          mode="end"
-          value={end}
-          constraintValue={start}
-          onChange={setEnd}
-        />
+        <div className="flex flex-col gap-4 md:flex-row">
+          {/* 開始時間 */}
+          <TimePicker
+            label="開始"
+            mode="start"
+            value={start}
+            constraintValue={end}
+            onChange={setStart}
+          />
+
+          {/* 終了時間 */}
+          <TimePicker
+            label="終了"
+            mode="end"
+            value={end}
+            constraintValue={start}
+            onChange={setEnd}
+          />
+        </div>
       </div>
 
       {start && end && (
         <>
-          <div className="section">
-            <div className="month-nav">
-              <button type="button" onClick={prevMonth}>
-                &lt;
-              </button>
-              <div>
-                {year}年 {month}月
-              </div>
-              <button type="button" onClick={nextMonth}>
-                &gt;
-              </button>
+          <div className="mb-6">
+            <div className="mb-2 text-left text-[18px] font-bold text-[#222]">
+              日付を選択
             </div>
 
-            <div className="calendar">
-              {weeks.map((week, weekIndex) =>
-                week.map((dayObj, dayIndex) => {
-                  const { dateString, day, isCurrentMonth } = dayObj;
-                  const isSelected = draftSchedule.dates?.some((d) =>
-                    d.start_date.startsWith(dateString),
-                  );
+            <div className="rounded-2xl border border-[#e5e7eb] bg-white p-4">
+              <div className="mb-6 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={prevMonth}
+                  className="px-2 text-3xl text-[#444]"
+                >
+                  &lt;
+                </button>
 
-                  return (
-                    <div
-                      key={`${weekIndex}-${dayIndex}`}
-                      className={`day ${isSelected ? "selected" : ""}${!isCurrentMonth ? "other-month" : ""}`}
-                      onClick={() => {
-                        if (!isCurrentMonth) return;
-                        handleClick(dateString);
-                        addDate(dateString);
-                      }}
-                    >
-                      {day}
-                    </div>
-                  );
-                }),
-              )}
+                <div className="text-[24px] font-bold text-[#222]">
+                  {year}年 {month}月
+                </div>
+
+                <button
+                  type="button"
+                  onClick={nextMonth}
+                  className="px-2 text-3xl text-[#444]"
+                >
+                  &gt;
+                </button>
+              </div>
+
+              <div className="mb-4 grid grid-cols-7 text-center text-[16px] font-semibold">
+                <div className="text-red-500">日</div>
+                <div>月</div>
+                <div>火</div>
+                <div>水</div>
+                <div>木</div>
+                <div>金</div>
+                <div className="text-blue-500">土</div>
+              </div>
+
+              <div className="grid grid-cols-7 gap-2 text-center text-[16px]">
+                {weeks.map((week, weekIndex) =>
+                  week.map((dayObj, dayIndex) => {
+                    const { dateString, day, isCurrentMonth } = dayObj;
+                    const isSelected = draftSchedule.dates?.some((d) =>
+                      d.start_date.startsWith(dateString),
+                    );
+
+                    return (
+                      <div
+                        key={`${weekIndex}-${dayIndex}`}
+                        className={[
+                          "flex h-12 cursor-pointer items-center justify-center rounded-xl transition-colors",
+                          isCurrentMonth ? "text-[#222]" : "text-[#d1d5db]",
+                          isSelected
+                            ? "bg-[#3b82f6] text-white"
+                            : "hover:bg-[#eef4ff]",
+                        ].join(" ")}
+                        onClick={() => {
+                          if (!isCurrentMonth) return;
+
+                          if (!isSelected) {
+                            addDate(dateString);
+                          } else {
+                            removeDate(dateString);
+                          }
+                        }}
+                      >
+                        {day}
+                      </div>
+                    );
+                  }),
+                )}
+              </div>
             </div>
           </div>
 
           <Button
             type="button"
-            variant="contained"
+            variant="outlined"
+            className="!mb-6 !w-full"
             onClick={() => setShowDatesModal(true)}
           >
             登録済み日程を見る
@@ -178,36 +279,44 @@ export default function ScheduleAsideForm({
         </>
       )}
 
-      <div className="section">
-        <div className="label">メモ（任意）</div>
-        <textarea
-          rows="2"
+      <div className="mb-6">
+        <div className="mb-2 text-left text-[18px] font-bold text-[#222]">
+          メモ（任意）
+        </div>
+
+        <TextField
+          fullWidth
+          multiline
+          rows={4}
+          variant="outlined"
           placeholder="メモを入力"
           name="note"
           value={draftSchedule.note || ""}
           onChange={onChange}
-        ></textarea>
+        />
       </div>
 
-      <Button
-        type="submit"
-        variant="contained"
-        className="submit-btn"
-        startIcon={<SendIcon />}
-        disabled={disabled}
-      >
-        完了
-      </Button>
+      <div className="flex flex-col gap-3">
+        <Button
+          type="submit"
+          variant="contained"
+          className="w-full"
+          startIcon={<SendIcon />}
+          disabled={disabled}
+        >
+          完了
+        </Button>
 
-      <Button
-        type="button"
-        variant="contained"
-        startIcon={<CloseIcon />}
-        className="btn-cancel"
-        onClick={onCancel}
-      >
-        終了
-      </Button>
+        <Button
+          type="button"
+          variant="contained"
+          startIcon={<CloseIcon />}
+          className="w-full"
+          onClick={onCancel}
+        >
+          終了
+        </Button>
+      </div>
 
       {showDatesModal && (
         <ScheduleDatesModal

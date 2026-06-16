@@ -20,19 +20,9 @@ export default function ScheduleDatesModal({ dates, onClose, onChange }) {
         start: formatDateTime(d.start_date, "time"), // 表示・編集用 HH:mm
         end: formatDateTime(d.end_date, "time"), // 表示・編集用 HH:mm
         _local_id: crypto.randomUUID(),
-      }))
+      })),
     );
   }, [dates]);
-
-  // 日程が1件のみの時、削除を禁止
-  const [minimumDates, setMinimumDates] = useState(false);
-  useEffect(() => {
-    if (internalDates.length === 1) {
-      setMinimumDates(true);
-    } else {
-      setMinimumDates(false);
-    }
-  }, [internalDates.length]);
 
   const handleTimeChange = (localId, field, value) => {
     setInternalDates((prev) =>
@@ -42,8 +32,8 @@ export default function ScheduleDatesModal({ dates, onClose, onChange }) {
               ...date,
               [field]: value,
             }
-          : date
-      )
+          : date,
+      ),
     );
   };
 
@@ -83,20 +73,6 @@ export default function ScheduleDatesModal({ dates, onClose, onChange }) {
                 }
               />
             </div>
-
-            <Button
-              type="button"
-              variant="contained"
-              startIcon={<DeleteIcon />}
-              onClick={() => {
-                setInternalDates((prev) =>
-                  prev.filter((d) => d._local_id !== date._local_id)
-                );
-              }}
-              disabled={minimumDates}
-            >
-              削除
-            </Button>
           </div>
         ))}
 
@@ -110,7 +86,7 @@ export default function ScheduleDatesModal({ dates, onClose, onChange }) {
                 ({ _local_id, date, start, end }) => ({
                   start_date: toISODatetime(date, start),
                   end_date: toISODatetime(date, end),
-                })
+                }),
               );
               onChange(merged);
             }

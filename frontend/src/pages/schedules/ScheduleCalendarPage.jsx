@@ -1,22 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCategory } from "../categories/categoryHandlers";
-import { useDateTime } from "../schedules/useDateTime";
 import { useSchedule } from "../schedules/useSchedule";
 import { useScheduleForm } from "../../hooks/schedule/useScheduleForm";
-import { useCalendarEvents } from "../../components/calendar/useCalendarEvent";
 
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-
-import FullCalendarWrapper from "../../components/calendar/FullCalendarWrapper";
-import CalendarAside from "../../components/calendar/CalendarAside/CalendarAside";
 import useIsMobile from "../../hooks/useIsMobile";
 
-import Loading from "../../components/Loading";
-
 import "./ScheduleCalendarPage.css";
+import CalendarMain from "../../components/calendar/CalendarMain";
+import CalendarAside from "../../components/calendar/CalendarAside/CalendarAside";
+import Loading from "../../components/Loading";
 
 export default function ScheduleCalendarPage() {
   const { categories } = useCategory();
@@ -34,45 +27,11 @@ export default function ScheduleCalendarPage() {
     handleChange,
   } = useSchedule();
 
-  const { handleDateClick } = useDateTime(schedules);
-  const { events } = useCalendarEvents(schedules);
-  const [asideMode, setAsideMode] = useState(null);
-
   // =============================
   // Unified State
   // =============================
-
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [currentView, setCurrentView] = useState("week");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  const calendarRef = useRef(null);
   const isMobile = useIsMobile(1024);
-
-  // =============================
-  // Handlers
-  // =============================
-
-  const handleDaySelect = (date) => {
-    setSelectedDate(date);
-    setCurrentView("day");
-
-    const api = calendarRef.current?.getApi();
-    if (api) {
-      api.changeView("timeGridDay", date);
-    }
-  };
-
-  const handleWeekSelect = (date) => {
-    setSelectedDate(date);
-    setCurrentView("week");
-
-    const api = calendarRef.current?.getApi();
-    if (api) {
-      api.changeView("timeGridWeek", date);
-    }
-  };
 
   useEffect(() => {
     fetchSchedules(); // ← マウント時に必ず実行
@@ -90,16 +49,9 @@ export default function ScheduleCalendarPage() {
     return (
       <div className="calendar-layout">
         <CalendarAside
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          selectedEvent={selectedEvent}
-          onDayClick={handleDaySelect}
-          onWeekClick={handleWeekSelect}
           draftSchedule={draftSchedule}
           resetForm={resetDraft}
           categories={categories}
-          asideMode={asideMode}
-          setAsideMode={setAsideMode}
           handleChange={handleChange}
           handleScheduleCreate={handleScheduleCreate}
           handleScheduleUpdate={handleScheduleUpdate}
@@ -107,23 +59,9 @@ export default function ScheduleCalendarPage() {
         />
 
         <div className="calendar-main">
-          <FullCalendarWrapper
-            ref={calendarRef}
-            events={events}
-            selectedDate={selectedDate}
-            currentView={currentView}
-            onDateClick={(date) => {
-              setSelectedDate(date);
-              setCurrentView("day");
-
-              const api = calendarRef.current?.getApi();
-              if (api) {
-                api.changeView("timeGridDay", date);
-              }
-            }}
+          <CalendarMain
+            schedules={schedules}
             setDraftSchedule={setDraftSchedule}
-            setAsideMode={setAsideMode}
-            setSelectedEvent={setSelectedEvent}
           />
         </div>
       </div>
@@ -144,23 +82,9 @@ export default function ScheduleCalendarPage() {
       </div>
 
       {/* Calendar */}
-      <FullCalendarWrapper
-        ref={calendarRef}
-        events={events}
-        selectedDate={selectedDate}
-        currentView={currentView}
-        onDateClick={(date) => {
-          setSelectedDate(date);
-          setCurrentView("day");
-
-          const api = calendarRef.current?.getApi();
-          if (api) {
-            api.changeView("timeGridDay", date);
-          }
-        }}
+      <CalendarMain
+        schedules={schedules}
         setDraftSchedule={setDraftSchedule}
-        setAsideMode={setAsideMode}
-        setSelectedEvent={setSelectedEvent}
         setIsDrawerOpen={setIsDrawerOpen}
       />
 
@@ -169,16 +93,9 @@ export default function ScheduleCalendarPage() {
         <div className="drawer-overlay" onClick={() => setIsDrawerOpen(false)}>
           <div className="drawer" onClick={(e) => e.stopPropagation()}>
             <CalendarAside
-              selectedDate={selectedDate}
-              setSelectedDate={setSelectedDate}
-              selectedEvent={selectedEvent}
-              onDayClick={handleDaySelect}
-              onWeekClick={handleWeekSelect}
               draftSchedule={draftSchedule}
               resetForm={resetDraft}
               categories={categories}
-              asideMode={asideMode}
-              setAsideMode={setAsideMode}
               handleChange={handleChange}
               handleScheduleCreate={handleScheduleCreate}
               handleScheduleUpdate={handleScheduleUpdate}
