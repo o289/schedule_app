@@ -1,8 +1,16 @@
 import { useState, useEffect } from "react";
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  useMediaQuery,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import "./DatesModal.css";
 import { formatDateTime, toISODate, toISODatetime } from "../../utils/date";
 
-import { Button } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -11,6 +19,10 @@ import TimePicker from "../../components/commonPicker/TimePicker";
 export default function ScheduleDatesModal({ dates, onClose, onChange }) {
   // モーダル内部でのみ使用する編集用 state
   const [internalDates, setInternalDates] = useState([]);
+
+  // モーダルの見た目制御のため(MUI製)
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   // dates を初期値として internalDates を生成
   useEffect(() => {
@@ -38,19 +50,28 @@ export default function ScheduleDatesModal({ dates, onClose, onChange }) {
   };
 
   return (
-    <div className="dates-modal">
-      <div className="dates-modal-contents">
-        <h3>登録済み日程</h3>
+    <Dialog
+      open
+      onClose={onClose}
+      fullScreen={fullScreen}
+      maxWidth="sm"
+      fullWidth
+    >
+      <DialogTitle>登録済み日程</DialogTitle>
 
+      <DialogContent dividers>
         {internalDates.length === 0 && <p>日程はありません。</p>}
 
         {internalDates.map((date) => (
-          <div key={date._local_id} className="dates-modal-card">
+          <div
+            key={date._local_id}
+            className="relative mb-3 rounded-lg border border-[#ddd] bg-[#fafbfc] p-3"
+          >
             <div style={{ display: "block", marginBottom: "4px" }}>
               日程: {formatDateTime(date.date, "date")}
             </div>
 
-            <div style={{ display: "block", marginBottom: "4px" }}>
+            <div className="m-3">
               <TimePicker
                 label="開始"
                 mode="start"
@@ -62,7 +83,7 @@ export default function ScheduleDatesModal({ dates, onClose, onChange }) {
               />
             </div>
 
-            <div style={{ display: "block", marginBottom: "8px" }}>
+            <div className="m-3">
               <TimePicker
                 label="終了"
                 mode="end"
@@ -75,7 +96,9 @@ export default function ScheduleDatesModal({ dates, onClose, onChange }) {
             </div>
           </div>
         ))}
+      </DialogContent>
 
+      <DialogActions>
         <Button
           type="button"
           variant="contained"
@@ -95,7 +118,7 @@ export default function ScheduleDatesModal({ dates, onClose, onChange }) {
         >
           閉じる
         </Button>
-      </div>
-    </div>
+      </DialogActions>
+    </Dialog>
   );
 }
