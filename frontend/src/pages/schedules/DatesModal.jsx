@@ -8,7 +8,6 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import "./DatesModal.css";
 import { formatDateTime, toISODate, toISODatetime } from "../../utils/date";
 
 import DeleteIcon from "@mui/icons-material/Delete";
