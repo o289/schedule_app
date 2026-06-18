@@ -1,7 +1,7 @@
 // src/context/AlertContext.jsx
 import { createContext, useContext, useState, useCallback } from "react";
 import { ALERT_MESSAGES } from "../constants/alertMessages";
-import AlertToast from "../components/alert/AlertToast";
+import AlertToast from "../components/AlertToast";
 
 // Context 作成
 const AlertContext = createContext(null);
