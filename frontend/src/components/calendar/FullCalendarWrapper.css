@@ -55,3 +55,13 @@
 .fc .fc-timegrid-slot-minor {
   border-top-style: none !important;
 }
+
+/* 日曜日 */
+.fc-day-sun .fc-col-header-cell-cushion {
+  color: red;
+}
+
+/* 土曜日 */
+.fc-day-sat .fc-col-header-cell-cushion {
+  color: blue;
+}
