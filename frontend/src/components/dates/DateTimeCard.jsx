@@ -1,6 +1,6 @@
 // DateTimeCard.jsx
 import { useState } from "react";
-import TimePicker from "../../commonPicker/TimePicker";
+import TimePicker from "../commonPicker/TimePicker";
 import "./dateTimeCard.css";
 import {
   formatDate,
