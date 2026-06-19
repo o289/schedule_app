@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { DateTimeCard } from "../card/dates/DateTimeCard";
-import { buildTimeGroupsFromDates } from "../card/dates/scheduleViewAdapter";
+import { DateTimeCard } from "../dates/DateTimeCard";
+import { buildTimeGroupsFromDates } from "../dates/scheduleViewAdapter";
 
 import { Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -10,7 +10,7 @@ import TodoList from "../../pages/todos/TodoList";
 import TodoForm from "../../pages/todos/TodoForm";
 import { useTodo } from "../../pages/todos/useTodo";
 import { formatDateTime } from "../../utils/date";
-import "./scheduleAsideDetail.css"
+import "./scheduleAsideDetail.css";
 export default function ScheduleAsideDetail({
   schedule,
   handleScheduleDelete,
@@ -26,14 +26,12 @@ export default function ScheduleAsideDetail({
   const start = selectedEvent?.start;
   const end = selectedEvent?.end;
 
-  const selectedDateStr = start
-    ? formatDateTime(start, "date")
-    : null;
+  const selectedDateStr = start ? formatDateTime(start, "date") : null;
 
   const otherDates = Array.isArray(schedule?.dates)
     ? schedule.dates.filter((d) => {
         if (!selectedDateStr) return true;
-        const dStr = formatDateTime(d.start_date,"date")
+        const dStr = formatDateTime(d.start_date, "date");
         return dStr !== selectedDateStr;
       })
     : [];
@@ -100,7 +98,7 @@ export default function ScheduleAsideDetail({
       <h3>{formatDateTime(start, "date") || "日付不明"}</h3>
 
       <p>
-        {formatDateTime(start,"time")} - {formatDateTime(end,"time")}
+        {formatDateTime(start, "time")} - {formatDateTime(end, "time")}
       </p>
 
       <div>

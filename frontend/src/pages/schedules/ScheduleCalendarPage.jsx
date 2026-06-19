@@ -6,10 +6,13 @@ import { useScheduleForm } from "../../hooks/schedule/useScheduleForm";
 
 import useIsMobile from "../../hooks/useIsMobile";
 
-import "./ScheduleCalendarPage.css";
 import CalendarMain from "../../components/calendar/CalendarMain";
 import CalendarAside from "../../components/calendar/CalendarAside/CalendarAside";
+
 import Loading from "../../components/Loading";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
 
 export default function ScheduleCalendarPage() {
   const { categories } = useCategory();
@@ -47,18 +50,20 @@ export default function ScheduleCalendarPage() {
 
   if (!isMobile) {
     return (
-      <div className="calendar-layout">
-        <CalendarAside
-          draftSchedule={draftSchedule}
-          resetForm={resetDraft}
-          categories={categories}
-          handleChange={handleChange}
-          handleScheduleCreate={handleScheduleCreate}
-          handleScheduleUpdate={handleScheduleUpdate}
-          handleScheduleDelete={handleScheduleDelete}
-        />
+      <div className="flex h-full overflow-hidden bg-[#f8f9fb]">
+        <div className="w-[368px]">
+          <CalendarAside
+            draftSchedule={draftSchedule}
+            resetForm={resetDraft}
+            categories={categories}
+            handleChange={handleChange}
+            handleScheduleCreate={handleScheduleCreate}
+            handleScheduleUpdate={handleScheduleUpdate}
+            handleScheduleDelete={handleScheduleDelete}
+          />
+        </div>
 
-        <div className="calendar-main">
+        <div className="flex-1 overflow-auto bg-white px-5">
           <CalendarMain
             schedules={schedules}
             setDraftSchedule={setDraftSchedule}
@@ -73,41 +78,43 @@ export default function ScheduleCalendarPage() {
   // =============================
 
   return (
-    <div className="calender-contents">
-      {/* Mobile Header */}
-      <div className="mobile-header">
-        <div className="hamburger" onClick={() => setIsDrawerOpen(true)}>
-          ☰
-        </div>
+    <div className="h-full bg-[#f8f9fb]">
+      <div className="px-4 py-2">
+        <IconButton onClick={() => setIsDrawerOpen(true)}>
+          <MenuIcon />
+        </IconButton>
       </div>
 
-      {/* Calendar */}
       <CalendarMain
         schedules={schedules}
         setDraftSchedule={setDraftSchedule}
         setIsDrawerOpen={setIsDrawerOpen}
       />
 
-      {/* Drawer */}
-      {isDrawerOpen && (
-        <div className="drawer-overlay" onClick={() => setIsDrawerOpen(false)}>
-          <div className="drawer" onClick={(e) => e.stopPropagation()}>
-            <CalendarAside
-              draftSchedule={draftSchedule}
-              resetForm={resetDraft}
-              categories={categories}
-              handleChange={handleChange}
-              handleScheduleCreate={handleScheduleCreate}
-              handleScheduleUpdate={handleScheduleUpdate}
-              handleScheduleDelete={handleScheduleDelete}
-              setIsDrawerOpen={setIsDrawerOpen}
-              closeButton={() => {
-                setIsDrawerOpen(false);
-              }}
-            />
-          </div>
-        </div>
-      )}
+      <Drawer
+        anchor="left"
+        open={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        PaperProps={{
+          sx: {
+            width: "100%",
+          },
+        }}
+      >
+        <CalendarAside
+          draftSchedule={draftSchedule}
+          resetForm={resetDraft}
+          categories={categories}
+          handleChange={handleChange}
+          handleScheduleCreate={handleScheduleCreate}
+          handleScheduleUpdate={handleScheduleUpdate}
+          handleScheduleDelete={handleScheduleDelete}
+          setIsDrawerOpen={setIsDrawerOpen}
+          closeButton={() => {
+            setIsDrawerOpen(false);
+          }}
+        />
+      </Drawer>
     </div>
   );
 }

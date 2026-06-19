@@ -204,7 +204,7 @@ export default function CalendarAside({
   }
 
   return (
-    <aside className="flex h-full w-[368px] flex-col gap-6 border-r border-[#eee] bg-[#fafafa] p-4 max-md:w-full max-md:border-r-0">
+    <aside className="flex h-full w-full flex-col gap-6 border-r border-[#eee] bg-[#fafafa] p-4 max-md:w-full max-md:border-r-0">
       {renderAsideContent()}
     </aside>
   );
