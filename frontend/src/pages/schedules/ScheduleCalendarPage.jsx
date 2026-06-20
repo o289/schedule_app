@@ -7,7 +7,7 @@ import { useScheduleForm } from "../../hooks/schedule/useScheduleForm";
 import useIsMobile from "../../hooks/useIsMobile";
 
 import CalendarMain from "../../components/calendar/CalendarMain";
-import CalendarAside from "../../components/calendar/CalendarAside/CalendarAside";
+import CalendarAside from "../../components/calendar/CalendarAside";
 
 import Loading from "../../components/Loading";
 import Drawer from "@mui/material/Drawer";
