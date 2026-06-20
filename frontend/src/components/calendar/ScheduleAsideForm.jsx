@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { generateMonthGrid, shiftMonth } from "../../../utils/monthGrid";
-import TimePicker from "../../commonPicker/TimePicker";
-import ScheduleDatesModal from "../../../pages/schedules/DatesModal";
-import { handleDateTime } from "../../../pages/schedules/handleDateTime";
+import { generateMonthGrid, shiftMonth } from "../../utils/monthGrid";
+import TimePicker from "../commonPicker/TimePicker";
+import ScheduleDatesModal from "../../pages/schedules/DatesModal";
+import { handleDateTime } from "../../pages/schedules/handleDateTime";
 
 import {
   Button,
@@ -16,7 +16,7 @@ import {
 import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import { getCategoryTheme } from "../../../utils/getCategoryTheme";
+import { getCategoryTheme } from "../../utils/getCategoryTheme";
 
 export default function ScheduleAsideForm({
   draftSchedule,

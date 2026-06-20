@@ -1,4 +1,4 @@
-import { useAuth } from "../../../context/AuthContext.jsx";
+import { useAuth } from "../../context/AuthContext";
 
 import { Button } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
@@ -6,14 +6,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import UndoIcon from "@mui/icons-material/Undo";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
-import useIsMobile from "../../../hooks/useIsMobile";
+import useIsMobile from "../../hooks/useIsMobile";
 
-import MiniMonthNav from "../MiniMonthNav/MiniMonthNav";
-import ScheduleAsideForm from "../ScheduleAsideForm/ScheduleAsideForm";
-import ScheduleAsideDetail from "../ScheduleAsideDetail";
-import CategoryAsidePage from "../../../pages/categories/CategoryAsidePage";
-import { getCategoryTheme } from "../../../utils/getCategoryTheme.js";
-import { useCalendar } from "../../../context/CalendarContext.jsx";
+import MiniMonthNav from "./MiniMonthNav/MiniMonthNav";
+import ScheduleAsideForm from "./ScheduleAsideForm";
+import ScheduleAsideDetail from "./ScheduleAsideDetail";
+import CategoryAsidePage from "../../pages/categories/CategoryAsidePage";
+import { getCategoryTheme } from "../../utils/getCategoryTheme";
+import { useCalendar } from "../../context/CalendarContext";
 
 export default function CalendarAside({
   categories,
