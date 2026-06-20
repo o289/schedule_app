@@ -30,6 +30,47 @@ export function CalendarProvider({ children }) {
     }
   };
 
+  const handlePrev = () => {
+    const api = calendarRef.current?.getApi();
+
+    if (!api) {
+      const prevDate = new Date(selectedDate);
+
+      if (currentView === "week") {
+        prevDate.setDate(prevDate.getDate() - 7);
+      } else {
+        prevDate.setDate(prevDate.getDate() - 1);
+      }
+
+      setSelectedDate(prevDate);
+      return;
+    }
+
+    api.prev();
+
+    setSelectedDate(api.getDate());
+  };
+
+  const handleNext = () => {
+    const api = calendarRef.current?.getApi();
+
+    if (!api) {
+      const nextDate = new Date(selectedDate);
+
+      if (currentView === "week") {
+        nextDate.setDate(nextDate.getDate() + 7);
+      } else {
+        nextDate.setDate(nextDate.getDate() + 1);
+      }
+
+      setSelectedDate(nextDate);
+      return;
+    }
+
+    api.next();
+
+    setSelectedDate(api.getDate());
+  };
   const value = useMemo(
     () => ({
       selectedDate,
@@ -48,6 +89,9 @@ export function CalendarProvider({ children }) {
 
       handleDaySelect,
       handleWeekSelect,
+
+      handleNext,
+      handlePrev,
     }),
     [selectedDate, currentView, selectedEvent, asideMode],
   );

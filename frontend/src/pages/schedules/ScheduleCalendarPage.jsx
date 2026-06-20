@@ -7,12 +7,11 @@ import { useScheduleForm } from "../../hooks/schedule/useScheduleForm";
 import useIsMobile from "../../hooks/useIsMobile";
 
 import CalendarMain from "../../components/calendar/CalendarMain";
-import CalendarAside from "../../components/calendar/CalendarAside/CalendarAside";
+import CalendarAside from "../../components/calendar/CalendarAside";
 
 import Loading from "../../components/Loading";
 import Drawer from "@mui/material/Drawer";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
+import CalendarHeader from "../../components/calendar/CalendarHeader";
 
 export default function ScheduleCalendarPage() {
   const { categories } = useCategory();
@@ -64,6 +63,7 @@ export default function ScheduleCalendarPage() {
         </div>
 
         <div className="flex-1 overflow-auto bg-white px-5">
+          <CalendarHeader isMobile={isMobile} />
           <CalendarMain
             schedules={schedules}
             setDraftSchedule={setDraftSchedule}
@@ -79,11 +79,7 @@ export default function ScheduleCalendarPage() {
 
   return (
     <div className="h-full bg-[#f8f9fb]">
-      <div className="px-4 py-2">
-        <IconButton onClick={() => setIsDrawerOpen(true)}>
-          <MenuIcon />
-        </IconButton>
-      </div>
+      <CalendarHeader isMobile={isMobile} setIsDrawerOpen={setIsDrawerOpen} />
 
       <CalendarMain
         schedules={schedules}
