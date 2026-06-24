@@ -8,7 +8,7 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
 import useIsMobile from "../../hooks/useIsMobile";
 
-import MiniMonthNav from "./MiniMonthNav/MiniMonthNav";
+import MiniMonthNav from "./MiniMonthNav";
 import ScheduleAsideForm from "./ScheduleAsideForm";
 import ScheduleAsideDetail from "./ScheduleAsideDetail";
 import CategoryAsidePage from "../../pages/categories/CategoryAsidePage";
@@ -86,6 +86,24 @@ export default function CalendarAside({
       default:
         return (
           <>
+            {closeButton && (
+              <Button
+                type="button"
+                variant="text"
+                startIcon={<CloseIcon sx={{ fontSize: 36 }} />}
+                onClick={closeButton}
+                sx={{
+                  color: "#111827",
+                  minWidth: "auto",
+                  "&:hover": {
+                    backgroundColor: "transparent",
+                  },
+                }}
+                className="!text-xl !justify-start !p-0"
+              >
+                閉じる
+              </Button>
+            )}
             <div className="flex items-center gap-3 px-2">
               <CalendarMonthIcon
                 sx={{
@@ -185,18 +203,6 @@ export default function CalendarAside({
 
                 <span className="text-[#6b7280]">⌄</span>
               </div>
-
-              {closeButton && (
-                <Button
-                  type="button"
-                  variant="contained"
-                  startIcon={<CloseIcon />}
-                  className="!rounded-lg !bg-gray-500 !px-3 !py-2.5 !text-[14px]"
-                  onClick={closeButton}
-                >
-                  戻る
-                </Button>
-              )}
             </div>
           </>
         );
