@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { DateTimeCard } from "../dates/DateTimeCard";
-import { buildTimeGroupsFromDates } from "../dates/scheduleViewAdapter";
+import { DateTimeCard } from "./DateTimeCard";
+import { buildTimeGroupsFromDates } from "./scheduleViewAdapter";
 
 import { Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -10,7 +10,6 @@ import TodoList from "../../pages/todos/TodoList";
 import TodoForm from "../../pages/todos/TodoForm";
 import { useTodo } from "../../pages/todos/useTodo";
 import { formatDateTime } from "../../utils/date";
-import "./scheduleAsideDetail.css";
 export default function ScheduleAsideDetail({
   schedule,
   handleScheduleDelete,
@@ -125,7 +124,7 @@ export default function ScheduleAsideDetail({
           </div>
         )}
 
-        <TodoList
+        {/* <TodoList
           todos={todos}
           onToggle={(t) => handleTodoUpdate(t.id, { is_done: !t.is_done })}
           onDelete={handleTodoDelete}
@@ -151,14 +150,14 @@ export default function ScheduleAsideDetail({
           <Button
             type="button"
             variant="contained"
-            className="mui-button"
+            className="m-5"
             onClick={() => {
               setOpenForm(true);
             }}
           >
             ToDoを追加
           </Button>
-        )}
+        )} */}
       </div>
     </div>
   );

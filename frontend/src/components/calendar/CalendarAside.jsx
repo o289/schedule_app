@@ -8,7 +8,7 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
 import useIsMobile from "../../hooks/useIsMobile";
 
-import MiniMonthNav from "./MiniMonthNav/MiniMonthNav";
+import MiniMonthNav from "./MiniMonthNav";
 import ScheduleAsideForm from "./ScheduleAsideForm";
 import ScheduleAsideDetail from "./ScheduleAsideDetail";
 import CategoryAsidePage from "../../pages/categories/CategoryAsidePage";
