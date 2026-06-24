@@ -2,14 +2,20 @@ import { useState, useEffect } from "react";
 import { DateTimeCard } from "./DateTimeCard";
 import { buildTimeGroupsFromDates } from "./scheduleViewAdapter";
 
-import { Button } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import { Button, Chip, Divider } from "@mui/material";
 import { Delete as DeleteIcon } from "@mui/icons-material";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import TodoList from "../../pages/todos/TodoList";
 import TodoForm from "../../pages/todos/TodoForm";
 import { useTodo } from "../../pages/todos/useTodo";
 import { formatDateTime } from "../../utils/date";
+import { getCategoryTheme } from "../../utils/getCategoryTheme";
+
 export default function ScheduleAsideDetail({
   schedule,
   handleScheduleDelete,
@@ -18,7 +24,7 @@ export default function ScheduleAsideDetail({
   setIsDrawerOpen = null,
 }) {
   if (!schedule) {
-    return <div>データがありません</div>;
+    setAsideMode(null);
   }
 
   const [openForm, setOpenForm] = useState(false);
@@ -35,6 +41,8 @@ export default function ScheduleAsideDetail({
       })
     : [];
 
+  const theme = getCategoryTheme(schedule.category.color);
+  const iconColor = theme.border;
   const {
     todos,
     formData,
@@ -50,114 +58,129 @@ export default function ScheduleAsideDetail({
   }, []);
 
   return (
-    <div>
+    <div className="p-4">
       <Button
         type="button"
-        variant="contained"
-        startIcon={<CloseIcon />}
+        variant="text"
+        startIcon={<ArrowBackIcon sx={{ fontSize: 36 }} />}
         onClick={() => {
           setAsideMode(null);
           if (setIsDrawerOpen) {
             setIsDrawerOpen(false);
           }
         }}
-        className="mui-button"
+        sx={{
+          color: "#111827",
+          minWidth: "auto",
+          "&:hover": {
+            backgroundColor: "transparent",
+          },
+        }}
+        className="!mb-6 !text-xl !justify-start !p-0"
       >
         戻る
       </Button>
 
-      <Button
-        type="button"
-        color="warning"
-        variant="contained"
-        onClick={() => {
-          setAsideMode("edit");
-        }}
-        className="mui-button"
-      >
-        編集
-      </Button>
+      <div className="bg-white rounded-3xl shadow-md p-6 mb-6">
+        <h1 className="text-4xl font-bold mb-6 break-words">
+          {schedule.title}
+        </h1>
 
-      <Button
-        type="button"
-        variant="contained"
-        color="error"
-        startIcon={<DeleteIcon />}
-        onClick={() => {
-          handleScheduleDelete();
-          setAsideMode(null);
-        }}
-        className="mui-button"
-      >
-        削除
-      </Button>
+        <Divider className="!mb-6" />
 
-      <h2>{schedule.title}</h2>
+        <div className="flex items-center gap-4 mb-6">
+          <CalendarMonthOutlinedIcon sx={{ color: iconColor, fontSize: 40 }} />
+          <div>
+            <div className="text-gray-500 text-sm">日付</div>
+            <div className="text-2xl">
+              {formatDateTime(start, "date") || "日付不明"}
+            </div>
+          </div>
+        </div>
 
-      <h3>{formatDateTime(start, "date") || "日付不明"}</h3>
+        <div className="flex items-center gap-4 mb-6">
+          <AccessTimeOutlinedIcon sx={{ color: iconColor, fontSize: 40 }} />
+          <div>
+            <div className="text-gray-500 text-sm">時間</div>
+            <div className="text-2xl">
+              {formatDateTime(start, "time")} - {formatDateTime(end, "time")}
+            </div>
+          </div>
+        </div>
 
-      <p>
-        {formatDateTime(start, "time")} - {formatDateTime(end, "time")}
-      </p>
+        <div className="flex items-center gap-4 mb-6">
+          <LocalOfferOutlinedIcon sx={{ color: iconColor, fontSize: 40 }} />
+          <div>
+            <div className="text-gray-500 text-sm mb-2">カテゴリー</div>
+            <Chip
+              label={schedule.category?.name || "なし"}
+              sx={{
+                backgroundColor: iconColor,
+                color: "#fff",
+                fontWeight: 600,
+              }}
+            />
+          </div>
+        </div>
 
-      <div>
-        <strong>カテゴリー:</strong> {schedule.category?.name || "なし"}
+        {schedule.note && (
+          <>
+            <Divider className="!mb-6" />
+            <div>
+              <div className="font-semibold mb-2">メモ</div>
+              <div>{schedule.note}</div>
+            </div>
+          </>
+        )}
       </div>
 
-      <div>
-        <strong>選択日以外一覧:</strong>
+      {Array.isArray(otherDates) && otherDates.length > 0 && (
+        <div className="mb-6">
+          <div className="text-2xl font-bold mb-4">他の日程</div>
 
-        {Array.isArray(otherDates) && otherDates.length > 0 ? (
-          buildTimeGroupsFromDates(otherDates, "gray").map((timeGroup) => (
+          {buildTimeGroupsFromDates(otherDates, "gray").map((timeGroup) => (
             <DateTimeCard
               key={`${timeGroup.start}-${timeGroup.end}`}
               timeGroup={timeGroup}
             />
-          ))
-        ) : (
-          <p>なし</p>
-        )}
+          ))}
+        </div>
+      )}
 
-        {schedule.note && (
-          <div>
-            <strong>メモ:</strong> {schedule.note}
-          </div>
-        )}
+      <div className="flex flex-col gap-4">
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<EditOutlinedIcon />}
+          sx={{
+            color: iconColor,
+            borderColor: iconColor,
+            "&:hover": {
+              borderColor: iconColor,
+              backgroundColor: `${iconColor}10`,
+            },
+          }}
+          size="large"
+          onClick={() => {
+            setAsideMode("edit");
+          }}
+        >
+          編集
+        </Button>
 
-        {/* <TodoList
-          todos={todos}
-          onToggle={(t) => handleTodoUpdate(t.id, { is_done: !t.is_done })}
-          onDelete={handleTodoDelete}
-        />
-
-        {openForm ? (
-          <TodoForm
-            formData={formData}
-            onChange={(e) => {
-              const { name, value } = e.target;
-              setFormData({
-                ...formData,
-                [name]: name === "due_date" && value === "" ? null : value,
-              });
-            }}
-            onCancel={() => setOpenForm(false)}
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleTodoCreate(formData);
-            }}
-          />
-        ) : (
-          <Button
-            type="button"
-            variant="contained"
-            className="m-5"
-            onClick={() => {
-              setOpenForm(true);
-            }}
-          >
-            ToDoを追加
-          </Button>
-        )} */}
+        <Button
+          type="button"
+          variant="outlined"
+          color="error"
+          startIcon={<DeleteIcon />}
+          size="large"
+          onClick={() => {
+            handleScheduleDelete();
+            setAsideMode(null);
+          }}
+        >
+          削除
+        </Button>
       </div>
     </div>
   );
