@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { DateTimeCard } from "../dates/DateTimeCard";
-import { buildTimeGroupsFromDates } from "../dates/scheduleViewAdapter";
+import { DateTimeCard } from "./DateTimeCard";
+import { buildTimeGroupsFromDates } from "./scheduleViewAdapter";
 
 import { Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
