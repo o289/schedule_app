@@ -10,7 +10,6 @@ import TodoList from "../../pages/todos/TodoList";
 import TodoForm from "../../pages/todos/TodoForm";
 import { useTodo } from "../../pages/todos/useTodo";
 import { formatDateTime } from "../../utils/date";
-import "./scheduleAsideDetail.css";
 export default function ScheduleAsideDetail({
   schedule,
   handleScheduleDelete,
