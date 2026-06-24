@@ -125,7 +125,7 @@ export default function ScheduleAsideDetail({
           </div>
         )}
 
-        <TodoList
+        {/* <TodoList
           todos={todos}
           onToggle={(t) => handleTodoUpdate(t.id, { is_done: !t.is_done })}
           onDelete={handleTodoDelete}
@@ -151,14 +151,14 @@ export default function ScheduleAsideDetail({
           <Button
             type="button"
             variant="contained"
-            className="mui-button"
+            className="m-5"
             onClick={() => {
               setOpenForm(true);
             }}
           >
             ToDoを追加
           </Button>
-        )}
+        )} */}
       </div>
     </div>
   );
